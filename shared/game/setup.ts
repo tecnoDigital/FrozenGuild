@@ -117,7 +117,7 @@ export function createInitialState(
   }
 
   return {
-    version: "stage-5",
+    version: "stage-6",
     createdAt: Date.now(),
     deck,
     discardPile: [],

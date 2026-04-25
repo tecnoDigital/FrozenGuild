@@ -97,6 +97,7 @@ describe("fishing move", () => {
 
     expect(result).toBeUndefined();
     expect(G.iceGrid[0]).toBeNull();
-    expect(gameOverPayload).toEqual({ reason: "ICE_CANNOT_REFILL" });
+    expect(gameOverPayload).toMatchObject({ reason: "ICE_CANNOT_REFILL" });
+    expect(gameOverPayload).toHaveProperty("scores");
   });
 });

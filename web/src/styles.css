@@ -225,7 +225,8 @@ h4 {
 
 .stats-grid,
 .ice-grid,
-.player-grid {
+.player-grid,
+.scoreboard-grid {
   display: grid;
   gap: 14px;
 }
@@ -270,15 +271,65 @@ h4 {
   color: #cfe6ff;
 }
 
+.game-over-banner {
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 143, 143, 0.35);
+  background: rgba(88, 19, 31, 0.5);
+  color: #ffe3e3;
+}
+
 .stats-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .stat-card,
 .ice-slot,
-.mini-card {
+.mini-card,
+.score-card {
   padding: 16px;
   border-radius: 18px;
+}
+
+.scoreboard-grid {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  margin-top: 16px;
+}
+
+.score-card {
+  border: 1px solid rgba(162, 194, 255, 0.18);
+  background: rgba(10, 23, 48, 0.92);
+}
+
+.score-card--leader {
+  border-color: rgba(120, 214, 255, 0.85);
+  background: rgba(17, 47, 85, 0.92);
+}
+
+.score-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.score-total {
+  text-align: right;
+}
+
+.score-total strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 2rem;
+}
+
+.score-breakdown {
+  display: grid;
+  gap: 6px;
+  margin-top: 14px;
+  color: #d6e7fb;
 }
 
 .stat-card strong {
@@ -293,10 +344,24 @@ h4 {
 }
 
 .ice-slot {
+  width: 100%;
   min-height: 124px;
   display: grid;
   align-content: start;
   gap: 8px;
+  border: 1px solid rgba(162, 194, 255, 0.18);
+  color: inherit;
+  text-align: left;
+}
+
+.ice-slot--clickable {
+  cursor: pointer;
+  border-color: rgba(120, 214, 255, 0.8);
+  background: rgba(16, 42, 78, 0.96);
+}
+
+.ice-slot--empty {
+  background: rgba(8, 20, 38, 0.4);
 }
 
 .player-grid {

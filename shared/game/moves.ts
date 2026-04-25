@@ -1,4 +1,5 @@
 import type { Ctx } from "boardgame.io";
+import { calculateFinalScores } from "./scoring";
 import type { FrozenGuildState } from "./types";
 
 const INVALID_MOVE = "INVALID_MOVE" as const;
@@ -80,7 +81,10 @@ export function fishFromIce(
     G.iceGrid[slot] = replacement;
   } else {
     G.iceGrid[slot] = null;
-    events?.endGame?.({ reason: "ICE_CANNOT_REFILL" });
+    events?.endGame?.({
+      reason: "ICE_CANNOT_REFILL",
+      scores: calculateFinalScores(G.players)
+    });
   }
 
   G.turn.actionCompleted = true;

@@ -17,7 +17,7 @@ describe("match setup", () => {
   it("creates 3x3 ice grid and players for a local match", () => {
     const state = createInitialState(2, () => 0.4);
 
-    expect(state.version).toBe("stage-5");
+    expect(state.version).toBe("stage-6");
     expect(state.iceGrid).toHaveLength(ICE_GRID_SIZE);
     expect(Object.keys(state.players)).toEqual(["0", "1"]);
     expect(state.players["0"]?.name).toBe("Player 1");
