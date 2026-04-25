@@ -1,9 +1,19 @@
 import type { Game } from "boardgame.io";
+import { endTurn, fishFromIce, resetTurnState, rollDice } from "./moves";
 import { createInitialState } from "./setup";
 import type { FrozenGuildState } from "./types";
 
 export const FrozenGuild: Game<FrozenGuildState> = {
   name: "frozen-guild",
   setup: ({ ctx }) => createInitialState(ctx.numPlayers),
-  moves: {}
+  turn: {
+    onBegin: ({ G }) => {
+      resetTurnState(G);
+    }
+  },
+  moves: {
+    rollDice,
+    fishFromIce,
+    endTurn
+  }
 };

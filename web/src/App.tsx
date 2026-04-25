@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { getCardById } from "../../shared/game/cards";
+import { endTurn, resetTurnState, rollDice } from "../../shared/game/moves";
 import {
   ICE_GRID_SIZE,
   INITIAL_HAND_SIZE,
@@ -7,7 +8,7 @@ import {
   MIN_PLAYERS,
   createInitialState
 } from "../../shared/game/setup";
-import type { CardId, FrozenGuildState } from "../../shared/game/types";
+import type { CardId, FrozenGuildState, PlayerID } from "../../shared/game/types";
 
 type LocalRoom = {
   id: string;
@@ -15,6 +16,9 @@ type LocalRoom = {
   status: "local_ready";
   createdAt: number;
   playerCount: number;
+  currentPlayer: PlayerID;
+  turnNumber: number;
+  lastAction: string;
   state: FrozenGuildState;
 };
 
@@ -49,20 +53,38 @@ function buildRoomName(roomNumber: number): string {
   return `Sala local ${String(roomNumber).padStart(2, "0")}`;
 }
 
+function buildInitialRoom(roomNumber: number, playerCount: number): LocalRoom {
+  return {
+    id: `room-${String(roomNumber).padStart(3, "0")}`,
+    name: buildRoomName(roomNumber),
+    status: "local_ready",
+    createdAt: Date.now(),
+    playerCount,
+    currentPlayer: "0",
+    turnNumber: 1,
+    lastAction: "Partida creada. Esperando primer lanzamiento de dado.",
+    state: createInitialState(playerCount)
+  };
+}
+
+function getNextPlayerID(playerCount: number, currentPlayer: PlayerID): PlayerID {
+  const nextPlayerIndex = (Number(currentPlayer) + 1) % playerCount;
+  return String(nextPlayerIndex);
+}
+
+function updateRoom(
+  rooms: LocalRoom[],
+  roomId: string,
+  updater: (room: LocalRoom) => LocalRoom
+): LocalRoom[] {
+  return rooms.map((room) => (room.id === roomId ? updater(room) : room));
+}
+
 export function App() {
   const [playerCount, setPlayerCount] = useState<number>(2);
   const [roomCounter, setRoomCounter] = useState(1);
   const [rooms, setRooms] = useState<LocalRoom[]>(() => {
-    const initialRoom: LocalRoom = {
-      id: "room-001",
-      name: buildRoomName(1),
-      status: "local_ready",
-      createdAt: Date.now(),
-      playerCount: 2,
-      state: createInitialState(2)
-    };
-
-    return [initialRoom];
+    return [buildInitialRoom(1, 2)];
   });
   const [selectedRoomId, setSelectedRoomId] = useState("room-001");
 
@@ -73,20 +95,75 @@ export function App() {
 
   function handleCreateRoom() {
     const nextRoomNumber = roomCounter + 1;
-    const roomId = `room-${String(nextRoomNumber).padStart(3, "0")}`;
-
-    const room: LocalRoom = {
-      id: roomId,
-      name: buildRoomName(nextRoomNumber),
-      status: "local_ready",
-      createdAt: Date.now(),
-      playerCount,
-      state: createInitialState(playerCount)
-    };
+    const room = buildInitialRoom(nextRoomNumber, playerCount);
 
     setRooms((currentRooms) => [room, ...currentRooms]);
     setRoomCounter(nextRoomNumber);
-    setSelectedRoomId(roomId);
+    setSelectedRoomId(room.id);
+  }
+
+  function handleRollDice(roomId: string) {
+    setRooms((currentRooms) =>
+      updateRoom(currentRooms, roomId, (room) => {
+        const nextState: FrozenGuildState = structuredClone(room.state);
+        const result = rollDice({
+          G: nextState,
+          ctx: { currentPlayer: room.currentPlayer } as never,
+          playerID: room.currentPlayer
+        });
+
+        if (result === "INVALID_MOVE") {
+          return {
+            ...room,
+            lastAction: `Turno ${room.turnNumber}: no se pudo tirar el dado.`
+          };
+        }
+
+        return {
+          ...room,
+          state: nextState,
+          lastAction: `Turno ${room.turnNumber}: ${room.state.players[room.currentPlayer]?.name ?? `Jugador ${room.currentPlayer}`} tiro ${nextState.dice.value}.`
+        };
+      })
+    );
+  }
+
+  function handleEndTurn(roomId: string) {
+    setRooms((currentRooms) =>
+      updateRoom(currentRooms, roomId, (room) => {
+        const nextState: FrozenGuildState = structuredClone(room.state);
+        const nextPlayer = getNextPlayerID(room.playerCount, room.currentPlayer);
+        let didAdvanceTurn = false;
+
+        const result = endTurn({
+          G: nextState,
+          ctx: { currentPlayer: room.currentPlayer } as never,
+          playerID: room.currentPlayer,
+          events: {
+            endTurn: () => {
+              didAdvanceTurn = true;
+            }
+          }
+        });
+
+        if (result === "INVALID_MOVE" || !didAdvanceTurn) {
+          return {
+            ...room,
+            lastAction: `Turno ${room.turnNumber}: debes tirar el dado antes de finalizar el turno.`
+          };
+        }
+
+        resetTurnState(nextState);
+
+        return {
+          ...room,
+          state: nextState,
+          currentPlayer: nextPlayer,
+          turnNumber: room.turnNumber + 1,
+          lastAction: `Comienza el turno ${room.turnNumber + 1}. Juega ${room.state.players[nextPlayer]?.name ?? `Jugador ${nextPlayer}`}.`
+        };
+      })
+    );
   }
 
   return (
@@ -168,6 +245,42 @@ export function App() {
                 <span className="pill">{selectedRoom.playerCount} jugadores</span>
               </div>
 
+              <section className="turn-panel">
+                <div className="turn-panel__summary">
+                  <div>
+                    <span className="stat-label">Turno activo</span>
+                    <h3>
+                      Turno {selectedRoom.turnNumber} · {selectedRoom.state.players[selectedRoom.currentPlayer]?.name}
+                    </h3>
+                    <p className="panel-copy">Solo el jugador activo puede tirar una vez y cerrar turno.</p>
+                  </div>
+                  <div className="dice-badge">
+                    <span className="stat-label">Dado</span>
+                    <strong>{selectedRoom.state.dice.value ?? "-"}</strong>
+                  </div>
+                </div>
+
+                <div className="turn-panel__actions">
+                  <button
+                    className="primary-button"
+                    type="button"
+                    onClick={() => handleRollDice(selectedRoom.id)}
+                    disabled={selectedRoom.state.dice.rolled}
+                  >
+                    {selectedRoom.state.dice.rolled ? "Dado ya tirado" : "Tirar dado"}
+                  </button>
+                  <button
+                    className="secondary-button"
+                    type="button"
+                    onClick={() => handleEndTurn(selectedRoom.id)}
+                  >
+                    Finalizar turno
+                  </button>
+                </div>
+
+                <p className="turn-log">{selectedRoom.lastAction}</p>
+              </section>
+
               <div className="stats-grid">
                 <article className="stat-card">
                   <span className="stat-label">Mazo restante</span>
@@ -208,13 +321,18 @@ export function App() {
 
                 <div className="player-grid">
                   {Object.entries(selectedRoom.state.players).map(([playerID, player]) => (
-                    <article key={`${selectedRoom.id}-player-${playerID}`} className="player-card">
+                    <article
+                      key={`${selectedRoom.id}-player-${playerID}`}
+                      className={`player-card${playerID === selectedRoom.currentPlayer ? " player-card--active" : ""}`}
+                    >
                       <div className="player-card__header">
                         <div>
                           <h4>{player.name}</h4>
                           <p>playerID {playerID}</p>
                         </div>
-                        <span className="pill">{player.zone.length} cartas</span>
+                        <span className="pill">
+                          {playerID === selectedRoom.currentPlayer ? "En turno" : `${player.zone.length} cartas`}
+                        </span>
                       </div>
 
                       <div className="card-list">

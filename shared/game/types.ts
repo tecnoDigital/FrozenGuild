@@ -27,6 +27,15 @@ export type PlayerState = {
   hasBombAtStart: boolean;
 };
 
+export type DiceState = {
+  value: number | null;
+  rolled: boolean;
+};
+
+export type TurnState = {
+  actionCompleted: boolean;
+};
+
 export type FrozenGuildState = {
   version: string;
   createdAt: number;
@@ -34,4 +43,6 @@ export type FrozenGuildState = {
   discardPile: CardId[];
   iceGrid: IceGridSlot[];
   players: Record<PlayerID, PlayerState>;
+  dice: DiceState;
+  turn: TurnState;
 };

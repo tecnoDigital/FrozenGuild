@@ -117,11 +117,18 @@ export function createInitialState(
   }
 
   return {
-    version: "stage-3",
+    version: "stage-5",
     createdAt: Date.now(),
     deck,
     discardPile: [],
     iceGrid,
-    players
+    players,
+    dice: {
+      value: null,
+      rolled: false
+    },
+    turn: {
+      actionCompleted: false
+    }
   };
 }
