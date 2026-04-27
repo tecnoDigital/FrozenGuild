@@ -9,7 +9,7 @@ import {
   createInitialState
 } from "../../shared/game/setup";
 
-function countVisibleIceCards(iceGrid: Array<string | null>): number {
+function countVisibleIceCards(iceGrid: Array<string | { hidden: true } | null>): number {
   return iceGrid.filter((slot) => slot !== null).length;
 }
 
@@ -17,13 +17,15 @@ describe("match setup", () => {
   it("creates 3x3 ice grid and players for a local match", () => {
     const state = createInitialState(2, () => 0.4);
 
-    expect(state.version).toBe("stage-6");
+    expect(state.version).toBe("stage-14");
     expect(state.iceGrid).toHaveLength(ICE_GRID_SIZE);
     expect(Object.keys(state.players)).toEqual(["0", "1"]);
     expect(state.players["0"]?.name).toBe("Player 1");
     expect(state.players["1"]?.name).toBe("Player 2");
     expect(state.dice).toEqual({ value: null, rolled: false });
-    expect(state.turn).toEqual({ actionCompleted: false });
+    expect(state.turn).toEqual({ actionCompleted: false, padrinoAction: null });
+    expect(state.orcaResolution).toBeNull();
+    expect(state.sealBombResolution).toBeNull();
   });
 
   it("deals initial hand to each player and leaves correct deck size", () => {
@@ -51,7 +53,7 @@ describe("match setup", () => {
 
   it("does not duplicate cards between deck, ice and player zones", () => {
     const state = createInitialState(4, () => 0.67);
-    const iceCards = state.iceGrid.filter((slot): slot is string => slot !== null);
+    const iceCards = state.iceGrid.filter((slot): slot is string => typeof slot === "string");
     const playerCards = Object.values(state.players).flatMap((player) => player.zone);
     const allCardIds = [...state.deck, ...iceCards, ...playerCards, ...state.discardPile];
 

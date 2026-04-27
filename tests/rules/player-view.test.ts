@@ -45,4 +45,50 @@ describe("playerView security", () => {
 
     client.stop();
   });
+
+  it("reveals only selected spy slots to spying player", () => {
+    const state = createInitialState(2, () => 0.4);
+    const firstCard = state.iceGrid[0];
+    const secondCard = state.iceGrid[1];
+
+    state.spy = {
+      playerID: "0",
+      revealedSlots: [0]
+    };
+
+    const spyPlayerView = buildPlayerView(state, "0");
+    const rivalView = buildPlayerView(state, "1");
+
+    expect(spyPlayerView.iceGrid[0]).toBe(firstCard);
+    expect(spyPlayerView.iceGrid[1]).toEqual({ hidden: true });
+    expect(spyPlayerView.spy).toEqual({ playerID: "0", revealedSlots: [0] });
+
+    expect(rivalView.iceGrid[0]).toEqual({ hidden: true });
+    expect(rivalView.iceGrid[1]).toEqual({ hidden: true });
+    expect(rivalView.spy).toBeNull();
+
+    expect(secondCard).not.toBeNull();
+  });
+
+  it("reveals orca resolution targets only to affected player", () => {
+    const state = createInitialState(2, () => 0.4);
+    const targetCard = state.players["0"]?.zone[0];
+    const orcaCard = state.players["0"]?.zone[1];
+
+    if (!targetCard || !orcaCard) {
+      throw new Error("Expected cards in player zone for test.");
+    }
+
+    state.orcaResolution = {
+      playerID: "0",
+      orcaCardID: orcaCard,
+      validTargetCardIDs: [targetCard]
+    };
+
+    const affectedView = buildPlayerView(state, "0");
+    const rivalView = buildPlayerView(state, "1");
+
+    expect(affectedView.orcaResolution).toEqual(state.orcaResolution);
+    expect(rivalView.orcaResolution).toBeNull();
+  });
 });

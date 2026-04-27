@@ -24,6 +24,17 @@ describe("turn integration with boardgame.io", () => {
 
     if (afterRoll?.G.dice.value !== null && afterRoll.G.dice.value >= 1 && afterRoll.G.dice.value <= 3) {
       client.moves.fishFromIce(0);
+    } else if (afterRoll?.G.dice.value === 4) {
+      client.moves.spyOnIce([0]);
+      client.moves.completeSpy();
+    } else if (afterRoll?.G.dice.value === 5) {
+      client.moves.swapCards(
+        { area: "player_zone", playerID: "0", index: 0 },
+        { area: "player_zone", playerID: "1", index: 0 }
+      );
+    } else if (afterRoll?.G.dice.value === 6) {
+      client.moves.choosePadrinoAction(1);
+      client.moves.fishFromIce(0);
     }
 
     client.moves.endTurn();

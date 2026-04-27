@@ -10,6 +10,10 @@ export type CardType =
 export type CardId = string;
 export type PlayerID = string;
 
+export type HiddenCardView = {
+  hidden: true;
+};
+
 export type PenguinFishValue = 1 | 2 | 3;
 
 export type Card = {
@@ -19,7 +23,7 @@ export type Card = {
   value?: PenguinFishValue;
 };
 
-export type IceGridSlot = CardId | null;
+export type IceGridSlot = CardId | HiddenCardView | null;
 
 export type PlayerState = {
   name: string;
@@ -34,7 +38,37 @@ export type DiceState = {
 
 export type TurnState = {
   actionCompleted: boolean;
+  padrinoAction: 1 | 2 | 3 | 4 | 5 | null;
 };
+
+export type SpyState = {
+  playerID: PlayerID;
+  revealedSlots: number[];
+};
+
+export type OrcaResolutionState = {
+  playerID: PlayerID;
+  orcaCardID: CardId;
+  validTargetCardIDs: CardId[];
+};
+
+export type SealBombResolutionState = {
+  playerID: PlayerID;
+  bombCardID: CardId;
+  requiredDiscardCount: number;
+  validTargetCardIDs: CardId[];
+};
+
+export type SwapLocation =
+  | {
+      area: "ice_grid";
+      slot: number;
+    }
+  | {
+      area: "player_zone";
+      playerID: PlayerID;
+      index: number;
+    };
 
 export type FrozenGuildState = {
   version: string;
@@ -45,4 +79,7 @@ export type FrozenGuildState = {
   players: Record<PlayerID, PlayerState>;
   dice: DiceState;
   turn: TurnState;
+  spy: SpyState | null;
+  orcaResolution: OrcaResolutionState | null;
+  sealBombResolution: SealBombResolutionState | null;
 };

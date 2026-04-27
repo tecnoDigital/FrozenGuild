@@ -48,6 +48,22 @@ describe("multiplayer base sync", () => {
     if (diceValue !== null && diceValue !== undefined && diceValue >= 1 && diceValue <= 3) {
       player0.moves.fishFromIce(0);
       await nextTick();
+    } else if (diceValue === 4) {
+      player0.moves.spyOnIce([0]);
+      await nextTick();
+      player0.moves.completeSpy();
+      await nextTick();
+    } else if (diceValue === 5) {
+      player0.moves.swapCards(
+        { area: "player_zone", playerID: "0", index: 0 },
+        { area: "player_zone", playerID: "1", index: 0 }
+      );
+      await nextTick();
+    } else if (diceValue === 6) {
+      player0.moves.choosePadrinoAction(1);
+      await nextTick();
+      player0.moves.fishFromIce(0);
+      await nextTick();
     }
 
     player0.moves.endTurn();

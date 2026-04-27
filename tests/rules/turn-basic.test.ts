@@ -1,6 +1,6 @@
 import type { Ctx } from "boardgame.io";
 import { describe, expect, it } from "vitest";
-import { endTurn, resetTurnState, rollDice } from "../../shared/game/moves";
+import { endTurn, fishFromIce, resetTurnState, rollDice } from "../../shared/game/moves";
 import { createInitialState } from "../../shared/game/setup";
 
 function makeCtx(currentPlayer: string): Ctx {
@@ -82,7 +82,7 @@ describe("basic turn", () => {
       ctx,
       playerID: "0",
       random: {
-        D6: () => 6
+        D6: () => 2
       }
     });
 
@@ -108,8 +108,23 @@ describe("basic turn", () => {
       }
     });
 
+    const fishResult = fishFromIce({ G, ctx, playerID: "0" }, 0);
+
+    const validEndAfterAction = endTurn({
+      G,
+      ctx,
+      playerID: "0",
+      events: {
+        endTurn: () => {
+          endTurnCalls += 1;
+        }
+      }
+    });
+
     expect(invalidEnd).toBe("INVALID_MOVE");
-    expect(validEnd).toBeUndefined();
+    expect(validEnd).toBe("INVALID_MOVE");
+    expect(fishResult).toBeUndefined();
+    expect(validEndAfterAction).toBeUndefined();
     expect(endTurnCalls).toBe(1);
   });
 
@@ -118,10 +133,11 @@ describe("basic turn", () => {
     G.dice.value = 5;
     G.dice.rolled = true;
     G.turn.actionCompleted = true;
+    G.turn.padrinoAction = 2;
 
     resetTurnState(G);
 
     expect(G.dice).toEqual({ value: null, rolled: false });
-    expect(G.turn).toEqual({ actionCompleted: false });
+    expect(G.turn).toEqual({ actionCompleted: false, padrinoAction: null });
   });
 });

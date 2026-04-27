@@ -117,7 +117,7 @@ export function createInitialState(
   }
 
   return {
-    version: "stage-6",
+    version: "stage-14",
     createdAt: Date.now(),
     deck,
     discardPile: [],
@@ -128,7 +128,11 @@ export function createInitialState(
       rolled: false
     },
     turn: {
-      actionCompleted: false
-    }
+      actionCompleted: false,
+      padrinoAction: null
+    },
+    spy: null,
+    orcaResolution: null,
+    sealBombResolution: null
   };
 }

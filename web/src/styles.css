@@ -389,6 +389,11 @@ h4 {
   background: rgba(11, 26, 48, 0.94);
 }
 
+.card-choice--selected {
+  border-color: rgba(255, 214, 107, 0.95);
+  box-shadow: 0 0 0 1px rgba(255, 214, 107, 0.9) inset;
+}
+
 .empty-state {
   padding: 32px;
   border-radius: 20px;
