@@ -16,5 +16,21 @@ export default tseslint.config(
         ...globals.node
       }
     }
+  },
+  {
+    files: ["**/*.cjs"],
+    languageOptions: {
+      globals: {
+        ...globals.node
+      }
+    }
+  },
+  {
+    files: ["**/*.mjs"],
+    languageOptions: {
+      globals: {
+        ...globals.node
+      }
+    }
   }
 );

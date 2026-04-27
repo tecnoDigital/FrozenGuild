@@ -25,6 +25,15 @@ export type PlayerState = {
   name: string;
   zone: CardId[];
   hasBombAtStart: boolean;
+  connectionStatus: "connected" | "reconnecting" | "absent";
+  disconnectStartedAt?: number;
+};
+
+export type AutoResolveItem = {
+  playerID: PlayerID;
+  stageType: "ORCA_DESTROY_SELECTION" | "SEAL_EXPLOSION" | "TURN_SKIP";
+  startedAt: number;
+  resolveAfterMs: number;
 };
 
 export type DiceState = {
@@ -39,10 +48,12 @@ export type TurnState = {
 export type FrozenGuildState = {
   version: string;
   createdAt: number;
+  activeTable: boolean;
   deck: CardId[];
   discardPile: CardId[];
   iceGrid: IceGridSlot[];
   players: Record<PlayerID, PlayerState>;
+  autoResolveQueue: AutoResolveItem[];
   dice: DiceState;
   turn: TurnState;
 };
