@@ -29,7 +29,25 @@ export type PlayerState = {
   name: string;
   zone: CardId[];
   hasBombAtStart: boolean;
+  connectionStatus: "connected" | "reconnecting" | "absent";
+  disconnectStartedAt?: number;
 };
+
+export type AutoResolveItem = {
+  playerID: PlayerID;
+  stageType: "ORCA_DESTROY_SELECTION" | "SEAL_EXPLOSION" | "TURN_SKIP";
+  startedAt: number;
+  resolveAfterMs: number;
+};
+
+export type PendingStage =
+  | {
+      type: "ORCA_DESTROY_SELECTION";
+      playerID: PlayerID;
+      orcaCardID: CardId;
+      validTargets: CardId[];
+    }
+  | null;
 
 export type DiceState = {
   value: number | null;
@@ -73,10 +91,13 @@ export type SwapLocation =
 export type FrozenGuildState = {
   version: string;
   createdAt: number;
+  activeTable: boolean;
   deck: CardId[];
   discardPile: CardId[];
   iceGrid: IceGridSlot[];
   players: Record<PlayerID, PlayerState>;
+  pendingStage: PendingStage;
+  autoResolveQueue: AutoResolveItem[];
   dice: DiceState;
   turn: TurnState;
   spy: SpyState | null;

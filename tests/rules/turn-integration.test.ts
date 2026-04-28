@@ -37,6 +37,15 @@ describe("turn integration with boardgame.io", () => {
       client.moves.fishFromIce(0);
     }
 
+    if (afterRoll?.G.dice.value === 5) {
+      const first = afterRoll.G.players["0"]?.zone[0];
+      const second = afterRoll.G.players["1"]?.zone[0];
+
+      if (first && second) {
+        client.moves.swapCards("0", first, "1", second);
+      }
+    }
+
     client.moves.endTurn();
 
     const afterEndTurn = client.getState();

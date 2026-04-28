@@ -66,6 +66,16 @@ describe("multiplayer base sync", () => {
       await nextTick();
     }
 
+    if (diceValue === 5) {
+      const first = afterRoll0.G.players["0"]?.zone[0];
+      const second = afterRoll0.G.players["1"]?.zone[0];
+
+      if (first && second) {
+        player0.moves.swapCards("0", first, "1", second);
+        await nextTick();
+      }
+    }
+
     player0.moves.endTurn();
     await nextTick();
 

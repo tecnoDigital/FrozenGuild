@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { getCardById } from "../../shared/game/cards";
 import { calculateFinalScores } from "../../shared/game/scoring";
 import { createFrozenGuildClient } from "./boardgame/client";
@@ -116,6 +116,129 @@ function sameSwapLocation(a: SwapLocation | null, b: SwapLocation): boolean {
   return false;
 }
 
+function isSwapTurn(G: FrozenGuildState): boolean {
+  return G.dice.rolled && G.dice.value === 5;
+}
+
+function runSelfTests(G: FrozenGuildState): SelfTestResult[] {
+  const iceCards = G.iceGrid.filter((cardId): cardId is string => typeof cardId === "string");
+  const zoneCards = Object.values(G.players).flatMap((player) => player.zone);
+  const knownCards = [...iceCards, ...zoneCards, ...G.deck, ...G.discardPile];
+  const uniqueCards = new Set(knownCards);
+
+  const swapReadyPlayers = Object.values(G.players).filter((player) => player.zone.length > 0).length;
+  const reconnectingCount = Object.values(G.players).filter(
+    (player) => player.connectionStatus === "reconnecting"
+  ).length;
+  const queuedTurnSkips = G.autoResolveQueue.filter((item) => item.stageType === "TURN_SKIP").length;
+
+  return [
+    {
+      label: "El Hielo tiene 9 slots",
+      ok: G.iceGrid.length === 9,
+      details: `slots=${G.iceGrid.length}`
+    },
+    {
+      label: "No hay IDs duplicados en estado visible",
+      ok: uniqueCards.size === knownCards.length,
+      details: `unicos=${uniqueCards.size} total=${knownCards.length}`
+    },
+    {
+      label: "Zonas sin cartas ocultas",
+      ok: Object.values(G.players).every((player) => player.zone.every((cardId) => typeof cardId === "string")),
+      details: "todas las cartas de zona son strings"
+    },
+    {
+      label: "Intercambio tiene objetivo posible",
+      ok: !isSwapTurn(G) || swapReadyPlayers >= 2,
+      details: `jugadores-con-cartas=${swapReadyPlayers}`
+    },
+    {
+      label: "Cola TURN_SKIP consistente",
+      ok: queuedTurnSkips >= reconnectingCount,
+      details: `reconnecting=${reconnectingCount} queue-turn-skip=${queuedTurnSkips}`
+    },
+    {
+      label: "Mesa pausada congela timers",
+      ok: G.activeTable || reconnectingCount === 0 || queuedTurnSkips > 0,
+      details: `activeTable=${G.activeTable ? "si" : "no"}`
+    }
+  ];
+}
+
+function formatDebugLogEntry(entry: DebugLogLike): string | null {
+  const move = entry.action?.payload?.type;
+  if (!move) {
+    return null;
+  }
+
+  const args = entry.action?.payload?.args ?? [];
+  const playerID = entry.action?.payload?.playerID;
+  const stateID = entry._stateID;
+
+  return `state=${stateID ?? "?"} player=${playerID ?? "?"} ${move}(${JSON.stringify(args)})`;
+}
+
+function formatConnectionStatus(status: ConnectionStatus): string {
+  if (status === "connected") {
+    return "Conectado";
+  }
+
+  if (status === "reconnecting") {
+    return "Reconectando";
+  }
+
+  return "Ausente";
+}
+
+function countByStatus(players: FrozenGuildState["players"], status: ConnectionStatus): number {
+  return Object.values(players).filter((player) => player.connectionStatus === status).length;
+}
+
+function getSocketStatus(args: {
+  session: LobbySession | null;
+  hasBrowserConnection: boolean;
+  gameStateReady: boolean;
+  lastServerSyncAt: number | null;
+  nowMs: number;
+}): ClientSocketStatus {
+  const { session, hasBrowserConnection, gameStateReady, lastServerSyncAt, nowMs } = args;
+
+  if (!session || !hasBrowserConnection) {
+    return "disconnected";
+  }
+
+  if (!gameStateReady || lastServerSyncAt === null) {
+    return "connecting";
+  }
+
+  if (nowMs - lastServerSyncAt > 7_000) {
+    return "disconnected";
+  }
+
+  return "connected";
+}
+
+function formatSocketStatus(status: ClientSocketStatus): string {
+  if (status === "connected") {
+    return "Conectado";
+  }
+
+  if (status === "connecting") {
+    return "Conectando";
+  }
+
+  return "Desconectado";
+}
+
+function ConnectionBadge({ status }: { status: ConnectionStatus }) {
+  return (
+    <span className={`pill pill--status pill--status-${status}`}>
+      {formatConnectionStatus(status)}
+    </span>
+  );
+}
+
 export function App() {
   const [playerName, setPlayerName] = useState("Jugador");
   const [numPlayers, setNumPlayers] = useState(2);
@@ -149,6 +272,7 @@ export function App() {
     currentPlayer: string;
     gameover?: unknown;
   } | null>(null);
+  const seenDebugLogKeys = useRef<Set<string>>(new Set());
 
   const client = useMemo(() => {
     if (!session) {
@@ -190,6 +314,24 @@ export function App() {
   }, [adminSession]);
 
   useEffect(() => {
+    const online = () => setHasBrowserConnection(true);
+    const offline = () => setHasBrowserConnection(false);
+
+    window.addEventListener("online", online);
+    window.addEventListener("offline", offline);
+
+    return () => {
+      window.removeEventListener("online", online);
+      window.removeEventListener("offline", offline);
+    };
+  }, []);
+
+  useEffect(() => {
+    const ticker = window.setInterval(() => setNowMs(Date.now()), 1000);
+    return () => window.clearInterval(ticker);
+  }, []);
+
+  useEffect(() => {
     if (!client) {
       return;
     }
@@ -201,6 +343,35 @@ export function App() {
         return;
       }
 
+      const logEntries = [
+        ...(((state as unknown as { deltalog?: unknown[] }).deltalog ?? []) as DebugLogLike[]),
+        ...(((state as unknown as { log?: unknown[] }).log ?? []) as DebugLogLike[])
+      ];
+
+      if (logEntries.length > 0) {
+        setDebugMoveLog((prev) => {
+          const next = [...prev];
+
+          for (const entry of logEntries) {
+            const line = formatDebugLogEntry(entry);
+            if (!line) {
+              continue;
+            }
+
+            const key = `${entry._stateID ?? "?"}:${line}`;
+            if (seenDebugLogKeys.current.has(key)) {
+              continue;
+            }
+
+            seenDebugLogKeys.current.add(key);
+            next.push(line);
+          }
+
+          return next.slice(-500);
+        });
+      }
+
+      setLastServerSyncAt(Date.now());
       setGameState({
         G: state.G,
         currentPlayer: state.ctx.currentPlayer,
@@ -210,6 +381,7 @@ export function App() {
 
     const initial = client.getState();
     if (initial) {
+      setLastServerSyncAt(Date.now());
       setGameState({
         G: initial.G,
         currentPlayer: initial.ctx.currentPlayer,
@@ -221,6 +393,10 @@ export function App() {
       unsubscribe();
       client.stop();
       setGameState(null);
+      setLastServerSyncAt(null);
+      setDebugMoveLog([]);
+      setCopyLogMessage(null);
+      seenDebugLogKeys.current = new Set();
     };
   }, [client]);
 
@@ -471,6 +647,17 @@ export function App() {
   function leaveMatch() {
     setSession(null);
     setGameState(null);
+    setLastServerSyncAt(null);
+  }
+
+  function retryConnection() {
+    if (!client) {
+      return;
+    }
+
+    client.stop();
+    client.start();
+    setLastServerSyncAt(null);
   }
 
   function stopAdminControl() {
@@ -622,6 +809,22 @@ export function App() {
 
           <button className="primary-button" onClick={joinMatch} disabled={isBusy}>Unirme a la partida</button>
           {session && <button className="secondary-button" onClick={leaveMatch}>Salir de la partida</button>}
+          <div className="lobby-meta">
+            <span className={`pill pill--status pill--socket-${socketStatus}`}>Socket: {formatSocketStatus(socketStatus)}</span>
+            {socketStatus === "disconnected" && session && (
+              <button className="secondary-button" onClick={retryConnection}>Reintentar</button>
+            )}
+          </div>
+          {session && socketStatus !== "connected" && (
+            <p className="helper-copy">
+              {socketStatus === "connecting"
+                ? "Conectando con el servidor..."
+                : "Conexion perdida. Reintenta o espera reconexion."}
+            </p>
+          )}
+          {session && (
+            <p className="helper-copy">matchID {session.matchID} · playerID {session.playerID}</p>
+          )}
           {error && <p className="helper-copy">{error}</p>}
 
           <hr style={{ borderColor: "rgba(162, 194, 255, 0.25)", width: "100%" }} />
@@ -776,18 +979,72 @@ export function App() {
               <span className="pill">{myTurn ? "Tu turno" : "Espera"}</span>
             </div>
 
+            {!tableActive && (
+              <div className="blocking-banner">
+                <strong>Mesa en pausa</strong>
+                <p>Mesa en pausa. No corren timers.</p>
+              </div>
+            )}
+
             <div className="turn-panel__actions">
-              <button className="primary-button" disabled={!myTurn} onClick={() => client?.moves?.rollDice?.()}>
+              <button className="primary-button" disabled={!!rollDisabledReason} onClick={() => client?.moves?.rollDice?.()}>
                 Tirar dado
               </button>
-              <button className="secondary-button" disabled={!myTurn} onClick={() => client?.moves?.endTurn?.()}>
+              <button className="secondary-button" disabled={!!endTurnDisabledReason} onClick={() => client?.moves?.endTurn?.()}>
                 Finalizar turno
               </button>
+              {isDev && (
+                <button className="secondary-button" onClick={copyDebugPanelLog}>
+                  Copiar log debug
+                </button>
+              )}
+            </div>
+            {(rollDisabledReason || endTurnDisabledReason) && (
+              <p className="disabled-reason">{rollDisabledReason ?? endTurnDisabledReason}</p>
+            )}
+            {isDev && copyLogMessage && <p className="turn-log turn-log--hint">{copyLogMessage}</p>}
+            <p className="action-hint">{actionMessage}</p>
+
+            <div className="table-status-grid">
+              <div className={`table-status-card ${tableActive ? "table-status-card--active" : "table-status-card--paused"}`}>
+                <span>Mesa</span>
+                <strong>{tableActive ? "Activa" : "Pausada"}</strong>
+              </div>
+              <div className="table-status-card">
+                <span>Connected</span>
+                <strong>{countByStatus(gameState.G.players, "connected")}</strong>
+              </div>
+              <div className="table-status-card">
+                <span>Reconnecting</span>
+                <strong>{countByStatus(gameState.G.players, "reconnecting")}</strong>
+              </div>
+              <div className="table-status-card">
+                <span>Absent</span>
+                <strong>{countByStatus(gameState.G.players, "absent")}</strong>
+              </div>
             </div>
 
             <p className="turn-log">
               Dado: {gameState.G.dice.value ?? "-"} · Padrino: {gameState.G.turn.padrinoAction ?? "-"} · Pesca obligatoria: {fishingTurn ? "si" : "no"} · Espionaje obligatorio: {spyTurn ? "si" : "no"} · Intercambio obligatorio: {swapTurn ? "si" : "no"} · Orca pendiente: {gameState.G.orcaResolution ? "si" : "no"} · Foca-bomba pendiente: {gameState.G.sealBombResolution ? "si" : "no"} · Accion completada: {gameState.G.turn.actionCompleted ? "si" : "no"}
             </p>
+            <p className="turn-log turn-log--hint">
+              Queue auto-resolve: {gameState.G.autoResolveQueue.length}
+            </p>
+            {!tableActive && (
+              <p className="turn-log turn-log--paused">
+                Mesa pausada: acciones bloqueadas y timers congelados.
+              </p>
+            )}
+            {swapTurn && (
+              <p className="turn-log turn-log--hint">
+                Intercambio: elige carta 1. Luego solo quedaran activas cartas de otro jugador.
+              </p>
+            )}
+            {swapTurn && swapDraft && (
+              <p className="turn-log turn-log--hint">
+                Carta 1: {swapDraft.cardID} (jugador {swapDraft.playerID}). Elige carta 2 de otro jugador.
+              </p>
+            )}
           </div>
 
           {orcaPendingForMe && gameState.G.orcaResolution && (
@@ -981,6 +1238,7 @@ export function App() {
               {gameState.G.iceGrid.map((cardId, slot) => {
                 const canFish =
                   myTurn &&
+                  tableActive &&
                   fishingTurn &&
                   !gameState.G.turn.actionCompleted &&
                   cardId !== null;
@@ -1083,18 +1341,59 @@ export function App() {
             </div>
           </div>
 
+          {isDev && (
+            <div className="subpanel">
+              <div className="selftest-header">
+                <h3>Selftest rapido (solo dev)</h3>
+                <div className="selftest-actions">
+                  <button className="secondary-button" onClick={runDebugSelfTests}>Correr checks</button>
+                  <button className="secondary-button" onClick={copyDebugPanelLog}>Copiar log debug</button>
+                  <button className="secondary-button" onClick={() => client?.moves?.setTableActive?.(true)}>Activar mesa</button>
+                  <button className="secondary-button" onClick={() => client?.moves?.setTableActive?.(false)}>Pausar mesa</button>
+                  <button className="secondary-button" onClick={() => client?.moves?.markPlayerDisconnected?.(Date.now())}>Simular desconexion</button>
+                  <button className="secondary-button" onClick={() => client?.moves?.markPlayerReconnected?.()}>Simular reconexion</button>
+                </div>
+              </div>
+              <p className="panel-copy">Moves capturados: {debugMoveLog.length}</p>
+              {copyLogMessage && <p className="panel-copy">{copyLogMessage}</p>}
+              {selfTestResults.length === 0 ? (
+                <p className="panel-copy">Corre los checks para validar estado y reglas basicas del turno.</p>
+              ) : (
+                <div className="selftest-list">
+                  {selfTestResults.map((result) => (
+                    <div key={result.label} className={`selftest-item ${result.ok ? "selftest-item--ok" : "selftest-item--fail"}`}>
+                      <strong>{result.ok ? "OK" : "FAIL"}</strong>
+                      <span>{result.label}</span>
+                      <small>{result.details}</small>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {!!gameState.gameover && (
             <div className="subpanel">
               <h3>Resultado final</h3>
+              {leader && (
+                <p className="panel-copy">Ganador: jugador {leader.playerID} con {leader.total} puntos.</p>
+              )}
               <div className="scoreboard-grid">
-                {Object.values(calculateFinalScores(gameState.G.players)).map((score) => (
-                  <article key={score.playerID} className="score-card">
+                {finalScores.map((score) => (
+                  <article key={score.playerID} className={`score-card ${leader?.playerID === score.playerID ? "score-card--leader" : ""}`}>
                     <div className="score-card__header">
                       <h4>Jugador {score.playerID}</h4>
                       <div className="score-total">
                         <span>Total</span>
                         <strong>{score.total}</strong>
                       </div>
+                    </div>
+                    <div className="score-breakdown">
+                      <span>Pinguino: {score.breakdown.penguinBase}</span>
+                      <span>Bonus morsa: {score.breakdown.walrusBonus}</span>
+                      <span>Petrel: {score.breakdown.petrel}</span>
+                      <span>Elefante marino: {score.breakdown.seaElephant}</span>
+                      <span>Krill: {score.breakdown.krill}</span>
                     </div>
                   </article>
                 ))}

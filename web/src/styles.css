@@ -223,6 +223,10 @@ h4 {
   font-size: 0.85rem;
 }
 
+.pill--status {
+  border: 1px solid rgba(162, 194, 255, 0.3);
+}
+
 .stats-grid,
 .ice-grid,
 .player-grid,
@@ -238,6 +242,31 @@ h4 {
   border-radius: 22px;
   border: 1px solid rgba(120, 214, 255, 0.18);
   background: linear-gradient(180deg, rgba(18, 42, 74, 0.9), rgba(8, 20, 38, 0.92));
+}
+
+.lobby-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.blocking-banner {
+  border: 1px solid rgba(255, 201, 120, 0.7);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: rgba(57, 37, 13, 0.75);
+  color: #ffd28f;
+  display: grid;
+  gap: 2px;
+}
+
+.action-hint {
+  color: #d9ebff;
+}
+
+.disabled-reason {
+  color: #ffd28f;
 }
 
 .turn-panel__summary,
@@ -379,6 +408,47 @@ h4 {
   background: rgba(17, 47, 85, 0.9);
 }
 
+.player-card__pills {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pill--status-connected {
+  border-color: rgba(118, 232, 173, 0.5);
+  color: #a6eac7;
+}
+
+.pill--status-reconnecting {
+  border-color: rgba(255, 201, 120, 0.6);
+  color: #ffd28f;
+}
+
+.pill--status-absent {
+  border-color: rgba(255, 134, 134, 0.6);
+  color: #ffadad;
+}
+
+.pill--socket-connected {
+  border-color: rgba(118, 232, 173, 0.5);
+  color: #a6eac7;
+}
+
+.pill--socket-connecting {
+  border-color: rgba(255, 201, 120, 0.6);
+  color: #ffd28f;
+}
+
+.pill--socket-disconnected {
+  border-color: rgba(255, 134, 134, 0.6);
+  color: #ffadad;
+}
+
+.player-presence-note {
+  margin-top: 10px;
+  color: #c7defa;
+}
+
 .card-list {
   margin-top: 14px;
 }
@@ -387,6 +457,106 @@ h4 {
   display: grid;
   gap: 4px;
   background: rgba(11, 26, 48, 0.94);
+  width: 100%;
+  text-align: left;
+  color: inherit;
+  border: 1px solid rgba(162, 194, 255, 0.12);
+}
+
+.mini-card--clickable {
+  cursor: pointer;
+  border-color: rgba(120, 214, 255, 0.72);
+  background: rgba(16, 42, 78, 0.95);
+}
+
+.mini-card--selected {
+  border-color: rgba(255, 201, 120, 0.9);
+  background: rgba(62, 47, 21, 0.9);
+}
+
+.mini-card--dimmed {
+  opacity: 0.5;
+}
+
+.turn-log--hint {
+  color: #c7defa;
+}
+
+.turn-log--paused {
+  color: #ffd28f;
+}
+
+.table-status-grid {
+  margin-top: 14px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+}
+
+.table-status-card {
+  border: 1px solid rgba(162, 194, 255, 0.18);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: rgba(9, 24, 45, 0.84);
+  display: grid;
+  gap: 4px;
+}
+
+.table-status-card span {
+  color: #9db5d6;
+  font-size: 0.8rem;
+}
+
+.table-status-card strong {
+  font-size: 1.1rem;
+}
+
+.table-status-card--active {
+  border-color: rgba(118, 232, 173, 0.6);
+  background: rgba(10, 45, 31, 0.72);
+}
+
+.table-status-card--paused {
+  border-color: rgba(255, 201, 120, 0.7);
+  background: rgba(57, 37, 13, 0.75);
+}
+
+.selftest-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.selftest-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.selftest-list {
+  margin-top: 16px;
+  display: grid;
+  gap: 10px;
+}
+
+.selftest-item {
+  border: 1px solid rgba(162, 194, 255, 0.2);
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: grid;
+  gap: 4px;
+}
+
+.selftest-item--ok {
+  border-color: rgba(118, 232, 173, 0.6);
+  background: rgba(12, 48, 35, 0.7);
+}
+
+.selftest-item--fail {
+  border-color: rgba(255, 134, 134, 0.6);
+  background: rgba(64, 21, 33, 0.7);
 }
 
 .card-choice--selected {

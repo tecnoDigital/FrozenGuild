@@ -14,8 +14,16 @@
   "scripts": {
     "dev": "concurrently \"npm run dev -w server\" \"npm run dev -w web\"",
     "build": "npm run build -w server && npm run build -w web",
+    "build:prod": "npm run build",
+    "start:prod": "pm2 start ecosystem.config.cjs",
+    "restart:prod": "pm2 restart frozen-guild-server",
+    "backup:sqlite": "node scripts/backup-sqlite.mjs",
+    "restore:sqlite": "node scripts/restore-sqlite.mjs",
+    "release:prod": "sh ./scripts/release.sh",
+    "release:check": "npm run typecheck && npm run lint && npm run test && npm run test:critical && npm run build",
     "typecheck": "npm run typecheck -w server && npm run typecheck -w web",
     "test": "vitest run",
+    "test:critical": "vitest run tests/rules/full-match-critical.test.ts tests/server",
     "lint": "eslint . --ext .ts,.tsx,.js,.cjs --max-warnings=0",
     "format": "prettier --write .",
     "format:check": "prettier --check ."

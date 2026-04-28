@@ -4,3 +4,8 @@ coverage/
 .env
 .env.*
 *.log
+data/*.db
+data/*.db-shm
+data/*.db-wal
+backups/
+data/*.bak

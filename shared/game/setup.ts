@@ -29,7 +29,8 @@ function createPlayers(playerCount: number): Record<PlayerID, PlayerState> {
     players[playerID] = {
       name: `Player ${index + 1}`,
       zone: [],
-      hasBombAtStart: false
+      hasBombAtStart: false,
+      connectionStatus: "connected"
     };
   }
 
@@ -119,10 +120,13 @@ export function createInitialState(
   return {
     version: "stage-14",
     createdAt: Date.now(),
+    activeTable: true,
     deck,
     discardPile: [],
     iceGrid,
     players,
+    pendingStage: null,
+    autoResolveQueue: [],
     dice: {
       value: null,
       rolled: false
