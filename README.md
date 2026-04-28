@@ -53,8 +53,10 @@ npm run build
 
 - PM2 config: `ecosystem.config.cjs`
 - Nginx sample: `deploy/nginx/frozen-guild.conf`
+- Nginx production: `deploy/nginx/frozen-guild.production.conf`
 - Env ejemplo server: `server/.env.production.example`
 - Env ejemplo web: `web/.env.production.example`
+- Release script build+deploy: `scripts/release.sh`
 
 Flujo rapido:
 
@@ -64,12 +66,19 @@ pm2 start ecosystem.config.cjs
 pm2 save
 ```
 
+Release completo en VPS:
+
+```bash
+npm run release:prod
+```
+
 ## Observabilidad minima (Etapa 19)
 
 - Health: `GET /ops/health`
 - Metrics: `GET /ops/metrics`
 - Persistence health: `GET /persistence/health`
 - Logs cada 30s con mesas activas/pausadas y memoria.
+- Logs HTTP y logs de moves (`[move]` / `[move:error]`).
 
 ## Testing critico (Etapa 20)
 
@@ -89,6 +98,7 @@ npm run test:critical
 - Guia RC: `RELEASE_CANDIDATE_STAGE_22.md`
 - Backup SQLite: `npm run backup:sqlite`
 - Restore SQLite: `npm run restore:sqlite -- "backups/<archivo>.db"`
+- Retención backup: `BACKUP_RETENTION_DAYS` (default 7)
 - Check completo pre-RC:
 
 ```bash

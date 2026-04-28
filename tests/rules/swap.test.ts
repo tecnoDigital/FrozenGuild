@@ -51,6 +51,45 @@ describe("swap move", () => {
     expect(result).toBe("INVALID_MOVE");
   });
 
+  it("supports legacy swap args with player_zone + index", () => {
+    const G = createInitialState(2, () => 0.3);
+    const ctx = makeCtx("0");
+    const firstBefore = G.players["0"]!.zone[0]!;
+    const secondBefore = G.players["1"]!.zone[0]!;
+
+    rollDice({ G, ctx, playerID: "0", random: { D6: () => 5 } });
+
+    const result = swapCards(
+      { G, ctx, playerID: "0" },
+      "0",
+      { area: "player_zone", playerID: "0", index: 0 },
+      "1",
+      { area: "player_zone", playerID: "1", index: 0 }
+    );
+
+    expect(result).toBeUndefined();
+    expect(G.players["0"]!.zone[0]).toBe(secondBefore);
+    expect(G.players["1"]!.zone[0]).toBe(firstBefore);
+    expect(G.turn.actionCompleted).toBe(true);
+  });
+
+  it("blocks legacy swap args when playerID does not match slot owner", () => {
+    const G = createInitialState(2, () => 0.3);
+    const ctx = makeCtx("0");
+
+    rollDice({ G, ctx, playerID: "0", random: { D6: () => 5 } });
+
+    const result = swapCards(
+      { G, ctx, playerID: "0" },
+      "0",
+      { area: "player_zone", playerID: "1", index: 0 },
+      "1",
+      { area: "player_zone", playerID: "1", index: 0 }
+    );
+
+    expect(result).toBe("INVALID_MOVE");
+  });
+
   it("blocks end turn until swap is completed", () => {
     const G = createInitialState(2, () => 0.3);
     const ctx = makeCtx("0");

@@ -5,6 +5,7 @@ import {
   markPlayerDisconnected,
   markPlayerReconnected,
   processAutoResolve,
+  resolveOrcaDestroy,
   resetTurnState,
   rollDice,
   setTableActive,
@@ -18,6 +19,13 @@ export const FrozenGuild: Game<FrozenGuildState> = {
   name: "frozen-guild",
   setup: ({ ctx }) => createInitialState(ctx.numPlayers),
   turn: {
+    stages: {
+      ORCA_DESTROY_SELECTION: {
+        moves: {
+          resolveOrcaDestroy
+        }
+      }
+    },
     onBegin: ({ G, ctx, events }) => {
       resetTurnState(G);
 
@@ -50,6 +58,7 @@ export const FrozenGuild: Game<FrozenGuildState> = {
     markPlayerDisconnected,
     markPlayerReconnected,
     processAutoResolve,
+    resolveOrcaDestroy,
     setTableActive,
     endTurn
   },

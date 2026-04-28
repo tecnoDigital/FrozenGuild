@@ -36,6 +36,15 @@ export type AutoResolveItem = {
   resolveAfterMs: number;
 };
 
+export type PendingStage =
+  | {
+      type: "ORCA_DESTROY_SELECTION";
+      playerID: PlayerID;
+      orcaCardID: CardId;
+      validTargets: CardId[];
+    }
+  | null;
+
 export type DiceState = {
   value: number | null;
   rolled: boolean;
@@ -53,6 +62,7 @@ export type FrozenGuildState = {
   discardPile: CardId[];
   iceGrid: IceGridSlot[];
   players: Record<PlayerID, PlayerState>;
+  pendingStage: PendingStage;
   autoResolveQueue: AutoResolveItem[];
   dice: DiceState;
   turn: TurnState;

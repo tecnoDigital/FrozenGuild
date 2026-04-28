@@ -98,4 +98,34 @@ describe("observability", () => {
     expect(logSpy).toHaveBeenCalled();
     expect(logSpy.mock.calls.some((call) => String(call[0]).includes("[http]"))).toBe(true);
   });
+
+  it("logs moves and error status", async () => {
+    vi.spyOn(global, "setInterval").mockImplementation(
+      () => ({ unref: () => undefined }) as unknown as NodeJS.Timeout
+    );
+
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const fake = createFakeServer();
+    setupObservability(fake.server);
+
+    const okMoveCtx: MiddlewareCtx = {
+      method: "POST",
+      path: "/games/frozen-guild/match-1/moves/rollDice",
+      status: 200
+    };
+    await runChain(fake.middlewares, okMoveCtx);
+
+    const invalidMoveCtx: MiddlewareCtx = {
+      method: "POST",
+      path: "/games/frozen-guild/match-1/moves/fishFromIce",
+      status: 400
+    };
+    await runChain(fake.middlewares, invalidMoveCtx);
+
+    expect(logSpy.mock.calls.some((call) => String(call[0]).includes("[move]"))).toBe(true);
+    expect(errorSpy.mock.calls.some((call) => String(call[0]).includes("[http:error-status]"))).toBe(
+      true
+    );
+  });
 });

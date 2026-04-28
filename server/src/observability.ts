@@ -33,10 +33,15 @@ function extractMoveRoute(path: string): MoveRouteInfo | null {
     return null;
   }
 
+  const [, game, matchID, moveName] = match;
+  if (!game || !matchID || !moveName) {
+    return null;
+  }
+
   return {
-    game: match[1],
-    matchID: match[2],
-    moveName: match[3]
+    game,
+    matchID,
+    moveName
   };
 }
 

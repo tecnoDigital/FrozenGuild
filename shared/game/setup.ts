@@ -125,6 +125,7 @@ export function createInitialState(
     discardPile: [],
     iceGrid,
     players,
+    pendingStage: null,
     autoResolveQueue: [],
     dice: {
       value: null,

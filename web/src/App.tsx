@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { getCardById } from "../../shared/game/cards";
 import { calculateFinalScores } from "../../shared/game/scoring";
 import { createFrozenGuildClient } from "./boardgame/client";
@@ -28,6 +28,17 @@ type SelfTestResult = {
 
 type ConnectionStatus = FrozenGuildState["players"][string]["connectionStatus"];
 type ClientSocketStatus = "connecting" | "connected" | "disconnected";
+
+type DebugLogLike = {
+  action?: {
+    payload?: {
+      type?: string;
+      args?: unknown[];
+      playerID?: string;
+    };
+  };
+  _stateID?: number;
+};
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL ?? "http://localhost:8000";
 const RECONNECT_ESTIMATE_MS = 30_000;
@@ -118,6 +129,19 @@ function runSelfTests(G: FrozenGuildState): SelfTestResult[] {
   ];
 }
 
+function formatDebugLogEntry(entry: DebugLogLike): string | null {
+  const move = entry.action?.payload?.type;
+  if (!move) {
+    return null;
+  }
+
+  const args = entry.action?.payload?.args ?? [];
+  const playerID = entry.action?.payload?.playerID;
+  const stateID = entry._stateID;
+
+  return `state=${stateID ?? "?"} player=${playerID ?? "?"} ${move}(${JSON.stringify(args)})`;
+}
+
 function formatConnectionStatus(status: ConnectionStatus): string {
   if (status === "connected") {
     return "Conectado";
@@ -190,6 +214,8 @@ export function App() {
   const [isBusy, setIsBusy] = useState(false);
   const [swapDraft, setSwapDraft] = useState<SwapDraft | null>(null);
   const [selfTestResults, setSelfTestResults] = useState<SelfTestResult[]>([]);
+  const [debugMoveLog, setDebugMoveLog] = useState<string[]>([]);
+  const [copyLogMessage, setCopyLogMessage] = useState<string | null>(null);
   const [hasBrowserConnection, setHasBrowserConnection] = useState<boolean>(() => navigator.onLine);
   const [nowMs, setNowMs] = useState<number>(() => Date.now());
   const [lastServerSyncAt, setLastServerSyncAt] = useState<number | null>(null);
@@ -198,6 +224,7 @@ export function App() {
     currentPlayer: string;
     gameover?: unknown;
   } | null>(null);
+  const seenDebugLogKeys = useRef<Set<string>>(new Set());
 
   const client = useMemo(() => {
     if (!session) {
@@ -242,6 +269,34 @@ export function App() {
         return;
       }
 
+      const logEntries = [
+        ...(((state as unknown as { deltalog?: unknown[] }).deltalog ?? []) as DebugLogLike[]),
+        ...(((state as unknown as { log?: unknown[] }).log ?? []) as DebugLogLike[])
+      ];
+
+      if (logEntries.length > 0) {
+        setDebugMoveLog((prev) => {
+          const next = [...prev];
+
+          for (const entry of logEntries) {
+            const line = formatDebugLogEntry(entry);
+            if (!line) {
+              continue;
+            }
+
+            const key = `${entry._stateID ?? "?"}:${line}`;
+            if (seenDebugLogKeys.current.has(key)) {
+              continue;
+            }
+
+            seenDebugLogKeys.current.add(key);
+            next.push(line);
+          }
+
+          return next.slice(-500);
+        });
+      }
+
       setLastServerSyncAt(Date.now());
       setGameState({
         G: state.G,
@@ -265,6 +320,9 @@ export function App() {
       client.stop();
       setGameState(null);
       setLastServerSyncAt(null);
+      setDebugMoveLog([]);
+      setCopyLogMessage(null);
+      seenDebugLogKeys.current = new Set();
     };
   }, [client]);
 
@@ -508,6 +566,20 @@ export function App() {
     setSelfTestResults(runSelfTests(gameState.G));
   }
 
+  async function copyDebugPanelLog() {
+    if (debugMoveLog.length === 0) {
+      setCopyLogMessage("No hay logs para copiar.");
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(debugMoveLog.join("\n"));
+      setCopyLogMessage(`Log copiado (${debugMoveLog.length} lineas).`);
+    } catch {
+      setCopyLogMessage("No se pudo copiar al portapapeles.");
+    }
+  }
+
   return (
     <main className="app-shell">
       <section className="hero-card">
@@ -634,10 +706,16 @@ export function App() {
               <button className="secondary-button" disabled={!!endTurnDisabledReason} onClick={() => client?.moves?.endTurn?.()}>
                 Finalizar turno
               </button>
+              {isDev && (
+                <button className="secondary-button" onClick={copyDebugPanelLog}>
+                  Copiar log debug
+                </button>
+              )}
             </div>
             {(rollDisabledReason || endTurnDisabledReason) && (
               <p className="disabled-reason">{rollDisabledReason ?? endTurnDisabledReason}</p>
             )}
+            {isDev && copyLogMessage && <p className="turn-log turn-log--hint">{copyLogMessage}</p>}
             <p className="action-hint">{actionMessage}</p>
 
             <div className="table-status-grid">
@@ -779,12 +857,15 @@ export function App() {
                 <h3>Selftest rapido (solo dev)</h3>
                 <div className="selftest-actions">
                   <button className="secondary-button" onClick={runDebugSelfTests}>Correr checks</button>
+                  <button className="secondary-button" onClick={copyDebugPanelLog}>Copiar log debug</button>
                   <button className="secondary-button" onClick={() => client?.moves?.setTableActive?.(true)}>Activar mesa</button>
                   <button className="secondary-button" onClick={() => client?.moves?.setTableActive?.(false)}>Pausar mesa</button>
                   <button className="secondary-button" onClick={() => client?.moves?.markPlayerDisconnected?.(Date.now())}>Simular desconexion</button>
                   <button className="secondary-button" onClick={() => client?.moves?.markPlayerReconnected?.()}>Simular reconexion</button>
                 </div>
               </div>
+              <p className="panel-copy">Moves capturados: {debugMoveLog.length}</p>
+              {copyLogMessage && <p className="panel-copy">{copyLogMessage}</p>}
               {selfTestResults.length === 0 ? (
                 <p className="panel-copy">Corre los checks para validar estado y reglas basicas del turno.</p>
               ) : (
