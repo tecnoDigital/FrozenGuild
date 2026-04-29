@@ -1,4 +1,4 @@
-import type { CardType, PenguinFishValue } from "./types";
+import type { CardType, PenguinFishValue } from "./types.js";
 
 export const PENGUIN_VALUE_DISTRIBUTION: Record<PenguinFishValue, number> = {
   1: 8,

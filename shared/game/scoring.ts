@@ -1,5 +1,5 @@
-import { getCardById } from "./cards";
-import type { CardId, PenguinFishValue, PlayerID, PlayerState } from "./types";
+import { getCardById } from "./cards.js";
+import type { CardId, PenguinFishValue, PlayerID, PlayerState } from "./types.js";
 
 export const KRILL_BONUS_POINTS = 5;
 export const KRILL_PENALTY_POINTS = -3;

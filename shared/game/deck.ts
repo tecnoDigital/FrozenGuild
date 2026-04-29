@@ -1,5 +1,5 @@
-import { ALL_CARDS } from "./cards";
-import type { CardId } from "./types";
+import { ALL_CARDS } from "./cards.js";
+import type { CardId } from "./types.js";
 
 export function createDeck(): CardId[] {
   return ALL_CARDS.map((card) => card.id);

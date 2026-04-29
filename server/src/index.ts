@@ -1,8 +1,8 @@
-import { FrozenGuild } from "../../shared/game/FrozenGuild";
+import { FrozenGuild } from "../../shared/game/FrozenGuild.js";
 import { createRequire } from "node:module";
-import { serverConfig } from "./config";
-import { setupObservability } from "./observability";
-import { setupSqlitePersistence } from "./storage";
+import { serverConfig } from "./config.js";
+import { setupObservability } from "./observability.js";
+import { setupSqlitePersistence } from "./storage.js";
 
 const require = createRequire(import.meta.url);
 

@@ -1,7 +1,7 @@
 import { Client } from "boardgame.io/client";
 import { SocketIO } from "boardgame.io/multiplayer";
-import { FrozenGuild } from "../../../shared/game/FrozenGuild";
-import type { FrozenGuildState } from "../../../shared/game/types";
+import { FrozenGuild } from "../../../shared/game/FrozenGuild.js";
+import type { FrozenGuildState } from "../../../shared/game/types.js";
 
 export type FrozenGuildClientConfig = {
   serverUrl: string;

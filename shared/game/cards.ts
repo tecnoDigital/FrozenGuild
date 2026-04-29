@@ -1,9 +1,9 @@
-import type { Card, CardId, CardType, PenguinFishValue } from "./types";
+import type { Card, CardId, CardType, PenguinFishValue } from "./types.js";
 import {
   NON_PENGUIN_BLUEPRINTS,
   PENGUIN_ART_BY_VALUE,
   PENGUIN_VALUE_DISTRIBUTION
-} from "./card-distribution";
+} from "./card-distribution.js";
 
 const PENGUIN_VALUES: PenguinFishValue[] = [1, 2, 3];
 

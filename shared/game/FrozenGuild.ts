@@ -15,10 +15,10 @@ import {
   spyGiveCard,
   spyOnIce,
   swapCards
-} from "./moves";
-import { buildPlayerView } from "./playerView";
-import { createInitialState } from "./setup";
-import type { FrozenGuildState } from "./types";
+} from "./moves.js";
+import { buildPlayerView } from "./playerView.js";
+import { createInitialState } from "./setup.js";
+import type { FrozenGuildState } from "./types.js";
 
 const INVALID_MOVE = "INVALID_MOVE" as const;
 

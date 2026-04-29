@@ -1,7 +1,7 @@
 import type { ActivePlayersArg, Ctx } from "boardgame.io";
-import { getCardById } from "./cards";
-import { calculateFinalScores } from "./scoring";
-import type { FrozenGuildState, SwapLocation } from "./types";
+import { getCardById } from "./cards.js";
+import { calculateFinalScores } from "./scoring.js";
+import type { FrozenGuildState, SwapLocation } from "./types.js";
 
 const INVALID_MOVE = "INVALID_MOVE" as const;
 export const DISCONNECT_GRACE_MS = 30_000;

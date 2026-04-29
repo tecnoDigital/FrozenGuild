@@ -1,12 +1,12 @@
-import { createDeck, shuffleDeck } from "./deck";
-import { getCardById } from "./cards";
+import { createDeck, shuffleDeck } from "./deck.js";
+import { getCardById } from "./cards.js";
 import type {
   CardId,
   FrozenGuildState,
   IceGridSlot,
   PlayerID,
   PlayerState
-} from "./types";
+} from "./types.js";
 
 export const MIN_PLAYERS = 1;
 export const MAX_PLAYERS = 4;

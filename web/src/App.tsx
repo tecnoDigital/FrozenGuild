@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { getCardById } from "../../shared/game/cards";
-import { calculateFinalScores } from "../../shared/game/scoring";
-import { createFrozenGuildClient } from "./boardgame/client";
-import type { FrozenGuildState, SwapLocation } from "../../shared/game/types";
+import { getCardById } from "../../shared/game/cards.js";
+import { calculateFinalScores } from "../../shared/game/scoring.js";
+import { createFrozenGuildClient } from "./boardgame/client.js";
+import type { FrozenGuildState, SwapLocation } from "../../shared/game/types.js";
 
 type LobbySession = {
   matchID: string;

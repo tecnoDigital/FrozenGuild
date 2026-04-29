@@ -1,4 +1,4 @@
-import type { FrozenGuildState, PlayerID } from "./types";
+import type { FrozenGuildState, PlayerID } from "./types.js";
 
 const HIDDEN_CARD = { hidden: true } as const;
 const HIDDEN_DECK_CARD = "hidden";
