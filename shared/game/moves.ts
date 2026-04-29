@@ -826,6 +826,7 @@ function resolveOrcaDestroyFromPendingStage(
     G.discardPile.push(targetCardID);
   }
 
+  G.orcaResolution = null;
   clearPendingStage(G, events);
 }
 
