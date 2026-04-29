@@ -242,6 +242,7 @@ function ConnectionBadge({ status }: { status: ConnectionStatus }) {
 export function App() {
   const [playerName, setPlayerName] = useState("Jugador");
   const [numPlayers, setNumPlayers] = useState(2);
+  const [selectedBotPlayerIDs, setSelectedBotPlayerIDs] = useState<string[]>([]);
   const [matchIDInput, setMatchIDInput] = useState("");
   const [joinPlayerID, setJoinPlayerID] = useState("0");
   const [matches, setMatches] = useState<string[]>([]);
@@ -496,6 +497,27 @@ export function App() {
       }
 
       const payload = (await response.json()) as { matchID: string };
+
+      const parsedBotIDs = selectedBotPlayerIDs
+        .map((value) => Number(value))
+        .filter((value) => Number.isInteger(value) && value >= 0 && value < numPlayers)
+        .map((value) => String(value));
+
+      for (const botPlayerID of parsedBotIDs) {
+        const botJoin = await fetch(`${SERVER_URL}/games/frozen-guild/${payload.matchID}/join`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            playerID: botPlayerID,
+            playerName: `BOT ${botPlayerID}`
+          })
+        });
+
+        if (!botJoin.ok && botJoin.status !== 409) {
+          throw new Error(`No se pudo unir BOT ${botPlayerID} (${botJoin.status}).`);
+        }
+      }
+
       setMatchIDInput(payload.matchID);
       setSelectedJoinMatchID(payload.matchID);
       await refreshMatches();
@@ -711,6 +733,22 @@ export function App() {
     ? Object.keys(gameState.G.players).filter((playerID) => playerID !== session?.playerID)
     : [];
 
+  const botCandidateIDs = Array.from({ length: numPlayers }, (_, index) => String(index));
+
+  useEffect(() => {
+    setSelectedBotPlayerIDs((current) => current.filter((id) => Number(id) < numPlayers));
+  }, [numPlayers]);
+
+  function toggleBotPlayerID(playerID: string) {
+    setSelectedBotPlayerIDs((current) => {
+      if (current.includes(playerID)) {
+        return current.filter((id) => id !== playerID);
+      }
+
+      return [...current, playerID];
+    });
+  }
+
   useEffect(() => {
     if (spyTargets.length === 0) {
       return;
@@ -741,8 +779,7 @@ export function App() {
           <p className="eyebrow">Frozen Guild MVP</p>
           <h1>Etapa 12 · El Padrino</h1>
           <p className="hero-copy">
-            Dado 6: elige una accion del 1 al 5 y ejecutala usando las mismas validaciones de
-            Pesca, Espionaje o Intercambio.
+            Etapa 22.1: release candidate con bot basico opcional en lobby para llenar asientos.
           </p>
         </div>
 
@@ -767,6 +804,24 @@ export function App() {
               <option key={count} value={count}>{count}</option>
             ))}
           </select>
+
+          <label className="field-label">¿Que jugadores entran como BOT?</label>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {botCandidateIDs.map((id) => {
+              const selected = selectedBotPlayerIDs.includes(id);
+              return (
+                <button
+                  key={`bot-${id}`}
+                  type="button"
+                  className={selected ? "primary-button" : "secondary-button"}
+                  onClick={() => toggleBotPlayerID(id)}
+                  style={{ minWidth: 86 }}
+                >
+                  {selected ? `BOT ${id} ✓` : `BOT ${id}`}
+                </button>
+              );
+            })}
+          </div>
 
           <button className="primary-button" onClick={createMatch} disabled={isBusy}>Crear partida</button>
           <button className="secondary-button" onClick={refreshMatches} disabled={isBusy}>Actualizar lista</button>
