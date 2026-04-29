@@ -1,7 +1,6 @@
 import type { Ctx } from "boardgame.io";
 import { getCardById } from "./cards";
 import { calculateFinalScores } from "./scoring";
-import { getCardById } from "./cards";
 import type { FrozenGuildState, SwapLocation } from "./types";
 
 const INVALID_MOVE = "INVALID_MOVE" as const;
@@ -17,6 +16,7 @@ type MoveCtx = {
   events?: {
     endTurn?: () => void;
     endGame?: (arg?: unknown) => void;
+    setActivePlayers?: (...args: any[]) => void;
   };
 };
 
@@ -43,11 +43,7 @@ function logInvalidSwap(reason: string, details: Record<string, unknown>): void 
 }
 
 function isActivePlayer(ctx: Ctx, playerID?: string): boolean {
-  if (!playerID) {
-    return false;
-  }
-
-  return playerID === ctx.currentPlayer;
+  return !!playerID && playerID === ctx.currentPlayer;
 }
 
 function isSealBombCard(cardID: string): boolean {
@@ -55,7 +51,63 @@ function isSealBombCard(cardID: string): boolean {
 }
 
 function hasPendingMandatoryResolution(G: FrozenGuildState): boolean {
-  return G.orcaResolution !== null || G.sealBombResolution !== null;
+  return G.orcaResolution !== null || G.sealBombResolution !== null || G.pendingStage !== null;
+}
+
+function hasPendingOrcaSelection(G: FrozenGuildState): boolean {
+  return G.pendingStage?.type === "ORCA_DESTROY_SELECTION";
+}
+
+function clearPendingStage(G: FrozenGuildState, events?: MoveCtx["events"]): void {
+  G.pendingStage = null;
+  events?.setActivePlayers?.({});
+}
+
+function startOrcaSelectionStage(
+  G: FrozenGuildState,
+  events: MoveCtx["events"] | undefined,
+  playerID: string,
+  orcaCardID: string
+): void {
+  const player = G.players[playerID];
+  if (!player) {
+    return;
+  }
+
+  const validTargets = player.zone.filter((cardID) => cardID !== orcaCardID);
+  if (validTargets.length === 0) {
+    if (removeCardFromPlayerZoneById(G, playerID, orcaCardID)) {
+      G.discardPile.push(orcaCardID);
+    }
+    G.pendingStage = null;
+    return;
+  }
+
+  G.pendingStage = {
+    type: "ORCA_DESTROY_SELECTION",
+    playerID,
+    orcaCardID,
+    validTargets
+  };
+  events?.setActivePlayers?.({ [playerID]: null });
+}
+
+function syncPendingStageFromOrcaResolution(
+  G: FrozenGuildState,
+  events?: MoveCtx["events"]
+): void {
+  if (!G.orcaResolution) {
+    clearPendingStage(G, events);
+    return;
+  }
+
+  G.pendingStage = {
+    type: "ORCA_DESTROY_SELECTION",
+    playerID: G.orcaResolution.playerID,
+    orcaCardID: G.orcaResolution.orcaCardID,
+    validTargets: [...G.orcaResolution.validTargetCardIDs]
+  };
+  events?.setActivePlayers?.({ [G.orcaResolution.playerID]: null });
 }
 
 function removeCardFromPlayerZoneById(
@@ -80,7 +132,8 @@ function removeCardFromPlayerZoneById(
 function triggerOrcaResolutionOnReceive(
   G: FrozenGuildState,
   playerID: string,
-  cardID: string
+  cardID: string,
+  events?: MoveCtx["events"]
 ): void {
   const card = getCardById(cardID);
   if (!card || card.type !== "orca") {
@@ -98,6 +151,8 @@ function triggerOrcaResolutionOnReceive(
     if (removeCardFromPlayerZoneById(G, playerID, cardID)) {
       G.discardPile.push(cardID);
     }
+    G.orcaResolution = null;
+    clearPendingStage(G, events);
     return;
   }
 
@@ -106,12 +161,14 @@ function triggerOrcaResolutionOnReceive(
     orcaCardID: cardID,
     validTargetCardIDs
   };
+  syncPendingStageFromOrcaResolution(G, events);
 }
 
 function addCardToPlayerZoneWithEffects(
   G: FrozenGuildState,
   playerID: string,
-  cardID: string
+  cardID: string,
+  events?: MoveCtx["events"]
 ): void {
   const player = G.players[playerID];
   if (!player) {
@@ -119,7 +176,7 @@ function addCardToPlayerZoneWithEffects(
   }
 
   player.zone.push(cardID);
-  triggerOrcaResolutionOnReceive(G, playerID, cardID);
+  triggerOrcaResolutionOnReceive(G, playerID, cardID, events);
 }
 
 export function setBombAtTurnStart(G: FrozenGuildState, playerID: string): void {
@@ -170,6 +227,9 @@ export function resetTurnState(G: FrozenGuildState): void {
   G.turn.actionCompleted = false;
   G.turn.padrinoAction = null;
   G.spy = null;
+  G.pendingStage = null;
+  G.orcaResolution = null;
+  G.sealBombResolution = null;
 }
 
 function getEffectiveActionValue(G: FrozenGuildState): number | null {
@@ -186,6 +246,44 @@ function getEffectiveActionValue(G: FrozenGuildState): number | null {
 
 function requiresActionForDiceValue(G: FrozenGuildState, value: number): boolean {
   return getEffectiveActionValue(G) === value;
+}
+
+function upsertPendingTurnSkip(G: FrozenGuildState, playerID: string, startedAt: number): void {
+  const existing = G.autoResolveQueue.find(
+    (item) => item.playerID === playerID && item.stageType === "TURN_SKIP"
+  );
+
+  if (existing) {
+    existing.startedAt = startedAt;
+    existing.resolveAfterMs = DISCONNECT_GRACE_MS;
+    return;
+  }
+
+  G.autoResolveQueue.push({
+    playerID,
+    stageType: "TURN_SKIP",
+    startedAt,
+    resolveAfterMs: DISCONNECT_GRACE_MS
+  });
+}
+
+function removePendingTurnSkip(G: FrozenGuildState, playerID: string): void {
+  G.autoResolveQueue = G.autoResolveQueue.filter(
+    (item) => !(item.playerID === playerID && item.stageType === "TURN_SKIP")
+  );
+}
+
+function hasConnectedOrReconnectingPlayersExceptCurrent(
+  G: FrozenGuildState,
+  currentPlayerID: string
+): boolean {
+  return Object.entries(G.players).some(([playerID, player]) => {
+    if (playerID === currentPlayerID) {
+      return false;
+    }
+
+    return player.connectionStatus === "connected" || player.connectionStatus === "reconnecting";
+  });
 }
 
 export function markPlayerDisconnected(
@@ -236,6 +334,7 @@ export function processAutoResolve({ G, ctx, events }: MoveCtx, nowMs: number = 
     }
 
     if (item.stageType !== "TURN_SKIP") {
+      nextQueue.push(item);
       continue;
     }
 
@@ -268,12 +367,7 @@ export function setTableActive(
   { G, playerID }: MoveCtx,
   active: boolean
 ): typeof INVALID_MOVE | void {
-  if (!playerID) {
-    return INVALID_MOVE;
-  }
-
-  const player = G.players[playerID];
-  if (!player) {
+  if (!playerID || !G.players[playerID]) {
     return INVALID_MOVE;
   }
 
@@ -295,14 +389,6 @@ function requiresSwapAction(G: FrozenGuildState): boolean {
 
 function requiresPadrinoSelection(G: FrozenGuildState): boolean {
   return G.dice.rolled && G.dice.value === 6 && G.turn.padrinoAction === null;
-}
-
-function requiresSwapAction(G: FrozenGuildState): boolean {
-  if (!G.dice.rolled || G.dice.value === null) {
-    return false;
-  }
-
-  return G.dice.value === 5;
 }
 
 function isValidIceSlotIndex(slot: number, length: number): boolean {
@@ -331,8 +417,8 @@ function readCardFromLocation(G: FrozenGuildState, location: SwapLocation): stri
       return null;
     }
 
-    const cardId = G.iceGrid[location.slot];
-    return typeof cardId === "string" ? cardId : null;
+    const cardID = G.iceGrid[location.slot];
+    return typeof cardID === "string" ? cardID : null;
   }
 
   const player = G.players[location.playerID];
@@ -347,9 +433,9 @@ function readCardFromLocation(G: FrozenGuildState, location: SwapLocation): stri
   return player.zone[location.index] ?? null;
 }
 
-function writeCardToLocation(G: FrozenGuildState, location: SwapLocation, cardId: string): void {
+function writeCardToLocation(G: FrozenGuildState, location: SwapLocation, cardID: string): void {
   if (location.area === "ice_grid") {
-    G.iceGrid[location.slot] = cardId;
+    G.iceGrid[location.slot] = cardID;
     return;
   }
 
@@ -358,7 +444,21 @@ function writeCardToLocation(G: FrozenGuildState, location: SwapLocation, cardId
     return;
   }
 
-  player.zone[location.index] = cardId;
+  player.zone[location.index] = cardID;
+}
+
+function drawIceReplacementCard(G: FrozenGuildState): string | null {
+  const nextIndex = G.deck.findIndex((cardID) => {
+    const card = getCardById(cardID);
+    return card?.type !== "orca" && card?.type !== "seal_bomb";
+  });
+
+  if (nextIndex === -1) {
+    return null;
+  }
+
+  const [replacement] = G.deck.splice(nextIndex, 1);
+  return replacement ?? null;
 }
 
 function refillIceSlotOrEndGame(
@@ -366,8 +466,8 @@ function refillIceSlotOrEndGame(
   slot: number,
   events?: MoveCtx["events"]
 ): void {
-  if (G.deck.length > 0) {
-    const replacement = G.deck.shift() ?? null;
+  const replacement = drawIceReplacementCard(G);
+  if (replacement !== null) {
     G.iceGrid[slot] = replacement;
     return;
   }
@@ -399,10 +499,6 @@ export function fishFromIce(
     return INVALID_MOVE;
   }
 
-  if (hasPendingOrcaSelection(G)) {
-    return INVALID_MOVE;
-  }
-
   if (G.turn.actionCompleted) {
     return INVALID_MOVE;
   }
@@ -411,24 +507,17 @@ export function fishFromIce(
     return INVALID_MOVE;
   }
 
-  const cardId = G.iceGrid[slot];
-  if (cardId === null || cardId === undefined) {
+  const cardID = G.iceGrid[slot];
+  if (typeof cardID !== "string") {
     return INVALID_MOVE;
   }
 
-  if (typeof cardId !== "string") {
+  if (!G.players[playerID]) {
     return INVALID_MOVE;
   }
 
-  const player = playerID ? G.players[playerID] : undefined;
-  if (!playerID || !player) {
-    return INVALID_MOVE;
-  }
-
-  addCardToPlayerZoneWithEffects(G, playerID, cardId);
-
+  addCardToPlayerZoneWithEffects(G, playerID, cardID, events);
   refillIceSlotOrEndGame(G, slot, events);
-
   G.turn.actionCompleted = true;
 }
 
@@ -521,24 +610,40 @@ export function spyGiveCard(
     return INVALID_MOVE;
   }
 
-  const targetPlayer = G.players[targetPlayerID];
-  if (!targetPlayer) {
+  if (!G.players[targetPlayerID]) {
     return INVALID_MOVE;
   }
 
-  const cardId = G.iceGrid[slot];
-  if (typeof cardId !== "string") {
+  const cardID = G.iceGrid[slot];
+  if (typeof cardID !== "string") {
     return INVALID_MOVE;
   }
 
-  addCardToPlayerZoneWithEffects(G, targetPlayerID, cardId);
+  addCardToPlayerZoneWithEffects(G, targetPlayerID, cardID, events);
   refillIceSlotOrEndGame(G, slot, events);
   G.spy = null;
   G.turn.actionCompleted = true;
 }
 
-export function swapCards(
-  { G, ctx, playerID }: MoveCtx,
+function resolveSwapCardID(G: FrozenGuildState, ref: SwapRef, playerID: string): string | null {
+  if (typeof ref === "string") {
+    return G.players[playerID]?.zone.includes(ref) ? ref : null;
+  }
+
+  if (ref.area !== "player_zone" || ref.playerID !== playerID) {
+    return null;
+  }
+
+  const player = G.players[playerID];
+  if (!player) {
+    return null;
+  }
+
+  return player.zone[ref.index] ?? null;
+}
+
+function swapCardsByLocation(
+  { G, ctx, playerID, events }: MoveCtx,
   source: SwapLocation,
   target: SwapLocation
 ): typeof INVALID_MOVE | void {
@@ -580,19 +685,30 @@ export function swapCards(
   writeCardToLocation(G, source, targetCard);
   writeCardToLocation(G, target, sourceCard);
 
-  triggerOrcaResolutionOnReceive(G, source.playerID, targetCard);
-  triggerOrcaResolutionOnReceive(G, target.playerID, sourceCard);
+  triggerOrcaResolutionOnReceive(G, source.playerID, targetCard, events);
+  if (!G.orcaResolution) {
+    triggerOrcaResolutionOnReceive(G, target.playerID, sourceCard, events);
+  }
 
   G.turn.actionCompleted = true;
 }
 
-export function swapCards(
+function swapCardsLegacy(
   { G, ctx, playerID, events }: MoveCtx,
   firstPlayerID: string,
   firstCardRef: SwapRef,
   secondPlayerID: string,
   secondCardRef: SwapRef
 ): typeof INVALID_MOVE | void {
+  if (hasPendingMandatoryResolution(G)) {
+    logInvalidSwap("PENDING_RESOLUTION", {
+      orcaResolution: G.orcaResolution,
+      pendingStage: G.pendingStage,
+      sealBombResolution: G.sealBombResolution
+    });
+    return INVALID_MOVE;
+  }
+
   if (!isActivePlayer(ctx, playerID)) {
     logInvalidSwap("NOT_ACTIVE_PLAYER", {
       playerID,
@@ -604,14 +720,8 @@ export function swapCards(
   if (!requiresSwapAction(G)) {
     logInvalidSwap("DICE_NOT_SWAP", {
       rolled: G.dice.rolled,
-      diceValue: G.dice.value
-    });
-    return INVALID_MOVE;
-  }
-
-  if (hasPendingOrcaSelection(G)) {
-    logInvalidSwap("PENDING_ORCA_SELECTION", {
-      pendingStage: G.pendingStage
+      diceValue: G.dice.value,
+      padrinoAction: G.turn.padrinoAction
     });
     return INVALID_MOVE;
   }
@@ -677,120 +787,30 @@ export function swapCards(
   firstPlayer.zone[firstIndex] = secondCardID;
   secondPlayer.zone[secondIndex] = firstCardID;
 
-  const cardGivenToFirst = getCardById(secondCardID);
-  if (cardGivenToFirst?.type === "orca") {
-    startOrcaSelectionStage(G, events, firstPlayerID, secondCardID);
-  }
-
-  const cardGivenToSecond = getCardById(firstCardID);
-  if (!hasPendingOrcaSelection(G) && cardGivenToSecond?.type === "orca") {
-    startOrcaSelectionStage(G, events, secondPlayerID, firstCardID);
+  triggerOrcaResolutionOnReceive(G, firstPlayerID, secondCardID, events);
+  if (!G.orcaResolution) {
+    triggerOrcaResolutionOnReceive(G, secondPlayerID, firstCardID, events);
   }
 
   G.turn.actionCompleted = true;
 }
 
-export function resolveOrcaDestroy(
-  { G, playerID, events }: MoveCtx,
-  targetCardID: string
+export function swapCards(
+  moveCtx: MoveCtx,
+  arg1: SwapLocation | string,
+  arg2: SwapLocation | SwapRef,
+  arg3?: string,
+  arg4?: SwapRef
 ): typeof INVALID_MOVE | void {
-  const pending = G.pendingStage;
-  if (!pending || pending.type !== "ORCA_DESTROY_SELECTION") {
-    return INVALID_MOVE;
+  if (typeof arg1 === "string" && typeof arg3 === "string") {
+    return swapCardsLegacy(moveCtx, arg1, arg2 as SwapRef, arg3, arg4 as SwapRef);
   }
 
-  if (!playerID || playerID !== pending.playerID) {
-    return INVALID_MOVE;
-  }
-
-  if (!pending.validTargets.includes(targetCardID)) {
-    return INVALID_MOVE;
-  }
-
-  const player = G.players[playerID];
-  if (!player) {
-    return INVALID_MOVE;
-  }
-
-  const orcaIndex = player.zone.indexOf(pending.orcaCardID);
-  if (orcaIndex === -1) {
-    clearPendingStage(G, events);
-    return INVALID_MOVE;
-  }
-
-  player.zone.splice(orcaIndex, 1);
-  G.discardPile.push(pending.orcaCardID);
-
-  if (targetCardID !== pending.orcaCardID) {
-    const targetIndex = player.zone.indexOf(targetCardID);
-    if (targetIndex === -1) {
-      clearPendingStage(G, events);
-      return INVALID_MOVE;
-    }
-
-    player.zone.splice(targetIndex, 1);
-    G.discardPile.push(targetCardID);
-  }
-
-  clearPendingStage(G, events);
-}
-
-export function rollDice({
-  G,
-  ctx,
-  playerID,
-  random
-}: MoveCtx): typeof INVALID_MOVE | void {
-  if (hasPendingMandatoryResolution(G)) {
-    return INVALID_MOVE;
-  }
-
-  if (!isActivePlayer(ctx, playerID)) {
-    return INVALID_MOVE;
-  }
-
-  if (hasPendingOrcaSelection(G)) {
-    return INVALID_MOVE;
-  }
-
-  if (G.dice.rolled) {
-    return INVALID_MOVE;
-  }
-
-  const value = random?.D6 ? random.D6() : Math.floor(Math.random() * 6) + 1;
-  G.dice.value = value;
-  G.dice.rolled = true;
-}
-
-export function choosePadrinoAction(
-  { G, ctx, playerID }: MoveCtx,
-  action: 1 | 2 | 3 | 4 | 5
-): typeof INVALID_MOVE | void {
-  if (hasPendingMandatoryResolution(G)) {
-    return INVALID_MOVE;
-  }
-
-  if (!isActivePlayer(ctx, playerID)) {
-    return INVALID_MOVE;
-  }
-
-  if (!G.dice.rolled || G.dice.value !== 6) {
-    return INVALID_MOVE;
-  }
-
-  if (G.turn.actionCompleted || G.turn.padrinoAction !== null) {
-    return INVALID_MOVE;
-  }
-
-  if (!Number.isInteger(action) || action < 1 || action > 5) {
-    return INVALID_MOVE;
-  }
-
-  G.turn.padrinoAction = action;
+  return swapCardsByLocation(moveCtx, arg1 as SwapLocation, arg2 as SwapLocation);
 }
 
 export function resolveOrcaDestroy(
-  { G, playerID }: MoveCtx,
+  { G, playerID, events }: MoveCtx,
   targetCardID: string
 ): typeof INVALID_MOVE | void {
   const pending = G.orcaResolution;
@@ -815,6 +835,7 @@ export function resolveOrcaDestroy(
 
   G.discardPile.push(targetCardID);
   G.orcaResolution = null;
+  clearPendingStage(G, events);
 }
 
 export function resolveSealBombExplosion(
@@ -860,6 +881,51 @@ export function resolveSealBombExplosion(
 
   G.players[playerID]!.hasBombAtStart = false;
   G.sealBombResolution = null;
+}
+
+export function rollDice({ G, ctx, playerID, random }: MoveCtx): typeof INVALID_MOVE | void {
+  if (hasPendingMandatoryResolution(G)) {
+    return INVALID_MOVE;
+  }
+
+  if (!isActivePlayer(ctx, playerID)) {
+    return INVALID_MOVE;
+  }
+
+  if (G.dice.rolled) {
+    return INVALID_MOVE;
+  }
+
+  const value = random?.D6 ? random.D6() : Math.floor(Math.random() * 6) + 1;
+  G.dice.value = value;
+  G.dice.rolled = true;
+}
+
+export function choosePadrinoAction(
+  { G, ctx, playerID }: MoveCtx,
+  action: 1 | 2 | 3 | 4 | 5
+): typeof INVALID_MOVE | void {
+  if (hasPendingMandatoryResolution(G)) {
+    return INVALID_MOVE;
+  }
+
+  if (!isActivePlayer(ctx, playerID)) {
+    return INVALID_MOVE;
+  }
+
+  if (!G.dice.rolled || G.dice.value !== 6) {
+    return INVALID_MOVE;
+  }
+
+  if (G.turn.actionCompleted || G.turn.padrinoAction !== null) {
+    return INVALID_MOVE;
+  }
+
+  if (!Number.isInteger(action) || action < 1 || action > 5) {
+    return INVALID_MOVE;
+  }
+
+  G.turn.padrinoAction = action;
 }
 
 export function endTurn({ G, ctx, playerID, events }: MoveCtx): typeof INVALID_MOVE | void {

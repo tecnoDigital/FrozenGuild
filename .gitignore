@@ -4,8 +4,12 @@ coverage/
 .env
 .env.*
 *.log
+.run/
 data/*.db
 data/*.db-shm
 data/*.db-wal
+server/data/*.db
+server/data/*.db-shm
+server/data/*.db-wal
 backups/
 data/*.bak

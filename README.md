@@ -23,23 +23,67 @@ frozen-guild/
 
 - Node.js 20 o 22 (Node 24 no es compatible con boardgame.io 0.50.x)
 
-## Comandos
+## Arranque local
 
 ```bash
 npm install
-npm run dev
+npm run start:local
 ```
 
 Esto levanta:
 
-- Web: `http://localhost:5173`
-- Server: `http://localhost:8000`
+- Web: `http://127.0.0.1:5173`
+- Server: `http://127.0.0.1:8000`
 
-Build y chequeos:
+Para apagar:
+
+```bash
+npm run stop
+```
+
+## Arranque rapido de desarrollo
+
+```bash
+npm run dev
+```
+
+Eso corre server + web en modo desarrollo directo.
+
+## Exponer con ngrok
+
+```bash
+ngrok config add-authtoken TU_TOKEN
+npm run start:ngrok
+```
+
+Esto:
+
+- levanta server local
+- levanta frontend local
+- abre un tunel publico de ngrok al frontend
+- usa proxy de Vite para `/games`, `/socket.io`, `/ops` y `/persistence`
+
+Alias compatibles con flujo anterior:
+
+```bash
+npm run test:start
+npm run test:stop
+```
+
+## Logs de runtime
+
+```bash
+cat .run/logs/server.log
+cat .run/logs/web.log
+cat .run/logs/ngrok.log
+```
+
+## Build y chequeos
 
 ```bash
 npm run typecheck
 npm run lint
+npm test
 npm run build
 ```
 

@@ -1,5 +1,8 @@
 import { FrozenGuild } from "../../shared/game/FrozenGuild";
 import { createRequire } from "node:module";
+import { serverConfig } from "./config";
+import { setupObservability } from "./observability";
+import { setupSqlitePersistence } from "./storage";
 
 const require = createRequire(import.meta.url);
 
@@ -18,22 +21,9 @@ if (
 const boardgameServer = await import("boardgame.io/dist/cjs/server.js");
 const Server = boardgameServer.default?.Server ?? boardgameServer.Server;
 
-const PORT = Number(process.env.PORT ?? 8000);
-
-const allowedOrigins =
-  process.env.CORS_ORIGINS === "*"
-    ? ["*"]
-    : (
-        process.env.CORS_ORIGINS ??
-        "*,http://localhost:5173,http://127.0.0.1:5173,http://0.0.0.0:5173"
-      )
-        .split(",")
-        .map((origin) => origin.trim())
-        .filter(Boolean);
-
 const server = Server({
   games: [FrozenGuild],
-  origins: allowedOrigins
+  origins: serverConfig.origins
 });
 
 const sqlite = setupSqlitePersistence(

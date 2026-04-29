@@ -4,11 +4,14 @@ import {
   completeSpy,
   endTurn,
   fishFromIce,
+  markPlayerDisconnected,
+  markPlayerReconnected,
   resolveOrcaDestroy,
   resolveSealBombExplosion,
   resetTurnState,
   rollDice,
   setBombAtTurnStart,
+  setTableActive,
   spyGiveCard,
   spyOnIce,
   swapCards
@@ -36,7 +39,10 @@ export const FrozenGuild: Game<FrozenGuildState> = {
     choosePadrinoAction,
     resolveOrcaDestroy,
     resolveSealBombExplosion,
-    endTurn
+    endTurn,
+    setTableActive,
+    markPlayerDisconnected,
+    markPlayerReconnected
   },
   playerView: ({ G, playerID }) => buildPlayerView(G, playerID)
 };

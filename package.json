@@ -13,6 +13,12 @@
   ],
   "scripts": {
     "dev": "concurrently \"npm run dev -w server\" \"npm run dev -w web\"",
+    "dev:local": "npm run dev",
+    "start:local": "bash ./scripts/start-local.sh",
+    "start:ngrok": "bash ./scripts/start-ngrok.sh",
+    "stop": "bash ./scripts/stop.sh",
+    "test:start": "npm run start:ngrok",
+    "test:stop": "npm run stop",
     "build": "npm run build -w server && npm run build -w web",
     "build:prod": "npm run build",
     "start:prod": "pm2 start ecosystem.config.cjs",
