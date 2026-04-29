@@ -809,10 +809,59 @@ export function swapCards(
   return swapCardsByLocation(moveCtx, arg1 as SwapLocation, arg2 as SwapLocation);
 }
 
+function resolveOrcaDestroyFromPendingStage(
+  { G, playerID, events }: MoveCtx,
+  targetCardID: string
+): typeof INVALID_MOVE | void {
+  const pending = G.pendingStage;
+  if (!pending || pending.type !== "ORCA_DESTROY_SELECTION") {
+    return INVALID_MOVE;
+  }
+
+  if (!playerID || playerID !== pending.playerID) {
+    return INVALID_MOVE;
+  }
+
+  if (!pending.validTargets.includes(targetCardID)) {
+    return INVALID_MOVE;
+  }
+
+  const player = G.players[playerID];
+  if (!player) {
+    return INVALID_MOVE;
+  }
+
+  const orcaIndex = player.zone.indexOf(pending.orcaCardID);
+  if (orcaIndex === -1) {
+    clearPendingStage(G, events);
+    return INVALID_MOVE;
+  }
+
+  player.zone.splice(orcaIndex, 1);
+  G.discardPile.push(pending.orcaCardID);
+
+  if (targetCardID !== pending.orcaCardID) {
+    const targetIndex = player.zone.indexOf(targetCardID);
+    if (targetIndex === -1) {
+      clearPendingStage(G, events);
+      return INVALID_MOVE;
+    }
+
+    player.zone.splice(targetIndex, 1);
+    G.discardPile.push(targetCardID);
+  }
+
+  clearPendingStage(G, events);
+}
+
 export function resolveOrcaDestroy(
   { G, playerID, events }: MoveCtx,
   targetCardID: string
 ): typeof INVALID_MOVE | void {
+  if (G.pendingStage?.type === "ORCA_DESTROY_SELECTION") {
+    return resolveOrcaDestroyFromPendingStage({ G, playerID, events }, targetCardID);
+  }
+
   const pending = G.orcaResolution;
   if (!pending || !playerID || pending.playerID !== playerID) {
     return INVALID_MOVE;

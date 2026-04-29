@@ -1,6 +1,12 @@
 import type { Ctx } from "boardgame.io";
 import { describe, expect, it } from "vitest";
-import { fishFromIce, resetTurnState, rollDice } from "../../shared/game/moves";
+import {
+  fishFromIce,
+  resetTurnState,
+  resolveOrcaDestroy,
+  resolveSealBombExplosion,
+  rollDice
+} from "../../shared/game/moves";
 import { createInitialState } from "../../shared/game/setup";
 
 function makeCtx(currentPlayer: string): Ctx {
@@ -38,6 +44,21 @@ describe("full match critical flow", () => {
         },
         slot
       );
+
+      if (G.orcaResolution) {
+        const target = G.orcaResolution.validTargetCardIDs[0];
+        if (target) {
+          resolveOrcaDestroy({ G, ctx, playerID: G.orcaResolution.playerID }, target);
+        }
+      }
+
+      if (G.sealBombResolution) {
+        const targets = G.sealBombResolution.validTargetCardIDs.slice(
+          0,
+          G.sealBombResolution.requiredDiscardCount
+        );
+        resolveSealBombExplosion({ G, ctx, playerID: G.sealBombResolution.playerID }, targets);
+      }
     }
 
     expect(guard).toBeLessThan(500);

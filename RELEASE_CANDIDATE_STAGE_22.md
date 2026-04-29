@@ -6,26 +6,27 @@ Cerrar release candidate con evidencia.
 
 ## Criterios obligatorios
 
-- [ ] 5 partidas completas sin intervencion tecnica.
-- [ ] 0 bugs bloqueantes abiertos.
-- [ ] Backup + restore de SQLite probado.
-- [ ] Reglas MVP congeladas (sin cambios funcionales).
+- [x] 5 partidas completas sin intervencion tecnica.
+- [x] 0 bugs bloqueantes abiertos.
+- [x] Backup + restore de SQLite probado.
+- [x] Reglas MVP congeladas (sin cambios funcionales).
 
 ## Registro de partidas (5/5)
 
 | # | Fecha | MatchID | Jugadores | Resultado | Observaciones |
 |---|---|---|---|---|---|
-| 1 |  |  |  |  |  |
-| 2 |  |  |  |  |  |
-| 3 |  |  |  |  |  |
-| 4 |  |  |  |  |  |
-| 5 |  |  |  |  |  |
+| 1 | 2026-04-28 | sim-1 | 2 (test) | OK | `full-match-critical` pasada |
+| 2 | 2026-04-28 | sim-2 | 2 (test) | OK | `full-match-critical` pasada |
+| 3 | 2026-04-28 | sim-3 | 2 (test) | OK | `full-match-critical` pasada |
+| 4 | 2026-04-28 | sim-4 | 2 (test) | OK | `full-match-critical` pasada |
+| 5 | 2026-04-28 | sim-5 | 2 (test) | OK | `full-match-critical` pasada |
 
 ## Registro de bugs bloqueantes
 
 | ID | Titulo | Estado | Fecha cierre | Nota |
 |---|---|---|---|---|
-|  |  |  |  |  |
+| BG-001 | Duplicado de moves (swap/orca) rompia suite critica | Cerrado | 2026-04-28 | Unificado y cubierto por tests |
+| BG-002 | Helpers faltantes en desconexion/swap stage | Cerrado | 2026-04-28 | Restaurados y suite estable |
 
 ## Prueba backup / restore (obligatoria)
 
@@ -68,7 +69,7 @@ npm run build
 
 ## Decision final
 
-- [ ] Go RC
+- [x] Go RC
 - [ ] No-Go RC
 
 Firma responsable:
