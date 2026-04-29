@@ -1,4 +1,4 @@
-import { createDeck, drawCard, shuffleDeck } from "./deck";
+import { createDeck, shuffleDeck } from "./deck";
 import { getCardById } from "./cards";
 import type {
   CardId,
@@ -35,24 +35,6 @@ function createPlayers(playerCount: number): Record<PlayerID, PlayerState> {
   }
 
   return players;
-}
-
-function drawMany(deck: CardId[], amount: number): { drawn: CardId[]; deck: CardId[] } {
-  const drawn: CardId[] = [];
-  let currentDeck = deck;
-
-  for (let index = 0; index < amount; index += 1) {
-    const result = drawCard(currentDeck);
-    currentDeck = result.deck;
-
-    if (result.cardId === null) {
-      break;
-    }
-
-    drawn.push(result.cardId);
-  }
-
-  return { drawn, deck: currentDeck };
 }
 
 function isRedCard(cardId: CardId): boolean {

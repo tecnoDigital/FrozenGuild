@@ -1,4 +1,4 @@
-import type { Ctx, Game } from "boardgame.io";
+import type { ActivePlayersArg, Ctx, Game } from "boardgame.io";
 import {
   choosePadrinoAction,
   completeSpy,
@@ -64,7 +64,7 @@ function runBasicBotTurn(args: {
     | {
         endTurn?: () => void;
         endGame?: (arg?: unknown) => void;
-        setActivePlayers?: (...args: any[]) => void;
+        setActivePlayers?: (arg: ActivePlayersArg) => void;
       }
     | undefined;
   random?: { D6: () => number } | undefined;

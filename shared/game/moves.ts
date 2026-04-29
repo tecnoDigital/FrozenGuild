@@ -1,4 +1,4 @@
-import type { Ctx } from "boardgame.io";
+import type { ActivePlayersArg, Ctx } from "boardgame.io";
 import { getCardById } from "./cards";
 import { calculateFinalScores } from "./scoring";
 import type { FrozenGuildState, SwapLocation } from "./types";
@@ -19,7 +19,7 @@ type MoveCtx = {
     | {
         endTurn?: () => void;
         endGame?: (arg?: unknown) => void;
-        setActivePlayers?: (...args: any[]) => void;
+        setActivePlayers?: (arg: ActivePlayersArg) => void;
       }
     | undefined;
 };
@@ -58,42 +58,9 @@ function hasPendingMandatoryResolution(G: FrozenGuildState): boolean {
   return G.orcaResolution !== null || G.sealBombResolution !== null || G.pendingStage !== null;
 }
 
-function hasPendingOrcaSelection(G: FrozenGuildState): boolean {
-  return G.pendingStage?.type === "ORCA_DESTROY_SELECTION";
-}
-
 function clearPendingStage(G: FrozenGuildState, events?: MoveCtx["events"]): void {
   G.pendingStage = null;
   events?.setActivePlayers?.({});
-}
-
-function startOrcaSelectionStage(
-  G: FrozenGuildState,
-  events: MoveCtx["events"] | undefined,
-  playerID: string,
-  orcaCardID: string
-): void {
-  const player = G.players[playerID];
-  if (!player) {
-    return;
-  }
-
-  const validTargets = player.zone.filter((cardID) => cardID !== orcaCardID);
-  if (validTargets.length === 0) {
-    if (removeCardFromPlayerZoneById(G, playerID, orcaCardID)) {
-      G.discardPile.push(orcaCardID);
-    }
-    G.pendingStage = null;
-    return;
-  }
-
-  G.pendingStage = {
-    type: "ORCA_DESTROY_SELECTION",
-    playerID,
-    orcaCardID,
-    validTargets
-  };
-  events?.setActivePlayers?.({ [playerID]: null });
 }
 
 function syncPendingStageFromOrcaResolution(
