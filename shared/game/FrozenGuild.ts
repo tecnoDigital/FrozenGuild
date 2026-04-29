@@ -1,4 +1,4 @@
-import type { Game } from "boardgame.io";
+import type { Ctx, Game } from "boardgame.io";
 import {
   choosePadrinoAction,
   completeSpy,
@@ -59,9 +59,15 @@ function botCanSwap(G: FrozenGuildState): boolean {
 
 function runBasicBotTurn(args: {
   G: FrozenGuildState;
-  ctx: { currentPlayer: string };
-  events?: { endTurn?: () => void; endGame?: (arg?: unknown) => void; setActivePlayers?: (arg?: unknown) => void };
-  random?: { D6: () => number };
+  ctx: Ctx;
+  events?:
+    | {
+        endTurn?: () => void;
+        endGame?: (arg?: unknown) => void;
+        setActivePlayers?: (...args: any[]) => void;
+      }
+    | undefined;
+  random?: { D6: () => number } | undefined;
 }): void {
   const { G, ctx, events, random } = args;
   const playerID = ctx.currentPlayer;

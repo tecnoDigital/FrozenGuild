@@ -9,15 +9,19 @@ export const DISCONNECT_GRACE_MS = 30_000;
 type MoveCtx = {
   G: FrozenGuildState;
   ctx: Ctx;
-  playerID?: string;
-  random?: {
-    D6: () => number;
-  };
-  events?: {
-    endTurn?: () => void;
-    endGame?: (arg?: unknown) => void;
-    setActivePlayers?: (...args: any[]) => void;
-  };
+  playerID?: string | undefined;
+  random?:
+    | {
+        D6: () => number;
+      }
+    | undefined;
+  events?:
+    | {
+        endTurn?: () => void;
+        endGame?: (arg?: unknown) => void;
+        setActivePlayers?: (...args: any[]) => void;
+      }
+    | undefined;
 };
 
 type LegacyPlayerZoneRef = {
@@ -810,7 +814,11 @@ export function swapCards(
 }
 
 function resolveOrcaDestroyFromPendingStage(
-  { G, playerID, events }: MoveCtx,
+  {
+    G,
+    playerID,
+    events
+  }: { G: FrozenGuildState; playerID?: string | undefined; events?: MoveCtx["events"] },
   targetCardID: string
 ): typeof INVALID_MOVE | void {
   const pending = G.pendingStage;
