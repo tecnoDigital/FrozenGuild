@@ -1,0 +1,37 @@
+.gameShell {
+  display: grid;
+  grid-template-columns: 260px minmax(580px, 1fr) 360px;
+  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "left center right"
+    "left actions right";
+  gap: 12px;
+  min-height: 100vh;
+  padding: 12px;
+}
+
+.left {
+  grid-area: left;
+}
+
+.center {
+  grid-area: center;
+}
+
+.actions {
+  grid-area: actions;
+}
+
+.right {
+  grid-area: right;
+}
+
+.left,
+.center,
+.actions,
+.right {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  padding: 12px;
+}

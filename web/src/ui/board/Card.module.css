@@ -1,0 +1,20 @@
+.card {
+  width: 120px;
+  height: 170px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.selected {
+  outline: 2px solid var(--accent);
+}
+
+.img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

@@ -1,0 +1,14 @@
+:root {
+  --bg: #07111f;
+  --surface: rgba(8, 20, 38, 0.86);
+  --surface-2: rgba(10, 23, 48, 0.96);
+  --text: #e7edf7;
+  --muted: #a9bcd8;
+  --accent: #78d6ff;
+  --accent-2: #8b8cff;
+  --danger: #ff7676;
+  --success: #56d6a6;
+  --border: rgba(162, 194, 255, 0.18);
+  --radius-md: 14px;
+  --radius-lg: 22px;
+}

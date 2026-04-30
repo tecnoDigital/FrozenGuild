@@ -2,6 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { getCardById } from "../../shared/game/cards.js";
 import { calculateFinalScores } from "../../shared/game/scoring.js";
 import { createFrozenGuildClient } from "./boardgame/client.js";
+import { useSocketStatus } from "./hooks/useSocketStatus.js";
+import { useFrozenGuildClient } from "./hooks/useFrozenGuildClient.js";
+import { GameScreen } from "./ui/screens/GameScreen.js";
+import { LobbyScreen } from "./ui/screens/LobbyScreen.js";
 import type { FrozenGuildState, SwapLocation } from "../../shared/game/types.js";
 
 type LobbySession = {
@@ -146,24 +150,7 @@ export function App() {
     "0": 0,
     "1": 0
   });
-  const [gameState, setGameState] = useState<{
-    G: FrozenGuildState;
-    currentPlayer: string;
-    gameover?: unknown;
-  } | null>(null);
-
-  const client = useMemo(() => {
-    if (!session) {
-      return null;
-    }
-
-    return createFrozenGuildClient({
-      serverUrl: SERVER_URL,
-      matchID: session.matchID,
-      playerID: session.playerID,
-      credentials: session.credentials
-    });
-  }, [session]);
+  const { client, gameState } = useFrozenGuildClient({ serverUrl: SERVER_URL, session });
 
   const adminClient0 = useMemo(() => {
     if (!adminSession) {
@@ -190,41 +177,6 @@ export function App() {
       credentials: adminSession.players["1"].credentials
     });
   }, [adminSession]);
-
-  useEffect(() => {
-    if (!client) {
-      return;
-    }
-
-    client.start();
-    const unsubscribe = client.subscribe(() => {
-      const state = client.getState();
-      if (!state) {
-        return;
-      }
-
-      setGameState({
-        G: state.G,
-        currentPlayer: state.ctx.currentPlayer,
-        gameover: state.ctx.gameover
-      });
-    });
-
-    const initial = client.getState();
-    if (initial) {
-      setGameState({
-        G: initial.G,
-        currentPlayer: initial.ctx.currentPlayer,
-        gameover: initial.ctx.gameover
-      });
-    }
-
-    return () => {
-      unsubscribe();
-      client.stop();
-      setGameState(null);
-    };
-  }, [client]);
 
   useEffect(() => {
     if (!adminClient0) {
@@ -498,7 +450,6 @@ export function App() {
 
   function leaveMatch() {
     setSession(null);
-    setGameState(null);
   }
 
   function stopAdminControl() {
@@ -548,6 +499,9 @@ export function App() {
   const sealBombPendingForMe =
     !!session && !!gameState && hasSealBombPendingForPlayer(gameState.G, session.playerID);
   const botActivity = gameState?.G.botActivity;
+  const isDev = import.meta.env.DEV;
+  const socketStatus = useSocketStatus(error ? "reconnecting" : "connected");
+  const lobbyPlayersPreview = [playerName.trim() || "Jugador", ...selectedBotPlayerIDs.map((id) => `BOT ${id}`)];
   const recentBotActivityPlayerID =
     botActivity?.playerID &&
     botActivity.completedAt !== null &&
@@ -603,12 +557,62 @@ export function App() {
     setSwapTarget(null);
   }, [gameState?.G.dice.value, gameState?.G.turn.actionCompleted, gameState?.currentPlayer]);
 
+  if (!session) {
+    return (
+      <>
+        <LobbyScreen
+          playerName={playerName}
+          matchID={matchIDInput || selectedJoinMatchID}
+          playerID={joinPlayerID}
+          players={lobbyPlayersPreview}
+          busy={isBusy}
+          onPlayerNameChange={setPlayerName}
+          onMatchIDChange={setMatchIDInput}
+          onPlayerIDChange={setJoinPlayerID}
+          onCreate={createMatch}
+          onJoin={joinMatch}
+        />
+        {error ? (
+          <div style={{ padding: "0 24px 24px", color: "var(--danger)" }}>
+            {error} · {socketStatus.label}
+          </div>
+        ) : null}
+        {isDev ? (
+          <div style={{ padding: "0 24px 24px", color: "var(--muted)" }}>
+            Matches: {matches.length} · Socket: {socketStatus.label}
+          </div>
+        ) : null}
+      </>
+    );
+  }
+
+  if (!gameState) {
+    return (
+      <main className="app-shell">
+        <section className="panel" style={{ marginTop: 20 }}>
+          <h2>Conectando partida</h2>
+          <p className="panel-copy">Entraste al match {session.matchID}. Esperando snapshot inicial...</p>
+          <button className="secondary-button" onClick={leaveMatch}>Volver al lobby</button>
+        </section>
+      </main>
+    );
+  }
+
+  if (import.meta.env.VITE_PREMIUM_GAME_UI !== "0") {
+    return (
+      <GameScreen
+        onRollDice={() => client?.moves?.rollDice?.()}
+        onChoosePadrinoAction={(action) => client?.moves?.choosePadrinoAction?.(action)}
+      />
+    );
+  }
+
   return (
     <main className="app-shell">
       <section className="hero-card">
         <div>
           <p className="eyebrow">Frozen Guild MVP</p>
-          <h1>Etapa 12 · El Padrino</h1>
+          <h1>Etapa 23.2 · lobby</h1>
           <p className="hero-copy">
             Etapa 22.1: release candidate con bot basico opcional en lobby para llenar asientos.
           </p>

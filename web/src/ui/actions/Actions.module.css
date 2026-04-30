@@ -1,0 +1,12 @@
+.banner {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  padding: 12px 14px;
+}
+
+.dice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}

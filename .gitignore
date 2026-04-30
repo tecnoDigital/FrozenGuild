@@ -13,3 +13,4 @@ server/data/*.db-shm
 server/data/*.db-wal
 backups/
 data/*.bak
+cortex.config.json
