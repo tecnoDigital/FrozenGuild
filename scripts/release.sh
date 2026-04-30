@@ -50,8 +50,20 @@ fi
 
 if command -v curl >/dev/null 2>&1; then
   printf '%s\n' "[release] checking health endpoint"
-  curl -fsS "http://127.0.0.1:${SERVER_PORT}/ops/health"
-  printf '\n'
+  health_ok=0
+  for _ in $(seq 1 30); do
+    if curl -fsS "http://127.0.0.1:${SERVER_PORT}/ops/health"; then
+      printf '\n'
+      health_ok=1
+      break
+    fi
+    sleep 1
+  done
+
+  if [ "$health_ok" -ne 1 ]; then
+    printf '%s\n' "[release] health check failed after waiting for server startup"
+    exit 1
+  fi
 fi
 
 printf '%s\n' "[release] done"

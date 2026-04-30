@@ -51,6 +51,17 @@ describe("match setup", () => {
     }
   });
 
+  it("allows red cards on the initial ice grid", () => {
+    const state = createInitialState(2, () => 0.2);
+    const iceCards = state.iceGrid.filter((slot): slot is string => typeof slot === "string");
+    const hasRed = iceCards.some((cardId) => {
+      const card = getCardById(cardId);
+      return card?.type === "orca" || card?.type === "seal_bomb";
+    });
+
+    expect(hasRed).toBe(true);
+  });
+
   it("does not duplicate cards between deck, ice and player zones", () => {
     const state = createInitialState(4, () => 0.67);
     const iceCards = state.iceGrid.filter((slot): slot is string => typeof slot === "string");
@@ -73,5 +84,12 @@ describe("match setup", () => {
   it("rejects player counts outside MVP range", () => {
     expect(() => createInitialState(0)).toThrowError();
     expect(() => createInitialState(5)).toThrowError();
+  });
+
+  it("marks configured bot seats in setup data", () => {
+    const state = createInitialState(2, () => 0.1, { botPlayerIDs: ["1"] });
+
+    expect(state.players["0"]?.name).toBe("Player 1");
+    expect(state.players["1"]?.name).toBe("BOT 1");
   });
 });

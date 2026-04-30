@@ -1,4 +1,4 @@
-import { createDeck, shuffleDeck } from "./deck.js";
+import { createDeck, drawCard, shuffleDeck } from "./deck.js";
 import { getCardById } from "./cards.js";
 import type {
   CardId,
@@ -7,6 +7,10 @@ import type {
   PlayerID,
   PlayerState
 } from "./types.js";
+
+export type SetupData = {
+  botPlayerIDs?: string[];
+};
 
 export const MIN_PLAYERS = 1;
 export const MAX_PLAYERS = 4;
@@ -21,13 +25,17 @@ function assertPlayerCount(playerCount: number): void {
   }
 }
 
-function createPlayers(playerCount: number): Record<PlayerID, PlayerState> {
+function createPlayers(
+  playerCount: number,
+  setupData?: SetupData
+): Record<PlayerID, PlayerState> {
   const players: Record<PlayerID, PlayerState> = {};
+  const botIds = new Set(setupData?.botPlayerIDs ?? []);
 
   for (let index = 0; index < playerCount; index += 1) {
     const playerID = String(index);
     players[playerID] = {
-      name: `Player ${index + 1}`,
+      name: botIds.has(playerID) ? `BOT ${playerID}` : `Player ${index + 1}`,
       zone: [],
       hasBombAtStart: false,
       connectionStatus: "connected"
@@ -44,6 +52,24 @@ function isRedCard(cardId: CardId): boolean {
   }
 
   return RED_CARD_TYPES.has(card.type);
+}
+
+function drawMany(deck: CardId[], amount: number): { drawn: CardId[]; deck: CardId[] } {
+  const drawn: CardId[] = [];
+  let currentDeck = deck;
+
+  for (let index = 0; index < amount; index += 1) {
+    const result = drawCard(currentDeck);
+    currentDeck = result.deck;
+
+    if (result.cardId === null) {
+      break;
+    }
+
+    drawn.push(result.cardId);
+  }
+
+  return { drawn, deck: currentDeck };
 }
 
 function drawManyNonRed(deck: CardId[], amount: number): { drawn: CardId[]; deck: CardId[] } {
@@ -71,14 +97,15 @@ function drawManyNonRed(deck: CardId[], amount: number): { drawn: CardId[]; deck
 
 export function createInitialState(
   playerCount: number,
-  randomFn: () => number = Math.random
+  randomFn: () => number = Math.random,
+  setupData?: SetupData
 ): FrozenGuildState {
   assertPlayerCount(playerCount);
 
-  const players = createPlayers(playerCount);
+  const players = createPlayers(playerCount, setupData);
   let deck = shuffleDeck(createDeck(), randomFn);
 
-  const iceDraw = drawManyNonRed(deck, ICE_GRID_SIZE);
+  const iceDraw = drawMany(deck, ICE_GRID_SIZE);
   const iceGrid: IceGridSlot[] = [...iceDraw.drawn];
   deck = iceDraw.deck;
 
@@ -103,6 +130,11 @@ export function createInitialState(
     version: "stage-14",
     createdAt: Date.now(),
     activeTable: true,
+    botActivity: {
+      playerID: null,
+      startedAt: null,
+      completedAt: null
+    },
     deck,
     discardPile: [],
     iceGrid,

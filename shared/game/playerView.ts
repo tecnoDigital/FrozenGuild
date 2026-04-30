@@ -2,6 +2,11 @@ import type { FrozenGuildState, PlayerID } from "./types.js";
 
 const HIDDEN_CARD = { hidden: true } as const;
 const HIDDEN_DECK_CARD = "hidden";
+const EMPTY_BOT_ACTIVITY: FrozenGuildState["botActivity"] = {
+  playerID: null,
+  startedAt: null,
+  completedAt: null
+};
 
 export function buildPlayerView(
   G: FrozenGuildState,
@@ -13,6 +18,7 @@ export function buildPlayerView(
 
   return {
     ...G,
+    botActivity: G.botActivity ?? EMPTY_BOT_ACTIVITY,
     deck: G.deck.map(() => HIDDEN_DECK_CARD),
     iceGrid: G.iceGrid.map((slot, index) => {
       if (slot === null) {

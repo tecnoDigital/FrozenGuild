@@ -7,9 +7,8 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 5173,
-	allowedHosts: [
-      "sullen-replace-reacquire.ngrok-free.dev"
-    ],
+    // Dev tunnel support: ngrok cambia subdominio, así que no conviene fijarlo a uno solo.
+    allowedHosts: true,
     proxy: {
       "/games": {
         target: "http://127.0.0.1:8000",

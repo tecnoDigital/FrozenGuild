@@ -92,6 +92,11 @@ export type FrozenGuildState = {
   version: string;
   createdAt: number;
   activeTable: boolean;
+  botActivity: {
+    playerID: PlayerID | null;
+    startedAt: number | null;
+    completedAt: number | null;
+  };
   deck: CardId[];
   discardPile: CardId[];
   iceGrid: IceGridSlot[];

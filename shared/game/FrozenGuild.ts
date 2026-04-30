@@ -18,9 +18,22 @@ import {
 } from "./moves.js";
 import { buildPlayerView } from "./playerView.js";
 import { createInitialState } from "./setup.js";
+import type { SetupData } from "./setup.js";
 import type { FrozenGuildState } from "./types.js";
 
 const INVALID_MOVE = "INVALID_MOVE" as const;
+
+function ensureBotActivity(G: FrozenGuildState): FrozenGuildState["botActivity"] {
+  if (!G.botActivity) {
+    G.botActivity = {
+      playerID: null,
+      startedAt: null,
+      completedAt: null
+    };
+  }
+
+  return G.botActivity;
+}
 
 function isBotPlayer(G: FrozenGuildState, playerID: string): boolean {
   const player = G.players[playerID];
@@ -57,6 +70,21 @@ function botCanSwap(G: FrozenGuildState): boolean {
   return playersWithCards >= 2;
 }
 
+function readSetupData(value: unknown): SetupData | undefined {
+  if (!value || typeof value !== "object") {
+    return undefined;
+  }
+
+  const candidate = value as { botPlayerIDs?: unknown };
+  if (!Array.isArray(candidate.botPlayerIDs)) {
+    return undefined;
+  }
+
+  return {
+    botPlayerIDs: candidate.botPlayerIDs.filter((item): item is string => typeof item === "string")
+  };
+}
+
 function runBasicBotTurn(args: {
   G: FrozenGuildState;
   ctx: Ctx;
@@ -72,6 +100,13 @@ function runBasicBotTurn(args: {
   const { G, ctx, events, random } = args;
   const playerID = ctx.currentPlayer;
   const randomFn = () => Math.random();
+
+  const botActivity = ensureBotActivity(G);
+  G.botActivity = {
+    playerID,
+    startedAt: Date.now(),
+    completedAt: null
+  };
 
   const rollResult = rollDice({ G, ctx, playerID, random });
   if (rollResult === INVALID_MOVE) {
@@ -158,15 +193,34 @@ function runBasicBotTurn(args: {
   }
 
   endTurn({ G, ctx, playerID, events });
+
+  G.botActivity = {
+    playerID,
+    startedAt: botActivity.startedAt,
+    completedAt: Date.now()
+  };
 }
 
 export const FrozenGuild: Game<FrozenGuildState> = {
   name: "frozen-guild",
-  setup: ({ ctx }) => createInitialState(ctx.numPlayers),
+  setup: ({ ctx }, setupData) =>
+    createInitialState(ctx.numPlayers, Math.random, readSetupData(setupData)),
   turn: {
     onBegin: ({ G, ctx, events, random }) => {
       resetTurnState(G);
       setBombAtTurnStart(G, ctx.currentPlayer);
+      const botActivity = ensureBotActivity(G);
+
+      if (!isBotPlayer(G, ctx.currentPlayer)) {
+        const completedAt = botActivity.completedAt;
+        if (completedAt !== null && Date.now() - completedAt > 2000) {
+          G.botActivity = {
+            playerID: null,
+            startedAt: null,
+            completedAt: null
+          };
+        }
+      }
 
       if (isBotPlayer(G, ctx.currentPlayer)) {
         runBasicBotTurn({ G, ctx, events, random });

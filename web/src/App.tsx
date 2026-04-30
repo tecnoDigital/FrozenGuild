@@ -120,6 +120,7 @@ export function App() {
   const [playerName, setPlayerName] = useState("Jugador");
   const [numPlayers, setNumPlayers] = useState(2);
   const [selectedBotPlayerIDs, setSelectedBotPlayerIDs] = useState<string[]>([]);
+  const [botPulseNow, setBotPulseNow] = useState(() => Date.now());
   const [matchIDInput, setMatchIDInput] = useState("");
   const [joinPlayerID, setJoinPlayerID] = useState("0");
   const [matches, setMatches] = useState<string[]>([]);
@@ -313,7 +314,12 @@ export function App() {
       const response = await fetch(`${SERVER_URL}/games/frozen-guild/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ numPlayers })
+        body: JSON.stringify({
+          numPlayers,
+          setupData: {
+            botPlayerIDs: selectedBotPlayerIDs
+          }
+        })
       });
 
       if (!response.ok) {
@@ -541,6 +547,13 @@ export function App() {
   const orcaPendingForMe = !!session && !!gameState && hasOrcaPendingForPlayer(gameState.G, session.playerID);
   const sealBombPendingForMe =
     !!session && !!gameState && hasSealBombPendingForPlayer(gameState.G, session.playerID);
+  const botActivity = gameState?.G.botActivity;
+  const recentBotActivityPlayerID =
+    botActivity?.playerID &&
+    botActivity.completedAt !== null &&
+    botPulseNow - botActivity.completedAt < 2200
+      ? botActivity.playerID
+      : null;
   const spyActive = !!session && !!gameState?.G.spy && gameState.G.spy.playerID === session.playerID;
   const spyTargets = gameState
     ? Object.keys(gameState.G.players).filter((playerID) => playerID !== session?.playerID)
@@ -551,6 +564,11 @@ export function App() {
   useEffect(() => {
     setSelectedBotPlayerIDs((current) => current.filter((id) => Number(id) < numPlayers));
   }, [numPlayers]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setBotPulseNow(Date.now()), 250);
+    return () => window.clearInterval(timer);
+  }, []);
 
   function toggleBotPlayerID(playerID: string) {
     setSelectedBotPlayerIDs((current) => {
@@ -1089,10 +1107,23 @@ export function App() {
           <div className="subpanel">
             <h3>Zonas de jugadores</h3>
             <div className="player-grid">
-              {Object.entries(gameState.G.players).map(([playerID, player]) => (
+              {Object.entries(gameState.G.players).map(([playerID, player]) => {
+                const isBotPlayer = player.name.trim().toUpperCase().startsWith("BOT ");
+                const showBotPulse =
+                  isBotPlayer &&
+                  (playerID === gameState.currentPlayer || recentBotActivityPlayerID === playerID);
+
+                return (
                 <article key={playerID} className={`player-card ${playerID === gameState.currentPlayer ? "player-card--active" : ""}`}>
                   <div className="player-card__header">
-                    <h4>{player.name}</h4>
+                    <h4>
+                      {player.name}
+                      {isBotPlayer && (
+                        <span className={`bot-badge ${showBotPulse ? "bot-badge--active" : ""}`}>
+                          🤖
+                        </span>
+                      )}
+                    </h4>
                     <span className="pill">id {playerID}</span>
                   </div>
                   <div className="card-list">
@@ -1134,7 +1165,8 @@ export function App() {
                     })}
                   </div>
                 </article>
-              ))}
+                );
+              })}
             </div>
           </div>
 
