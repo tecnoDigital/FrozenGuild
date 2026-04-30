@@ -1,12 +1,129 @@
 .banner {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  background: var(--surface);
+  background: linear-gradient(rgba(9, 22, 38, 0.74), rgba(9, 22, 38, 0.74)), url("/src/assets/game-ice-bg.webp");
+  background-size: cover;
+  background-position: center;
   padding: 12px 14px;
+}
+
+.bannerNeutral {
+  box-shadow: inset 0 0 0 1px rgba(120, 214, 255, 0.12);
+}
+
+.bannerYourTurn {
+  box-shadow: inset 0 0 0 1px rgba(125, 239, 171, 0.24);
+}
+
+.bannerBlocked {
+  box-shadow: inset 0 0 0 1px rgba(255, 166, 166, 0.22);
+}
+
+.bannerDanger {
+  box-shadow: inset 0 0 0 1px rgba(255, 99, 99, 0.42);
+}
+
+.bannerSuccess {
+  box-shadow: inset 0 0 0 1px rgba(125, 239, 171, 0.4);
+}
+
+.bannerTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bannerModeIcon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
 }
 
 .dice {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.diceIcon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.panelBlock {
+  margin-top: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.helper {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.helperRow {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modeIcon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+
+.modeChip {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-size: 0.78rem;
+  color: var(--text);
+  background: var(--surface-2);
+  white-space: nowrap;
+}
+
+.actionRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.choiceList {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.choiceButton {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text);
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.choiceButtonSelected {
+  outline: 2px solid var(--accent);
+}
+
+.select {
+  width: 100%;
+  margin-top: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text);
+  padding: 8px;
 }

@@ -7,9 +7,26 @@ const meta: Meta<typeof LobbyScreen> = {
   component: LobbyScreen,
   args: {
     playerName: "Jugador",
-    matchID: "match-001",
-    playerID: "0",
+    numPlayers: 4,
+    selectedBotPlayerIDs: ["2"],
     players: ["Oz", "BOT 1"],
+    availableMatches: [
+      {
+        matchID: "match-001",
+        availableSeats: ["2", "3"],
+        occupiedSeats: ["0", "1"],
+        occupiedPlayers: [
+          { seat: "0", name: "Oz", isBot: false },
+          { seat: "1", name: "BOT 1", isBot: true }
+        ],
+        totalPlayers: 4
+      }
+    ],
+    selectedJoinMatchID: "match-001",
+    onRefreshMatches: fn(),
+    onSelectJoinMatchID: fn(),
+    onNumPlayersChange: fn(),
+    onToggleBotPlayerID: fn(),
     onCreate: fn(),
     onJoin: fn()
   }

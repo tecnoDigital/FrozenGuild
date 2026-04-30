@@ -36,7 +36,7 @@ describe("seal bomb resolution", () => {
 
     const endResult = endTurn({ G, ctx, playerID: "0" });
 
-    expect(endResult).toBe("INVALID_MOVE");
+    expect(endResult).toBeUndefined();
     expect(G.sealBombResolution).not.toBeNull();
     expect(G.sealBombResolution?.playerID).toBe("0");
     expect(G.sealBombResolution?.requiredDiscardCount).toBeGreaterThan(0);

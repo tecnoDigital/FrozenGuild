@@ -1,0 +1,71 @@
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  border-top: 1px solid var(--border);
+  background: rgba(10, 18, 30, 0.94);
+  backdrop-filter: blur(12px);
+  padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+}
+
+.sheetCollapsed {
+  max-height: 68px;
+}
+
+.sheetHalf {
+  max-height: 45vh;
+}
+
+.sheetExpanded {
+  max-height: 78vh;
+}
+
+.handle {
+  width: 100%;
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  margin-bottom: 6px;
+}
+
+.handleBar {
+  width: 42px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border);
+}
+
+.handleLabel {
+  font-size: 0.8rem;
+}
+
+.tabRow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.tab {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text);
+  padding: 8px 6px;
+  font-size: 0.86rem;
+}
+
+.tabActive {
+  border-color: var(--accent);
+}
+
+.content {
+  margin-top: 8px;
+  overflow: auto;
+  max-height: calc(78vh - 96px);
+}

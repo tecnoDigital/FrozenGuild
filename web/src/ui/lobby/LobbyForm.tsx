@@ -3,50 +3,66 @@ import styles from "./Lobby.module.css";
 
 type LobbyFormProps = {
   playerName: string;
-  matchID: string;
-  playerID: string;
+  numPlayers?: number;
+  botPlayerIDs?: string[];
   busy?: boolean;
   onPlayerNameChange?: (value: string) => void;
-  onMatchIDChange?: (value: string) => void;
-  onPlayerIDChange?: (value: string) => void;
+  onNumPlayersChange?: (value: number) => void;
+  onToggleBotPlayerID?: (playerID: string) => void;
   onCreate?: () => void;
-  onJoin?: () => void;
 };
 
 export function LobbyForm({
   playerName,
-  matchID,
-  playerID,
+  numPlayers = 2,
+  botPlayerIDs = [],
   busy = false,
   onPlayerNameChange,
-  onMatchIDChange,
-  onPlayerIDChange,
-  onCreate,
-  onJoin
+  onNumPlayersChange,
+  onToggleBotPlayerID,
+  onCreate
 }: LobbyFormProps) {
+  const botCandidates = Array.from({ length: Math.max(0, numPlayers - 1) }, (_, index) => String(index + 1));
+
   return (
     <section className={styles.panel}>
-      <h3 style={{ marginTop: 0 }}>Sala</h3>
+      <h3 style={{ marginTop: 0 }}>Crear partida</h3>
       <div className={styles.list}>
         <label>
           Nombre
           <input value={playerName} onChange={(e) => onPlayerNameChange?.(e.target.value)} />
         </label>
         <label>
-          Match ID
-          <input value={matchID} onChange={(e) => onMatchIDChange?.(e.target.value)} />
+          Cantidad de jugadores
+          <select value={numPlayers} onChange={(e) => onNumPlayersChange?.(Number(e.target.value))}>
+            {[2, 3, 4].map((count) => (
+              <option key={count} value={count}>{count}</option>
+            ))}
+          </select>
         </label>
-        <label>
-          Player ID
-          <input value={playerID} onChange={(e) => onPlayerIDChange?.(e.target.value)} />
-        </label>
+
+        <div>
+          <strong>Asientos BOT</strong>
+          <div className={styles.botRow}>
+            {botCandidates.map((id) => {
+              const selected = botPlayerIDs.includes(id);
+              return (
+                <button
+                  key={`lobby-bot-${id}`}
+                  type="button"
+                  className={selected ? styles.botChipActive : styles.botChip}
+                  onClick={() => onToggleBotPlayerID?.(id)}
+                >
+                  {selected ? `BOT ${id} ✓` : `BOT ${id}`}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
-      <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-        <Button disabled={busy} onClick={onCreate}>
-          Crear sala
-        </Button>
-        <Button disabled={busy} onClick={onJoin}>
-          Romper el hielo
+      <div className={styles.actionRow}>
+        <Button className={styles.createBtnSmall} disabled={busy} onClick={onCreate}>
+          Crear partida
         </Button>
       </div>
     </section>

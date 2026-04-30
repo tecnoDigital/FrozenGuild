@@ -105,7 +105,7 @@ export function createInitialState(
   const players = createPlayers(playerCount, setupData);
   let deck = shuffleDeck(createDeck(), randomFn);
 
-  const iceDraw = drawMany(deck, ICE_GRID_SIZE);
+  const iceDraw = drawManyNonRed(deck, ICE_GRID_SIZE);
   const iceGrid: IceGridSlot[] = [...iceDraw.drawn];
   deck = iceDraw.deck;
 

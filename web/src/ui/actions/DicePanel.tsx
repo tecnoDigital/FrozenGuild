@@ -11,6 +11,7 @@ type DicePanelProps = {
 export function DicePanel({ value, rolled, disabled = false, onRoll }: DicePanelProps) {
   return (
     <div className={styles.dice}>
+      <img className={styles.diceIcon} src="/src/assets/dice.png" alt="Dado" />
       <strong>Dado: {rolled ? value : "-"}</strong>
       <Button disabled={disabled} onClick={onRoll}>
         Lanzar dado

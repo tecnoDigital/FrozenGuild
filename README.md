@@ -148,3 +148,20 @@ npm run test:critical
 ```bash
 npm run release:check
 ```
+
+## UI Premium - Semana 4 (cerrada)
+
+- Flujos contextuales activos: Fish, Spy, Swap, Orca, Seal.
+- Seleccion visual sincronizada entre tablero y ledger (swap/spy).
+- Fondo lobby con `web/src/assets/Lobby-background.png`.
+- Banner/panel con feedback contextual por modo y estado de turno.
+- Layout responsive mejorado para pantallas angostas.
+- Ledger derecho con compactacion movil + tap targets tactiles.
+
+Chequeos usados en esta etapa:
+
+```bash
+npm run typecheck -w web
+npm run build -w web
+npm run build-storybook -w web
+```

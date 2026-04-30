@@ -125,4 +125,19 @@ describe("swap move", () => {
     expect(endAfterSwap).toBeUndefined();
     expect(endTurnCalls).toBe(1);
   });
+
+  it("requires current player to be part of swap pair", () => {
+    const G = createInitialState(3, () => 0.2);
+    const ctx = makeCtx("0");
+
+    rollDice({ G, ctx, playerID: "0", random: { D6: () => 5 } });
+
+    const invalid = swapCards(
+      { G, ctx, playerID: "0" },
+      { area: "player_zone", playerID: "1", index: 0 },
+      { area: "player_zone", playerID: "2", index: 0 }
+    );
+
+    expect(invalid).toBe("INVALID_MOVE");
+  });
 });

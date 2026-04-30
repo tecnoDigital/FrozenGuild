@@ -1,0 +1,1 @@
+import{j as o}from"./jsx-runtime-D_zvdyIk.js";import{s as r}from"./Lobby.module-OZmPMUJ1.js";const e=""+new URL("Lobby-background-Ddj9AfTN.png",import.meta.url).href;function s(){return o.jsx("div",{className:r.bg,style:{"--lobby-bg-image":`url(${e})`},"aria-hidden":!0})}s.__docgenInfo={description:"",methods:[],displayName:"LobbyBackground"};export{s as L};

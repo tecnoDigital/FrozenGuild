@@ -35,3 +35,28 @@
   background: var(--surface);
   padding: 12px;
 }
+
+@media (max-width: 1200px) {
+  .gameShell {
+    grid-template-columns: 240px minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+      "left center"
+      "left actions"
+      "right right";
+  }
+}
+
+@media (max-width: 900px) {
+  .gameShell {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto auto;
+    grid-template-areas:
+      "left"
+      "center"
+      "actions"
+      "right";
+    padding: 8px;
+    gap: 8px;
+  }
+}

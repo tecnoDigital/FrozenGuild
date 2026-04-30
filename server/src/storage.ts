@@ -35,6 +35,25 @@ type ServerLike = {
   };
 };
 
+type MutableStoreLike = {
+  clear?: () => void;
+  delete?: (key: string) => void;
+  entries: () => IterableIterator<[string, unknown]>;
+};
+
+function clearStore(store: MutableStoreLike): void {
+  if (typeof store.clear === "function") {
+    store.clear();
+    return;
+  }
+
+  if (typeof store.delete === "function") {
+    for (const [key] of store.entries()) {
+      store.delete(key);
+    }
+  }
+}
+
 const DEFAULT_DB_PATH = "./data/frozen-guild.db";
 
 type PersistenceOptions = {
@@ -254,11 +273,29 @@ export function setupSqlitePersistence(
   patchStore(server.db.log, (matchID, value) => persistLog(matchID, value));
 
   server.app.use(async (ctx, next) => {
+    const method = (ctx as { method?: string }).method ?? "GET";
+
     if (ctx.path === "/persistence/health") {
       ctx.body = {
         ok: true,
         sqlitePath: dbPath,
         savedMatches: db.prepare("SELECT COUNT(*) as total FROM matches").get()
+      };
+      return;
+    }
+
+    if (ctx.path === "/persistence/debug/clear-matches" && method === "POST") {
+      db.exec("DELETE FROM match_summaries; DELETE FROM players; DELETE FROM matches;");
+
+      clearStore(server.db.state as unknown as MutableStoreLike);
+      clearStore(server.db.initial as unknown as MutableStoreLike);
+      clearStore(server.db.metadata as unknown as MutableStoreLike);
+      clearStore(server.db.log as unknown as MutableStoreLike);
+
+      ctx.body = {
+        ok: true,
+        cleared: true,
+        sqlitePath: dbPath
       };
       return;
     }

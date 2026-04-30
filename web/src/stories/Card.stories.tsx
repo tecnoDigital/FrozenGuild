@@ -17,7 +17,7 @@ type Story = StoryObj<typeof Card>;
 export const Visible: Story = {};
 export const Hidden: Story = {
   args: {
-    hidden: false,
+    hidden: true,
     image: "/src/assets/cards/Reverso.png"
   }
 };

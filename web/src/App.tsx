@@ -29,8 +29,59 @@ type AdminDualSession = {
 };
 
 type MatchListResponse = {
-  matches: Array<{ matchID: string }>;
+  matches: Array<{
+    matchID: string;
+    setupData?: { numPlayers?: number };
+    players?: Record<string, { id?: number | string; name?: string | null }> | Array<{ id?: number | string; name?: string | null }>;
+  }>;
 };
+
+type AvailableLobbyMatch = {
+  matchID: string;
+  availableSeats: string[];
+  occupiedSeats: string[];
+  occupiedPlayers: Array<{ seat: string; name: string; isBot: boolean }>;
+  totalPlayers: number;
+};
+
+function mapAvailableLobbyMatches(payload: MatchListResponse): AvailableLobbyMatch[] {
+  return payload.matches
+    .map((match) => {
+      const totalPlayers = Math.max(1, Math.min(4, Number(match.setupData?.numPlayers ?? 4)));
+      const allSeats = Array.from({ length: totalPlayers }, (_, index) => String(index));
+
+      const rawPlayers = Array.isArray(match.players)
+        ? match.players
+        : match.players
+          ? Object.values(match.players)
+          : [];
+
+      const occupiedPlayers = rawPlayers
+        .map((player) => ({
+          id: player.id !== undefined && player.id !== null ? String(player.id) : null,
+          name: typeof player.name === "string" ? player.name.trim() : ""
+        }))
+        .filter((player) => player.id !== null && player.name.length > 0)
+        .map((player) => ({
+          seat: player.id as string,
+          name: player.name,
+          isBot: player.name.toUpperCase().startsWith("BOT ")
+        }));
+
+      const occupied = occupiedPlayers.map((player) => player.seat);
+
+      const occupiedUnique = Array.from(new Set(occupied)).filter((seat) => allSeats.includes(seat));
+      const available = allSeats.filter((seat) => !occupiedUnique.includes(seat));
+
+      return {
+        matchID: match.matchID,
+        availableSeats: available,
+        occupiedSeats: occupiedUnique,
+        occupiedPlayers: occupiedPlayers.filter((player) => allSeats.includes(player.seat)),
+        totalPlayers
+      };
+    });
+}
 
 const SERVER_URL =
   import.meta.env.VITE_SERVER_URL ??
@@ -125,9 +176,7 @@ export function App() {
   const [numPlayers, setNumPlayers] = useState(2);
   const [selectedBotPlayerIDs, setSelectedBotPlayerIDs] = useState<string[]>([]);
   const [botPulseNow, setBotPulseNow] = useState(() => Date.now());
-  const [matchIDInput, setMatchIDInput] = useState("");
-  const [joinPlayerID, setJoinPlayerID] = useState("0");
-  const [matches, setMatches] = useState<string[]>([]);
+  const [matches, setMatches] = useState<AvailableLobbyMatch[]>([]);
   const [selectedJoinMatchID, setSelectedJoinMatchID] = useState("");
   const [session, setSession] = useState<LobbySession | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -246,12 +295,13 @@ export function App() {
       }
 
       const payload = (await response.json()) as MatchListResponse;
-      const listed = payload.matches.map((match) => match.matchID);
+      const listed = mapAvailableLobbyMatches(payload);
       setMatches(listed);
-      if (!selectedJoinMatchID && listed.length > 0) {
-        const firstMatch = listed[0];
-        if (firstMatch) {
-          setSelectedJoinMatchID(firstMatch);
+      const hasCurrent = listed.some((match) => match.matchID === selectedJoinMatchID);
+      if ((!selectedJoinMatchID || !hasCurrent) && listed.length > 0) {
+        const first = listed.find((match) => match.availableSeats.length > 0) ?? listed[0];
+        if (first) {
+          setSelectedJoinMatchID(first.matchID);
         }
       }
     } catch (fetchError) {
@@ -282,7 +332,7 @@ export function App() {
 
       const parsedBotIDs = selectedBotPlayerIDs
         .map((value) => Number(value))
-        .filter((value) => Number.isInteger(value) && value >= 0 && value < numPlayers)
+        .filter((value) => Number.isInteger(value) && value >= 1 && value < numPlayers)
         .map((value) => String(value));
 
       for (const botPlayerID of parsedBotIDs) {
@@ -300,7 +350,6 @@ export function App() {
         }
       }
 
-      setMatchIDInput(payload.matchID);
       setSelectedJoinMatchID(payload.matchID);
       await refreshMatches();
     } catch (createError) {
@@ -311,9 +360,16 @@ export function App() {
   }
 
   async function joinMatch() {
-    const targetMatchID = (matchIDInput || selectedJoinMatchID).trim();
+    const targetMatchID = selectedJoinMatchID.trim();
     if (!targetMatchID) {
-      setError("Debes seleccionar o escribir un Match ID.");
+      setError("Debes seleccionar una partida.");
+      return;
+    }
+
+    const selectedMatch = matches.find((match) => match.matchID === targetMatchID);
+    const freeSeat = selectedMatch?.availableSeats[0];
+    if (!freeSeat) {
+      setError("La partida seleccionada no tiene asientos libres.");
       return;
     }
 
@@ -324,7 +380,7 @@ export function App() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          playerID: joinPlayerID,
+          playerID: freeSeat,
           playerName: playerName.trim() || "Jugador"
         })
       });
@@ -347,8 +403,61 @@ export function App() {
     } catch (joinError) {
       setError(joinError instanceof Error ? joinError.message : "Error al unirse.");
     } finally {
+      if (!session) {
+        await refreshMatches();
+      }
       setIsBusy(false);
     }
+  }
+
+  async function debugClearMatches() {
+    setIsBusy(true);
+    setError(null);
+    try {
+      const response = await fetch(`${SERVER_URL}/persistence/debug/clear-matches`, {
+        method: "POST"
+      });
+
+      if (!response.ok) {
+        throw new Error(`No se pudieron borrar partidas (${response.status}).`);
+      }
+
+      setMatches([]);
+      setSelectedJoinMatchID("");
+      await refreshMatches();
+    } catch (clearError) {
+      setError(clearError instanceof Error ? clearError.message : "Error borrando partidas.");
+    } finally {
+      setIsBusy(false);
+    }
+  }
+
+  useEffect(() => {
+    if (session) {
+      return;
+    }
+
+    void refreshMatches();
+    const onVisible = () => {
+      if (document.visibilityState === "visible") {
+        void refreshMatches();
+      }
+    };
+    window.addEventListener("focus", onVisible);
+    document.addEventListener("visibilitychange", onVisible);
+    const timer = window.setInterval(() => {
+      void refreshMatches();
+    }, 3000);
+
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener("focus", onVisible);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [session]);
+
+  function selectJoinMatch(matchID: string) {
+    setSelectedJoinMatchID(matchID);
   }
 
   async function joinPlayerForAdmin(matchID: string, playerID: AdminPlayerID, playerName: string) {
@@ -406,7 +515,6 @@ export function App() {
         }
       });
 
-      setMatchIDInput(matchID);
       setSelectedJoinMatchID(matchID);
       await refreshMatches();
     } catch (adminCreateError) {
@@ -419,7 +527,7 @@ export function App() {
   }
 
   async function attachTwoPlayersToExistingMatch() {
-    const targetMatchID = (matchIDInput || selectedJoinMatchID).trim();
+    const targetMatchID = selectedJoinMatchID.trim();
     if (!targetMatchID) {
       setAdminError("Debes seleccionar un Match ID para control dual.");
       return;
@@ -513,10 +621,10 @@ export function App() {
     ? Object.keys(gameState.G.players).filter((playerID) => playerID !== session?.playerID)
     : [];
 
-  const botCandidateIDs = Array.from({ length: numPlayers }, (_, index) => String(index));
+  const botCandidateIDs = Array.from({ length: Math.max(0, numPlayers - 1) }, (_, index) => String(index + 1));
 
   useEffect(() => {
-    setSelectedBotPlayerIDs((current) => current.filter((id) => Number(id) < numPlayers));
+    setSelectedBotPlayerIDs((current) => current.filter((id) => Number(id) > 0 && Number(id) < numPlayers));
   }, [numPlayers]);
 
   useEffect(() => {
@@ -525,6 +633,10 @@ export function App() {
   }, []);
 
   function toggleBotPlayerID(playerID: string) {
+    if (playerID === "0") {
+      return;
+    }
+
     setSelectedBotPlayerIDs((current) => {
       if (current.includes(playerID)) {
         return current.filter((id) => id !== playerID);
@@ -562,13 +674,17 @@ export function App() {
       <>
         <LobbyScreen
           playerName={playerName}
-          matchID={matchIDInput || selectedJoinMatchID}
-          playerID={joinPlayerID}
+          numPlayers={numPlayers}
+          selectedBotPlayerIDs={selectedBotPlayerIDs}
           players={lobbyPlayersPreview}
+          availableMatches={matches}
+          selectedJoinMatchID={selectedJoinMatchID}
           busy={isBusy}
           onPlayerNameChange={setPlayerName}
-          onMatchIDChange={setMatchIDInput}
-          onPlayerIDChange={setJoinPlayerID}
+          onNumPlayersChange={setNumPlayers}
+          onToggleBotPlayerID={toggleBotPlayerID}
+          onSelectJoinMatchID={selectJoinMatch}
+          onRefreshMatches={refreshMatches}
           onCreate={createMatch}
           onJoin={joinMatch}
         />
@@ -578,8 +694,11 @@ export function App() {
           </div>
         ) : null}
         {isDev ? (
-          <div style={{ padding: "0 24px 24px", color: "var(--muted)" }}>
-            Matches: {matches.length} · Socket: {socketStatus.label}
+          <div style={{ padding: "0 24px 24px", color: "var(--muted)", display: "grid", gap: 8 }}>
+            <div>Matches disponibles: {matches.length} · Socket: {socketStatus.label}</div>
+            <button type="button" className="secondary-button" onClick={debugClearMatches} disabled={isBusy}>
+              Debug: borrar partidas
+            </button>
           </div>
         ) : null}
       </>
@@ -602,7 +721,15 @@ export function App() {
     return (
       <GameScreen
         onRollDice={() => client?.moves?.rollDice?.()}
+        onFishFromIce={(slot) => client?.moves?.fishFromIce?.(slot)}
         onChoosePadrinoAction={(action) => client?.moves?.choosePadrinoAction?.(action)}
+        onEndTurn={() => client?.moves?.endTurn?.()}
+        onSwapCards={(source, target) => client?.moves?.swapCards?.(source, target)}
+        onResolveOrca={(targetCardID) => client?.moves?.resolveOrcaDestroy?.(targetCardID)}
+        onResolveSealBomb={(targetCardIDs) => client?.moves?.resolveSealBombExplosion?.(targetCardIDs)}
+        onSpyOnIce={(slots) => client?.moves?.spyOnIce?.(slots)}
+        onSpyGiveCard={(slot, targetPlayerID) => client?.moves?.spyGiveCard?.(slot, targetPlayerID)}
+        onCompleteSpy={() => client?.moves?.completeSpy?.()}
       />
     );
   }
@@ -635,7 +762,7 @@ export function App() {
             value={numPlayers}
             onChange={(event) => setNumPlayers(Number(event.target.value))}
           >
-            {[1, 2, 3, 4].map((count) => (
+            {[2, 3, 4].map((count) => (
               <option key={count} value={count}>{count}</option>
             ))}
           </select>
@@ -661,41 +788,19 @@ export function App() {
           <button className="primary-button" onClick={createMatch} disabled={isBusy}>Crear partida</button>
           <button className="secondary-button" onClick={refreshMatches} disabled={isBusy}>Actualizar lista</button>
 
-          <label className="field-label" htmlFor="match-id">Match ID</label>
-          <input
-            id="match-id"
-            className="select-control"
-            value={matchIDInput}
-            onChange={(event) => setMatchIDInput(event.target.value)}
-            placeholder="Escribe o selecciona un match"
-          />
-
           {matches.length > 0 && (
             <select
               className="select-control"
               value={selectedJoinMatchID}
               onChange={(event) => {
-                setSelectedJoinMatchID(event.target.value);
-                setMatchIDInput(event.target.value);
+                selectJoinMatch(event.target.value);
               }}
             >
-              {matches.map((id) => (
-                <option key={id} value={id}>{id}</option>
+              {matches.map((match) => (
+                <option key={match.matchID} value={match.matchID}>{match.matchID}</option>
               ))}
             </select>
           )}
-
-          <label className="field-label" htmlFor="join-player-id">Player ID (0-3)</label>
-          <select
-            id="join-player-id"
-            className="select-control"
-            value={joinPlayerID}
-            onChange={(event) => setJoinPlayerID(event.target.value)}
-          >
-            {["0", "1", "2", "3"].map((id) => (
-              <option key={id} value={id}>{id}</option>
-            ))}
-          </select>
 
           <button className="primary-button" onClick={joinMatch} disabled={isBusy}>Unirme a la partida</button>
           {session && <button className="secondary-button" onClick={leaveMatch}>Salir de la partida</button>}
@@ -857,7 +962,18 @@ export function App() {
               <button className="primary-button" disabled={!myTurn} onClick={() => client?.moves?.rollDice?.()}>
                 Tirar dado
               </button>
-              <button className="secondary-button" disabled={!myTurn} onClick={() => client?.moves?.endTurn?.()}>
+              <button
+                className="secondary-button"
+                disabled={
+                  !myTurn
+                  || !gameState.G.dice.rolled
+                  || !!gameState.G.orcaResolution
+                  || !!gameState.G.sealBombResolution
+                  || (gameState.G.dice.value === 6 && gameState.G.turn.padrinoAction === null)
+                  || ((fishingTurn || spyTurn || swapTurn) && !gameState.G.turn.actionCompleted)
+                }
+                onClick={() => client?.moves?.endTurn?.()}
+              >
                 Finalizar turno
               </button>
             </div>

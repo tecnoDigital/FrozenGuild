@@ -419,16 +419,7 @@ function writeCardToLocation(G: FrozenGuildState, location: SwapLocation, cardID
 }
 
 function drawIceReplacementCard(G: FrozenGuildState): string | null {
-  const nextIndex = G.deck.findIndex((cardID) => {
-    const card = getCardById(cardID);
-    return card?.type !== "orca" && card?.type !== "seal_bomb";
-  });
-
-  if (nextIndex === -1) {
-    return null;
-  }
-
-  const [replacement] = G.deck.splice(nextIndex, 1);
+  const [replacement] = G.deck.splice(0, 1);
   return replacement ?? null;
 }
 
@@ -646,6 +637,10 @@ function swapCardsByLocation(
     return INVALID_MOVE;
   }
 
+  if (source.playerID !== playerID && target.playerID !== playerID) {
+    return INVALID_MOVE;
+  }
+
   const sourceCard = readCardFromLocation(G, source);
   const targetCard = readCardFromLocation(G, target);
 
@@ -719,6 +714,15 @@ function swapCardsLegacy(
 
   if (firstPlayerID === secondPlayerID) {
     logInvalidSwap("SAME_PLAYER_SELECTED", {
+      firstPlayerID,
+      secondPlayerID
+    });
+    return INVALID_MOVE;
+  }
+
+  if (firstPlayerID !== playerID && secondPlayerID !== playerID) {
+    logInvalidSwap("CURRENT_PLAYER_NOT_INCLUDED", {
+      playerID,
       firstPlayerID,
       secondPlayerID
     });
@@ -983,7 +987,7 @@ export function endTurn({ G, ctx, playerID, events }: MoveCtx): typeof INVALID_M
   }
 
   if (playerID && triggerSealBombResolutionIfNeeded(G, playerID)) {
-    return INVALID_MOVE;
+    return;
   }
 
   events?.endTurn?.();

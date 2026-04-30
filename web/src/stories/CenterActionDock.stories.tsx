@@ -10,8 +10,33 @@ const meta: Meta<typeof CenterActionDock> = {
     value: 6,
     disabled: false,
     onRoll: fn(),
-    showPadrinoOptions: true,
-    onChoosePadrinoAction: fn()
+    onChoosePadrinoAction: fn(),
+    onEndTurn: fn(),
+    flow: {
+      mode: "padrino",
+      helperText: "El Padrino: elige una accion 1-5.",
+      diceValue: 6,
+      isMyTurn: true,
+      canRoll: false,
+      canEndTurn: false,
+      showPadrinoOptions: true
+    },
+    swap: {
+      source: null,
+      target: null,
+      canConfirm: false,
+      helperText: "",
+      sourceKey: "",
+      targetKey: "",
+      options: [],
+      onSourceKeyChange: fn(),
+      onTargetKeyChange: fn(),
+      onConfirm: fn(),
+      onClearSelection: fn()
+    },
+    orca: null,
+    seal: null,
+    spy: null
   }
 };
 
@@ -23,6 +48,14 @@ export const PadrinoVisible: Story = {};
 export const Hidden: Story = {
   args: {
     value: 5,
-    showPadrinoOptions: false
+    flow: {
+      mode: "swap",
+      helperText: "Intercambio: elige carta origen y luego destino.",
+      diceValue: 5,
+      isMyTurn: true,
+      canRoll: false,
+      canEndTurn: false,
+      showPadrinoOptions: false
+    }
   }
 };

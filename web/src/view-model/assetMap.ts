@@ -1,4 +1,5 @@
 import type { CardType } from "../../../shared/game/types.js";
+import { getCardById } from "../../../shared/game/cards.js";
 
 const CARD_FALLBACK = "/src/assets/placeholder.png";
 
@@ -22,4 +23,12 @@ export function getCardBackAsset(): string {
 
 export function getCardFallbackAsset(): string {
   return CARD_FALLBACK;
+}
+
+export function getCardAssetById(cardID: string): string {
+  const card = getCardById(cardID);
+  if (!card) {
+    return CARD_FALLBACK;
+  }
+  return getCardAssetByType(card.type);
 }

@@ -7,10 +7,11 @@ const meta: Meta<typeof LobbyForm> = {
   component: LobbyForm,
   args: {
     playerName: "Jugador",
-    matchID: "match-001",
-    playerID: "0",
+    numPlayers: 4,
+    botPlayerIDs: ["2"],
     onCreate: fn(),
-    onJoin: fn()
+    onNumPlayersChange: fn(),
+    onToggleBotPlayerID: fn()
   }
 };
 
@@ -19,9 +20,9 @@ type Story = StoryObj<typeof LobbyForm>;
 
 export const Default: Story = {};
 
-export const ClickJoin: Story = {
+export const ClickCreate: Story = {
   play: async ({ canvas, args }) => {
-    await userEvent.click(canvas.getByRole("button", { name: "Romper el hielo" }));
-    await expect(args.onJoin).toHaveBeenCalled();
+    await userEvent.click(canvas.getByRole("button", { name: "Crear partida" }));
+    await expect(args.onCreate).toHaveBeenCalled();
   }
 };

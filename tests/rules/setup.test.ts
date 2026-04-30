@@ -51,7 +51,7 @@ describe("match setup", () => {
     }
   });
 
-  it("allows red cards on the initial ice grid", () => {
+  it("does not deal red cards on the initial ice grid", () => {
     const state = createInitialState(2, () => 0.2);
     const iceCards = state.iceGrid.filter((slot): slot is string => typeof slot === "string");
     const hasRed = iceCards.some((cardId) => {
@@ -59,7 +59,7 @@ describe("match setup", () => {
       return card?.type === "orca" || card?.type === "seal_bomb";
     });
 
-    expect(hasRed).toBe(true);
+    expect(hasRed).toBe(false);
   });
 
   it("does not duplicate cards between deck, ice and player zones", () => {

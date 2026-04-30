@@ -12,7 +12,7 @@ type CardProps = {
 
 export function Card({ id, label, image, selected = false, hidden = false, motionLayout = true }: CardProps) {
   const className = `${styles.card} ${selected ? styles.selected : ""}`.trim();
-  const content = hidden ? <span>Oculta</span> : <img src={image} alt={label} className={styles.img} />;
+  const content = <img src={image} alt={hidden ? "Carta oculta" : label} className={styles.img} />;
 
   if (!motionLayout) {
     return <article className={className}>{content}</article>;

@@ -7,16 +7,18 @@ type IceSlotProps = {
   hidden?: boolean;
   image: string;
   empty?: boolean;
+  selected?: boolean;
+  onClick?: () => void;
 };
 
-export function IceSlot({ cardId, label, hidden = true, image, empty = false }: IceSlotProps) {
+export function IceSlot({ cardId, label, hidden = true, image, empty = false, selected = false, onClick }: IceSlotProps) {
   if (empty) {
     return <div className={styles.empty}>Vacio</div>;
   }
 
   return (
-    <div className={styles.slot}>
+    <button type="button" className={`${styles.slot} ${selected ? styles.slotSelected : ""}`} onClick={onClick} disabled={!onClick}>
       <Card id={cardId} label={label} hidden={hidden} image={image} />
-    </div>
+    </button>
   );
 }

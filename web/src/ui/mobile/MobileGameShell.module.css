@@ -1,0 +1,23 @@
+.mobileRoot {
+  min-height: 100vh;
+  padding: 8px 8px 92px;
+}
+
+.mobileBoardSticky {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  backdrop-filter: blur(14px);
+  background: rgba(9, 18, 30, 0.74);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 8px;
+}
+
+.mobileSummary {
+  margin-top: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  padding: 10px;
+}
