@@ -50,8 +50,12 @@ function isActivePlayer(ctx: Ctx, playerID?: string): boolean {
   return !!playerID && playerID === ctx.currentPlayer;
 }
 
-function isSealBombCard(cardID: string): boolean {
+export function isSealBombCard(cardID: string): boolean {
   return getCardById(cardID)?.type === "seal_bomb";
+}
+
+export function isOrcaCard(cardID: string): boolean {
+  return getCardById(cardID)?.type === "orca";
 }
 
 function hasPendingMandatoryResolution(G: FrozenGuildState): boolean {
@@ -104,7 +108,8 @@ function triggerOrcaResolutionOnReceive(
   G: FrozenGuildState,
   playerID: string,
   cardID: string,
-  events?: MoveCtx["events"]
+  events?: MoveCtx["events"],
+  random?: MoveCtx["random"]
 ): void {
   const card = getCardById(cardID);
   if (!card || card.type !== "orca") {
@@ -127,6 +132,20 @@ function triggerOrcaResolutionOnReceive(
     return;
   }
 
+  if (random) {
+    const idx = random.D6() % validTargetCardIDs.length;
+    const discardCardID = validTargetCardIDs[idx];
+    if (discardCardID && removeCardFromPlayerZoneById(G, playerID, discardCardID)) {
+      G.discardPile.push(discardCardID);
+    }
+    if (removeCardFromPlayerZoneById(G, playerID, cardID)) {
+      G.discardPile.push(cardID);
+    }
+    G.orcaResolution = null;
+    clearPendingStage(G, events);
+    return;
+  }
+
   G.orcaResolution = {
     playerID,
     orcaCardID: cardID,
@@ -139,7 +158,8 @@ function addCardToPlayerZoneWithEffects(
   G: FrozenGuildState,
   playerID: string,
   cardID: string,
-  events?: MoveCtx["events"]
+  events?: MoveCtx["events"],
+  random?: MoveCtx["random"]
 ): void {
   const player = G.players[playerID];
   if (!player) {
@@ -147,7 +167,7 @@ function addCardToPlayerZoneWithEffects(
   }
 
   player.zone.push(cardID);
-  triggerOrcaResolutionOnReceive(G, playerID, cardID, events);
+  triggerOrcaResolutionOnReceive(G, playerID, cardID, events, random);
 }
 
 export function setBombAtTurnStart(G: FrozenGuildState, playerID: string): void {
@@ -157,17 +177,29 @@ export function setBombAtTurnStart(G: FrozenGuildState, playerID: string): void 
   }
 
   player.hasBombAtStart = player.zone.some((cardID) => isSealBombCard(cardID));
+  player.hasBombAtEnd = player.hasBombAtStart;
 }
 
 function triggerSealBombResolutionIfNeeded(G: FrozenGuildState, playerID: string): boolean {
   const player = G.players[playerID];
-  if (!player || !player.hasBombAtStart) {
+  if (!player) {
+    return false;
+  }
+
+  const hasBombNow = player.zone.some((cardID) => isSealBombCard(cardID));
+  const hadBombAtStart = player.hasBombAtStart;
+  const hadBombAtEnd = player.hasBombAtEnd;
+
+  if (!hadBombAtStart || !hadBombAtEnd || !hasBombNow) {
+    player.hasBombAtStart = false;
+    player.hasBombAtEnd = false;
     return false;
   }
 
   const bombCardID = player.zone.find((cardID) => isSealBombCard(cardID));
   if (!bombCardID) {
     player.hasBombAtStart = false;
+    player.hasBombAtEnd = false;
     return false;
   }
 
@@ -179,6 +211,7 @@ function triggerSealBombResolutionIfNeeded(G: FrozenGuildState, playerID: string
       G.discardPile.push(bombCardID);
     }
     player.hasBombAtStart = false;
+    player.hasBombAtEnd = false;
     return false;
   }
 
@@ -188,7 +221,6 @@ function triggerSealBombResolutionIfNeeded(G: FrozenGuildState, playerID: string
     requiredDiscardCount,
     validTargetCardIDs
   };
-
   return true;
 }
 
@@ -442,7 +474,7 @@ function refillIceSlotOrEndGame(
 }
 
 export function fishFromIce(
-  { G, ctx, playerID, events }: MoveCtx,
+  { G, ctx, playerID, events, random }: MoveCtx,
   slot: number
 ): typeof INVALID_MOVE | void {
   if (!playerID) {
@@ -478,7 +510,7 @@ export function fishFromIce(
     return INVALID_MOVE;
   }
 
-  addCardToPlayerZoneWithEffects(G, playerID, cardID, events);
+  addCardToPlayerZoneWithEffects(G, playerID, cardID, events, random);
   refillIceSlotOrEndGame(G, slot, events);
   G.turn.actionCompleted = true;
 }
@@ -548,7 +580,7 @@ export function completeSpy({ G, ctx, playerID }: MoveCtx): typeof INVALID_MOVE 
 }
 
 export function spyGiveCard(
-  { G, ctx, playerID, events }: MoveCtx,
+  { G, ctx, playerID, events, random }: MoveCtx,
   slot: number,
   targetPlayerID: string
 ): typeof INVALID_MOVE | void {
@@ -581,7 +613,7 @@ export function spyGiveCard(
     return INVALID_MOVE;
   }
 
-  addCardToPlayerZoneWithEffects(G, targetPlayerID, cardID, events);
+  addCardToPlayerZoneWithEffects(G, targetPlayerID, cardID, events, random);
   refillIceSlotOrEndGame(G, slot, events);
   G.spy = null;
   G.turn.actionCompleted = true;
@@ -605,7 +637,7 @@ function resolveSwapCardID(G: FrozenGuildState, ref: SwapRef, playerID: string):
 }
 
 function swapCardsByLocation(
-  { G, ctx, playerID, events }: MoveCtx,
+  { G, ctx, playerID, events, random }: MoveCtx,
   source: SwapLocation,
   target: SwapLocation
 ): typeof INVALID_MOVE | void {
@@ -651,16 +683,16 @@ function swapCardsByLocation(
   writeCardToLocation(G, source, targetCard);
   writeCardToLocation(G, target, sourceCard);
 
-  triggerOrcaResolutionOnReceive(G, source.playerID, targetCard, events);
+  triggerOrcaResolutionOnReceive(G, source.playerID, targetCard, events, random);
   if (!G.orcaResolution) {
-    triggerOrcaResolutionOnReceive(G, target.playerID, sourceCard, events);
+    triggerOrcaResolutionOnReceive(G, target.playerID, sourceCard, events, random);
   }
 
   G.turn.actionCompleted = true;
 }
 
 function swapCardsLegacy(
-  { G, ctx, playerID, events }: MoveCtx,
+  { G, ctx, playerID, events, random }: MoveCtx,
   firstPlayerID: string,
   firstCardRef: SwapRef,
   secondPlayerID: string,
@@ -762,9 +794,9 @@ function swapCardsLegacy(
   firstPlayer.zone[firstIndex] = secondCardID;
   secondPlayer.zone[secondIndex] = firstCardID;
 
-  triggerOrcaResolutionOnReceive(G, firstPlayerID, secondCardID, events);
+  triggerOrcaResolutionOnReceive(G, firstPlayerID, secondCardID, events, random);
   if (!G.orcaResolution) {
-    triggerOrcaResolutionOnReceive(G, secondPlayerID, firstCardID, events);
+    triggerOrcaResolutionOnReceive(G, secondPlayerID, firstCardID, events, random);
   }
 
   G.turn.actionCompleted = true;

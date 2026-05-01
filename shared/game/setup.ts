@@ -32,12 +32,15 @@ function createPlayers(
   const players: Record<PlayerID, PlayerState> = {};
   const botIds = new Set(setupData?.botPlayerIDs ?? []);
 
-  for (let index = 0; index < playerCount; index += 1) {
+for (let index = 0; index < playerCount; index += 1) {
     const playerID = String(index);
+    const isBot = botIds.has(playerID);
+    const playerName = isBot ? `BOT ${playerID}` : `Player ${index + 1}`;
     players[playerID] = {
-      name: botIds.has(playerID) ? `BOT ${playerID}` : `Player ${index + 1}`,
+      name: playerName,
       zone: [],
       hasBombAtStart: false,
+      hasBombAtEnd: false,
       connectionStatus: "connected"
     };
   }
@@ -135,6 +138,7 @@ export function createInitialState(
       startedAt: null,
       completedAt: null
     },
+    botIDs: Array.from(new Set(setupData?.botPlayerIDs ?? [])),
     deck,
     discardPile: [],
     iceGrid,

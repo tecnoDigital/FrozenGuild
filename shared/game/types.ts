@@ -29,6 +29,7 @@ export type PlayerState = {
   name: string;
   zone: CardId[];
   hasBombAtStart: boolean;
+  hasBombAtEnd: boolean;
   connectionStatus: "connected" | "reconnecting" | "absent";
   disconnectStartedAt?: number;
 };
@@ -97,6 +98,7 @@ export type FrozenGuildState = {
     startedAt: number | null;
     completedAt: number | null;
   };
+  botIDs: PlayerID[];
   deck: CardId[];
   discardPile: CardId[];
   iceGrid: IceGridSlot[];

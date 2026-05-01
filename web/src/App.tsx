@@ -341,7 +341,8 @@ export function App() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             playerID: botPlayerID,
-            playerName: `BOT ${botPlayerID}`
+            playerName: `BOT ${botPlayerID}`,
+            botPlayerIDs: parsedBotIDs
           })
         });
 

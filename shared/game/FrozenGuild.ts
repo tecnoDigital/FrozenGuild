@@ -4,6 +4,8 @@ import {
   completeSpy,
   endTurn,
   fishFromIce,
+  isOrcaCard,
+  isSealBombCard,
   markPlayerDisconnected,
   markPlayerReconnected,
   resolveOrcaDestroy,
@@ -36,6 +38,10 @@ function ensureBotActivity(G: FrozenGuildState): FrozenGuildState["botActivity"]
 }
 
 function isBotPlayer(G: FrozenGuildState, playerID: string): boolean {
+  if (G.botIDs?.includes(playerID)) {
+    return true;
+  }
+  
   const player = G.players[playerID];
   if (!player) {
     return false;
@@ -75,13 +81,15 @@ function readSetupData(value: unknown): SetupData | undefined {
     return undefined;
   }
 
-  const candidate = value as { botPlayerIDs?: unknown };
-  if (!Array.isArray(candidate.botPlayerIDs)) {
+  const candidate = value as Record<string, unknown>;
+  const botPlayerIDs = candidate.botPlayerIDs;
+  
+  if (!Array.isArray(botPlayerIDs)) {
     return undefined;
   }
 
   return {
-    botPlayerIDs: candidate.botPlayerIDs.filter((item): item is string => typeof item === "string")
+    botPlayerIDs: botPlayerIDs.filter((item): item is string => typeof item === "string")
   };
 }
 
@@ -143,9 +151,16 @@ function runBasicBotTurn(args: {
       const target = randomPick(otherPlayers, randomFn);
       const giftSlot = randomPick(revealed, randomFn);
 
-      if (target && giftSlot !== null && randomFn() < 0.5) {
-        const giftResult = spyGiveCard({ G, ctx, playerID, events }, giftSlot, target);
-        if (giftResult === INVALID_MOVE) {
+      if (target && giftSlot !== null) {
+        const cardId = G.iceGrid[giftSlot];
+        const isDangerousCard = typeof cardId === "string" && (isOrcaCard(cardId) || isSealBombCard(cardId));
+        
+        if (!isDangerousCard && randomFn() < 0.5) {
+          const giftResult = spyGiveCard({ G, ctx, playerID, events }, giftSlot, target);
+          if (giftResult === INVALID_MOVE) {
+            completeSpy({ G, ctx, playerID });
+          }
+        } else {
           completeSpy({ G, ctx, playerID });
         }
       } else {
@@ -224,6 +239,12 @@ export const FrozenGuild: Game<FrozenGuildState> = {
 
       if (isBotPlayer(G, ctx.currentPlayer)) {
         runBasicBotTurn({ G, ctx, events, random });
+      }
+    },
+    onEnd: ({ G, ctx }) => {
+      const player = G.players[ctx.currentPlayer];
+      if (player) {
+        player.hasBombAtEnd = player.zone.some((cardID) => isSealBombCard(cardID));
       }
     }
   },
