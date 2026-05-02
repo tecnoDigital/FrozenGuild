@@ -1,8 +1,8 @@
-import { ActionBar } from "./ActionBar";
-import { BoardCardSlot } from "./BoardCardSlot";
+import { ActionBarContainer } from "./ActionBarContainer";
+import { BoardSlotsContainer } from "./BoardSlotsContainer";
 import { CurrentTurnPanelContainer } from "./CurrentTurnPanelContainer";
-import { DeckPanel } from "./DeckPanel";
-import { DicePanel } from "./DicePanel";
+import { DeckPanelContainer } from "./DeckPanelContainer";
+import { DicePanelContainer } from "./DicePanelContainer";
 import { LocalPlayerHandContainer } from "./LocalPlayerHandContainer";
 import { OpponentPanelContainer } from "./OpponentPanelContainer";
 import { RoundBadgeContainer } from "./RoundBadgeContainer";
@@ -12,10 +12,10 @@ import type { GameShellProps } from "./types";
 import { assets } from "../../../ui/assets";
 
 export function GameShell({
-  boardSlots,
-  deckPanel,
-  dicePanel,
-  actionBar
+  boardSlots: _boardSlots,
+  deckPanel: _deckPanel,
+  dicePanel: _dicePanel,
+  actionBar: _actionBar
 }: GameShellProps) {
   return (
     <main className={styles.shell}>
@@ -36,13 +36,11 @@ export function GameShell({
         <aside className={styles.leftRail} data-testid="phase4-left-panel">
           <CurrentTurnPanelContainer />
           <ScorePanelContainer />
-          <DeckPanel {...deckPanel} />
+          <DeckPanelContainer />
         </aside>
 
         <section className={styles.grid} data-testid="phase4-board">
-          {boardSlots.map((slot) => (
-            <BoardCardSlot key={slot.slotId} {...slot} />
-          ))}
+          <BoardSlotsContainer />
         </section>
 
         <aside className={styles.rightRail} data-testid="phase4-opponents-panel">
@@ -50,8 +48,8 @@ export function GameShell({
         </aside>
 
         <section className={styles.bottomCenter} data-testid="phase4-dice-actions">
-          <DicePanel {...dicePanel} />
-          <ActionBar {...actionBar} />
+          <DicePanelContainer />
+          <ActionBarContainer />
         </section>
 
         <section className={styles.bottomRight} data-testid="phase4-local-hand">

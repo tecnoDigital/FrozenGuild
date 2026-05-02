@@ -1,12 +1,15 @@
 import { describe, expect, it } from "vitest";
 import type { ReactNode } from "react";
 import { ActionBar } from "../../web/src/features/game/ui/ActionBar";
+import { ActionBarContainer } from "../../web/src/features/game/ui/ActionBarContainer";
 import { ActionButton } from "../../web/src/features/game/ui/ActionButton";
-import { BoardCardSlot } from "../../web/src/features/game/ui/BoardCardSlot";
+import { BoardSlotsContainer } from "../../web/src/features/game/ui/BoardSlotsContainer";
 import { CurrentTurnPanel } from "../../web/src/features/game/ui/CurrentTurnPanel";
 import { CurrentTurnPanelContainer } from "../../web/src/features/game/ui/CurrentTurnPanelContainer";
 import { DeckPanel } from "../../web/src/features/game/ui/DeckPanel";
+import { DeckPanelContainer } from "../../web/src/features/game/ui/DeckPanelContainer";
 import { DicePanel } from "../../web/src/features/game/ui/DicePanel";
+import { DicePanelContainer } from "../../web/src/features/game/ui/DicePanelContainer";
 import { GameShell } from "../../web/src/features/game/ui/GameShell";
 import { LocalPlayerHandContainer } from "../../web/src/features/game/ui/LocalPlayerHandContainer";
 import { OpponentPanel } from "../../web/src/features/game/ui/OpponentPanel";
@@ -143,13 +146,13 @@ describe("fg phase 3 UI contract", () => {
     const testIds = getTestIds(nodes);
 
     expect(nodeTypes.has(RoundBadgeContainer)).toBe(true);
-    expect(nodeTypes.has(BoardCardSlot)).toBe(true);
+    expect(nodeTypes.has(BoardSlotsContainer)).toBe(true);
     expect(nodeTypes.has(CurrentTurnPanelContainer)).toBe(true);
     expect(nodeTypes.has(ScorePanelContainer)).toBe(true);
-    expect(nodeTypes.has(DeckPanel)).toBe(true);
+    expect(nodeTypes.has(DeckPanelContainer)).toBe(true);
     expect(nodeTypes.has(OpponentPanelContainer)).toBe(true);
-    expect(nodeTypes.has(DicePanel)).toBe(true);
-    expect(nodeTypes.has(ActionBar)).toBe(true);
+    expect(nodeTypes.has(DicePanelContainer)).toBe(true);
+    expect(nodeTypes.has(ActionBarContainer)).toBe(true);
     expect(nodeTypes.has(LocalPlayerHandContainer)).toBe(true);
 
     expect(testIds.includes("phase4-top-bar")).toBe(true);

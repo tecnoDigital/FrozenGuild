@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { ReactNode } from "react";
+import { BoardSlotsContainer } from "../../web/src/features/game/ui/BoardSlotsContainer";
+import { ActionBarContainer } from "../../web/src/features/game/ui/ActionBarContainer";
+import { DicePanelContainer } from "../../web/src/features/game/ui/DicePanelContainer";
 import { GameShell } from "../../web/src/features/game/ui/GameShell";
 import { CurrentTurnPanelContainer } from "../../web/src/features/game/ui/CurrentTurnPanelContainer";
+import { DeckPanelContainer } from "../../web/src/features/game/ui/DeckPanelContainer";
 import { LocalPlayerHandContainer } from "../../web/src/features/game/ui/LocalPlayerHandContainer";
 import { mockGameShell } from "../../web/src/features/game/ui/mockData";
 import { OpponentPanelContainer } from "../../web/src/features/game/ui/OpponentPanelContainer";
@@ -9,7 +13,12 @@ import { RoundBadgeContainer } from "../../web/src/features/game/ui/RoundBadgeCo
 import { ScorePanelContainer } from "../../web/src/features/game/ui/ScorePanelContainer";
 import {
   selectCurrentTurnView,
+  selectDeckCount,
+  selectDiceView,
   selectLocalPlayerHandView,
+  selectBoardSlotsView,
+  selectActionButtonsView,
+  selectActionFlowView,
   selectOpponentHandCounts,
   selectOpponentIdentities,
   selectPlayersLedger,
@@ -423,5 +432,300 @@ describe("fg phase 6 round connection contract", () => {
 
     expect(counts).toEqual([{ id: "1", handCount: 2 }, { id: "2", handCount: 0 }]);
     expect(fallback).toEqual([]);
+  });
+
+  it("mounts deck panel through a Zustand container boundary instead of static mock deck props", () => {
+    const shellTree = GameShell(mockGameShell);
+    const nodes = collectElements(shellTree);
+    const nodeTypes = new Set(nodes.map((node) => (node as { type?: unknown }).type));
+
+    expect(nodeTypes.has(DeckPanelContainer)).toBe(true);
+  });
+
+  it("derives deck count from snapshot deck length with safe fallback", () => {
+    const activeCount = selectDeckCount({
+      G: {
+        version: "v",
+        createdAt: 0,
+        activeTable: true,
+        botActivity: { playerID: null, startedAt: null, completedAt: null },
+        botIDs: [],
+        deck: ["penguin-001", "penguin-002", "orca-001"],
+        discardPile: [],
+        iceGrid: [],
+        players: {
+          "0": { name: "Local Penguin", zone: [], hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" }
+        },
+        pendingStage: null,
+        autoResolveQueue: [],
+        dice: { value: null, rolled: false },
+        turn: { actionCompleted: false, padrinoAction: null },
+        spy: null,
+        orcaResolution: null,
+        sealBombResolution: null
+      },
+      ctx: { currentPlayer: "0", turn: 1 },
+      gameover: undefined,
+      localPlayerID: "0",
+      spyDraftSlots: [],
+      spyDraftGiftSlot: null,
+      swapDraftSourceKey: "",
+      swapDraftTargetKey: "",
+      setSnapshot: () => undefined,
+      toggleSpyDraftSlot: () => undefined,
+      setSpyDraftGiftSlot: () => undefined,
+      clearSpyDraft: () => undefined,
+      setSwapDraftSourceKey: () => undefined,
+      setSwapDraftTargetKey: () => undefined,
+      clearSwapDraft: () => undefined
+    });
+
+    const fallbackCount = selectDeckCount({
+      G: null,
+      ctx: null,
+      gameover: undefined,
+      localPlayerID: null,
+      spyDraftSlots: [],
+      spyDraftGiftSlot: null,
+      swapDraftSourceKey: "",
+      swapDraftTargetKey: "",
+      setSnapshot: () => undefined,
+      toggleSpyDraftSlot: () => undefined,
+      setSpyDraftGiftSlot: () => undefined,
+      clearSpyDraft: () => undefined,
+      setSwapDraftSourceKey: () => undefined,
+      setSwapDraftTargetKey: () => undefined,
+      clearSwapDraft: () => undefined
+    });
+
+    expect(activeCount).toBe(3);
+    expect(fallbackCount).toBe(0);
+  });
+
+  it("mounts 3x3 board through a Zustand container boundary instead of static mock board props", () => {
+    const shellTree = GameShell(mockGameShell);
+    const nodes = collectElements(shellTree);
+    const nodeTypes = new Set(nodes.map((node) => (node as { type?: unknown }).type));
+
+    expect(nodeTypes.has(BoardSlotsContainer)).toBe(true);
+  });
+
+  it("derives board slots from snapshot iceGrid card IDs only with safe fallback", () => {
+    const board = selectBoardSlotsView({
+      G: {
+        version: "v",
+        createdAt: 0,
+        activeTable: true,
+        botActivity: { playerID: null, startedAt: null, completedAt: null },
+        botIDs: [],
+        deck: [],
+        discardPile: [],
+        iceGrid: ["penguin-001", "walrus-001", "petrel-001", "sea_elephant-001", null, "krill-001", "orca-001", "seal_bomb-001", "penguin-002"],
+        players: {
+          "0": { name: "Local Penguin", zone: [], hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" }
+        },
+        pendingStage: null,
+        autoResolveQueue: [],
+        dice: { value: null, rolled: false },
+        turn: { actionCompleted: false, padrinoAction: null },
+        spy: null,
+        orcaResolution: null,
+        sealBombResolution: null
+      },
+      ctx: { currentPlayer: "0", turn: 1 },
+      gameover: undefined,
+      localPlayerID: "0",
+      spyDraftSlots: [],
+      spyDraftGiftSlot: null,
+      swapDraftSourceKey: "",
+      swapDraftTargetKey: "",
+      setSnapshot: () => undefined,
+      toggleSpyDraftSlot: () => undefined,
+      setSpyDraftGiftSlot: () => undefined,
+      clearSpyDraft: () => undefined,
+      setSwapDraftSourceKey: () => undefined,
+      setSwapDraftTargetKey: () => undefined,
+      clearSwapDraft: () => undefined
+    });
+
+    const fallback = selectBoardSlotsView({
+      G: null,
+      ctx: null,
+      gameover: undefined,
+      localPlayerID: null,
+      spyDraftSlots: [],
+      spyDraftGiftSlot: null,
+      swapDraftSourceKey: "",
+      swapDraftTargetKey: "",
+      setSnapshot: () => undefined,
+      toggleSpyDraftSlot: () => undefined,
+      setSpyDraftGiftSlot: () => undefined,
+      clearSpyDraft: () => undefined,
+      setSwapDraftSourceKey: () => undefined,
+      setSwapDraftTargetKey: () => undefined,
+      clearSwapDraft: () => undefined
+    });
+
+    expect(board).toHaveLength(9);
+    expect(board.map((slot) => slot.slotId)).toEqual([
+      "slot-1",
+      "slot-2",
+      "slot-3",
+      "slot-4",
+      "slot-5",
+      "slot-6",
+      "slot-7",
+      "slot-8",
+      "slot-9"
+    ]);
+    expect(board[0]?.card?.variant).toBe("penguin-1");
+    expect(board[3]?.card?.variant).toBe("sea-elephant");
+    expect(board[7]?.card?.variant).toBe("seal-bomb");
+    expect(board[4]?.card).toBeUndefined();
+    expect(fallback).toEqual([]);
+  });
+
+  it("mounts dice through a Zustand container boundary instead of static mock dice props", () => {
+    const shellTree = GameShell(mockGameShell);
+    const nodes = collectElements(shellTree);
+    const nodeTypes = new Set(nodes.map((node) => (node as { type?: unknown }).type));
+
+    expect(nodeTypes.has(DicePanelContainer)).toBe(true);
+  });
+
+  it("derives dice result view from snapshot dice state with safe fallback", () => {
+    const activeDice = selectDiceView({
+      G: {
+        version: "v",
+        createdAt: 0,
+        activeTable: true,
+        botActivity: { playerID: null, startedAt: null, completedAt: null },
+        botIDs: [],
+        deck: [],
+        discardPile: [],
+        iceGrid: [],
+        players: {
+          "0": { name: "Local Penguin", zone: [], hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" }
+        },
+        pendingStage: null,
+        autoResolveQueue: [],
+        dice: { value: 5, rolled: true },
+        turn: { actionCompleted: false, padrinoAction: null },
+        spy: null,
+        orcaResolution: null,
+        sealBombResolution: null
+      },
+      ctx: { currentPlayer: "0", turn: 4 },
+      gameover: undefined,
+      localPlayerID: "0",
+      spyDraftSlots: [],
+      spyDraftGiftSlot: null,
+      swapDraftSourceKey: "",
+      swapDraftTargetKey: "",
+      setSnapshot: () => undefined,
+      toggleSpyDraftSlot: () => undefined,
+      setSpyDraftGiftSlot: () => undefined,
+      clearSpyDraft: () => undefined,
+      setSwapDraftSourceKey: () => undefined,
+      setSwapDraftTargetKey: () => undefined,
+      clearSwapDraft: () => undefined
+    });
+
+    const fallbackDice = selectDiceView({
+      G: null,
+      ctx: null,
+      gameover: undefined,
+      localPlayerID: null,
+      spyDraftSlots: [],
+      spyDraftGiftSlot: null,
+      swapDraftSourceKey: "",
+      swapDraftTargetKey: "",
+      setSnapshot: () => undefined,
+      toggleSpyDraftSlot: () => undefined,
+      setSpyDraftGiftSlot: () => undefined,
+      clearSpyDraft: () => undefined,
+      setSwapDraftSourceKey: () => undefined,
+      setSwapDraftTargetKey: () => undefined,
+      clearSwapDraft: () => undefined
+    });
+
+    expect(activeDice).toEqual({ rolled: true, value: 5, disabled: false });
+    expect(fallbackDice).toEqual({ rolled: false, value: null, disabled: true });
+  });
+
+  it("mounts current and available actions through a Zustand container boundary instead of static mock action props", () => {
+    const shellTree = GameShell(mockGameShell);
+    const nodes = collectElements(shellTree);
+    const nodeTypes = new Set(nodes.map((node) => (node as { type?: unknown }).type));
+
+    expect(nodeTypes.has(ActionBarContainer)).toBe(true);
+  });
+
+  it("derives action flow and available/current action buttons from snapshot state with safe fallback", () => {
+    const actionFlow = selectActionFlowView({
+      G: {
+        version: "v",
+        createdAt: 0,
+        activeTable: true,
+        botActivity: { playerID: null, startedAt: null, completedAt: null },
+        botIDs: [],
+        deck: [],
+        discardPile: [],
+        iceGrid: [],
+        players: {
+          "0": { name: "Local Penguin", zone: [], hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" }
+        },
+        pendingStage: null,
+        autoResolveQueue: [],
+        dice: { value: null, rolled: false },
+        turn: { actionCompleted: false, padrinoAction: null },
+        spy: null,
+        orcaResolution: null,
+        sealBombResolution: null
+      },
+      ctx: { currentPlayer: "0", turn: 4 },
+      gameover: undefined,
+      localPlayerID: "0",
+      spyDraftSlots: [],
+      spyDraftGiftSlot: null,
+      swapDraftSourceKey: "",
+      swapDraftTargetKey: "",
+      setSnapshot: () => undefined,
+      toggleSpyDraftSlot: () => undefined,
+      setSpyDraftGiftSlot: () => undefined,
+      clearSpyDraft: () => undefined,
+      setSwapDraftSourceKey: () => undefined,
+      setSwapDraftTargetKey: () => undefined,
+      clearSwapDraft: () => undefined
+    });
+
+    const actionButtons = selectActionButtonsView(actionFlow);
+    const fallbackButtons = selectActionButtonsView(selectActionFlowView({
+      G: null,
+      ctx: null,
+      gameover: undefined,
+      localPlayerID: null,
+      spyDraftSlots: [],
+      spyDraftGiftSlot: null,
+      swapDraftSourceKey: "",
+      swapDraftTargetKey: "",
+      setSnapshot: () => undefined,
+      toggleSpyDraftSlot: () => undefined,
+      setSpyDraftGiftSlot: () => undefined,
+      clearSpyDraft: () => undefined,
+      setSwapDraftSourceKey: () => undefined,
+      setSwapDraftTargetKey: () => undefined,
+      clearSwapDraft: () => undefined
+    }));
+
+    expect(actionFlow).toMatchObject({ mode: "roll", canRoll: true, isMyTurn: true });
+    expect(actionButtons).toEqual([
+      { id: "roll", label: "Roll Dice", disabled: false },
+      { id: "end-turn", label: "End Turn", disabled: true }
+    ]);
+    expect(fallbackButtons).toEqual([
+      { id: "roll", label: "Roll Dice", disabled: true },
+      { id: "end-turn", label: "End Turn", disabled: true }
+    ]);
   });
 });

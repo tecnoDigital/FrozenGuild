@@ -23,6 +23,14 @@ let lastLocalHand: { playerId: string; cards: Array<{ cardID: string; cardType: 
   playerId: "local",
   cards: []
 };
+let lastIceGridRefForBoard: NonNullable<FrozenGuildUiStore["G"]>["iceGrid"] | null | undefined;
+let lastBoardSlots: Array<{
+  slotId: string;
+  card?: {
+    cardType: "penguin" | "walrus" | "petrel" | "sea-elephant" | "krill" | "orca" | "seal-bomb";
+    variant: "penguin-1" | "penguin-2" | "penguin-3" | "walrus" | "petrel" | "sea-elephant" | "krill" | "orca" | "seal-bomb";
+  };
+}> = [];
 
 function mapCardTypeToUiCardType(type: "penguin" | "walrus" | "petrel" | "sea_elephant" | "krill" | "orca" | "seal_bomb") {
   if (type === "sea_elephant") return "sea-elephant";
@@ -279,6 +287,46 @@ export function selectLocalPlayerHandView(state: FrozenGuildUiStore): {
   return lastLocalHand;
 }
 
+export function selectBoardSlotsView(state: FrozenGuildUiStore): Array<{
+  slotId: string;
+  card?: {
+    cardType: "penguin" | "walrus" | "petrel" | "sea-elephant" | "krill" | "orca" | "seal-bomb";
+    variant: "penguin-1" | "penguin-2" | "penguin-3" | "walrus" | "petrel" | "sea-elephant" | "krill" | "orca" | "seal-bomb";
+  };
+}> {
+  if (!state.G) {
+    lastIceGridRefForBoard = null;
+    lastBoardSlots = [];
+    return lastBoardSlots;
+  }
+
+  if (state.G.iceGrid === lastIceGridRefForBoard) {
+    return lastBoardSlots;
+  }
+
+  lastIceGridRefForBoard = state.G.iceGrid;
+  lastBoardSlots = state.G.iceGrid.map((slot, index) => {
+    if (!slot || typeof slot !== "string") {
+      return { slotId: `slot-${index + 1}` };
+    }
+
+    const card = getCardById(slot);
+    if (!card) {
+      return { slotId: `slot-${index + 1}` };
+    }
+
+    return {
+      slotId: `slot-${index + 1}`,
+      card: {
+        cardType: mapCardTypeToUiCardType(card.type),
+        variant: mapCardIdToVariant(slot)
+      }
+    };
+  });
+
+  return lastBoardSlots;
+}
+
 export function selectIceGrid(state: FrozenGuildUiStore) {
   return state.G?.iceGrid ?? [];
 }
@@ -308,6 +356,61 @@ export type ActionFlowView = {
   canEndTurn: boolean;
   showPadrinoOptions: boolean;
 };
+
+export function selectActionButtonsView(flow: ActionFlowView): Array<{ id: string; label: string; disabled?: boolean }> {
+  const rollButton = { id: "roll", label: "Roll Dice", disabled: !flow.canRoll };
+  const endTurnButton = { id: "end-turn", label: "End Turn", disabled: !flow.canEndTurn };
+
+  if (flow.mode === "padrino") {
+    return [
+      { id: "padrino-fish", label: "Padrino: Fish", disabled: false },
+      { id: "padrino-spy", label: "Padrino: Spy", disabled: false },
+      { id: "padrino-swap", label: "Padrino: Swap", disabled: false },
+      endTurnButton
+    ];
+  }
+
+  if (flow.mode === "fish") {
+    return [
+      { id: "fish", label: "Current: Fish", disabled: true },
+      endTurnButton
+    ];
+  }
+
+  if (flow.mode === "spy") {
+    return [
+      { id: "spy", label: "Current: Spy", disabled: true },
+      endTurnButton
+    ];
+  }
+
+  if (flow.mode === "swap") {
+    return [
+      { id: "swap", label: "Current: Swap", disabled: true },
+      endTurnButton
+    ];
+  }
+
+  if (flow.mode === "orca") {
+    return [
+      { id: "orca", label: "Current: Orca Resolution", disabled: true },
+      endTurnButton
+    ];
+  }
+
+  if (flow.mode === "seal") {
+    return [
+      { id: "seal", label: "Current: Seal-Bomb Resolution", disabled: true },
+      endTurnButton
+    ];
+  }
+
+  if (flow.mode === "done") {
+    return [rollButton, endTurnButton];
+  }
+
+  return [rollButton, endTurnButton];
+}
 
 export function selectActionFlowView(state: FrozenGuildUiStore): ActionFlowView {
   const diceRolled = !!state.G?.dice.rolled;
