@@ -1,0 +1,12 @@
+.shell {
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+  padding: 24px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(90px, 150px));
+  gap: 12px;
+}

@@ -1259,8 +1259,7 @@ const meta: Meta&lt;typeof AvailableMatchesPanel&gt; = {
       }
     ],
     onRefresh: fn(),
-    onSelectMatchID: fn(),
-    onSelectSeat: fn()
+    onSelectMatchID: fn()
   }
 };
 
@@ -1323,8 +1322,7 @@ export const Empty: Story = {
       }
     ]}
     onRefresh={fn()}
-    onSelectMatchID={fn()}
-    onSelectSeat={fn()} /&gt;;</code></pre>
+    onSelectMatchID={fn()} /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -1337,8 +1335,7 @@ export const Empty: Story = {
     selectedMatchID=&quot;match-001&quot;
     rows={[]}
     onRefresh={fn()}
-    onSelectMatchID={fn()}
-    onSelectSeat={fn()} /&gt;;</code></pre>
+    onSelectMatchID={fn()} /&gt;;</code></pre>
             </div>
         </div>
     
@@ -2722,12 +2719,9 @@ const meta: Meta&lt;typeof LobbyForm&gt; = {
   component: LobbyForm,
   args: {
     playerName: &quot;Jugador&quot;,
-    matchID: &quot;match-001&quot;,
-    playerID: &quot;0&quot;,
     numPlayers: 4,
     botPlayerIDs: [&quot;2&quot;],
     onCreate: fn(),
-    onJoin: fn(),
     onNumPlayersChange: fn(),
     onToggleBotPlayerID: fn()
   }
@@ -2738,10 +2732,10 @@ type Story = StoryObj&lt;typeof LobbyForm&gt;;
 
 export const Default: Story = {};
 
-export const ClickJoin: Story = {
+export const ClickCreate: Story = {
   play: async ({ canvas, args }) =&gt; {
-    await userEvent.click(canvas.getByRole(&quot;button&quot;, { name: &quot;Romper el hielo&quot; }));
-    await expect(args.onJoin).toHaveBeenCalled();
+    await userEvent.click(canvas.getByRole(&quot;button&quot;, { name: &quot;Crear partida&quot; }));
+    await expect(args.onCreate).toHaveBeenCalled();
   }
 };
 </code></pre></div>
@@ -2778,30 +2772,24 @@ export const ClickJoin: Story = {
               
               <pre><code>const Default = () =&gt; &lt;LobbyForm
     playerName=&quot;Jugador&quot;
-    matchID=&quot;match-001&quot;
-    playerID=&quot;0&quot;
     numPlayers={4}
     botPlayerIDs={[&quot;2&quot;]}
     onCreate={fn()}
-    onJoin={fn()}
     onNumPlayersChange={fn()}
     onToggleBotPlayerID={fn()} /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Click Join</span>
+                <span class="ex-name">Click Create</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const ClickJoin = () =&gt; &lt;LobbyForm
+              <pre><code>const ClickCreate = () =&gt; &lt;LobbyForm
     playerName=&quot;Jugador&quot;
-    matchID=&quot;match-001&quot;
-    playerID=&quot;0&quot;
     numPlayers={4}
     botPlayerIDs={[&quot;2&quot;]}
     onCreate={fn()}
-    onJoin={fn()}
     onNumPlayersChange={fn()}
     onToggleBotPlayerID={fn()} /&gt;;</code></pre>
             </div>
@@ -2962,8 +2950,6 @@ const meta: Meta&lt;typeof LobbyScreen&gt; = {
   component: LobbyScreen,
   args: {
     playerName: &quot;Jugador&quot;,
-    matchID: &quot;match-001&quot;,
-    playerID: &quot;0&quot;,
     numPlayers: 4,
     selectedBotPlayerIDs: [&quot;2&quot;],
     players: [&quot;Oz&quot;, &quot;BOT 1&quot;],
@@ -3027,8 +3013,6 @@ export const Default: Story = {};
               
               <pre><code>const Default = () =&gt; &lt;LobbyScreen
     playerName=&quot;Jugador&quot;
-    matchID=&quot;match-001&quot;
-    playerID=&quot;0&quot;
     numPlayers={4}
     selectedBotPlayerIDs={[&quot;2&quot;]}
     players={[&quot;Oz&quot;, &quot;BOT 1&quot;]}
@@ -3728,6 +3712,7 @@ const meta: Meta&lt;typeof RoomPlayersPanel&gt; = {
     selectedMatch: {
       matchID: &quot;match-001&quot;,
       totalPlayers: 4,
+      availableSeats: [&quot;2&quot;, &quot;3&quot;],
       occupiedPlayers: [
         { seat: &quot;0&quot;, name: &quot;Oz&quot;, isBot: false },
         { seat: &quot;1&quot;, name: &quot;BOT 1&quot;, isBot: true }
@@ -3779,6 +3764,7 @@ export const Empty: Story = { args: { players: [] } };
     selectedMatch={{
       matchID: &quot;match-001&quot;,
       totalPlayers: 4,
+      availableSeats: [&quot;2&quot;, &quot;3&quot;],
       occupiedPlayers: [
         { seat: &quot;0&quot;, name: &quot;Oz&quot;, isBot: false },
         { seat: &quot;1&quot;, name: &quot;BOT 1&quot;, isBot: true }
@@ -3798,6 +3784,7 @@ export const Empty: Story = { args: { players: [] } };
     selectedMatch={{
       matchID: &quot;match-001&quot;,
       totalPlayers: 4,
+      availableSeats: [&quot;2&quot;, &quot;3&quot;],
       occupiedPlayers: [
         { seat: &quot;0&quot;, name: &quot;Oz&quot;, isBot: false },
         { seat: &quot;1&quot;, name: &quot;BOT 1&quot;, isBot: true }
@@ -4595,8 +4582,7 @@ const meta: Meta&lt;typeof AvailableMatchesPanel&gt; = {
       }
     ],
     onRefresh: fn(),
-    onSelectMatchID: fn(),
-    onSelectSeat: fn()
+    onSelectMatchID: fn()
   }
 };
 
@@ -4659,8 +4645,7 @@ export const Empty: Story = {
       }
     ]}
     onRefresh={fn()}
-    onSelectMatchID={fn()}
-    onSelectSeat={fn()} /&gt;;</code></pre>
+    onSelectMatchID={fn()} /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
@@ -4673,8 +4658,7 @@ export const Empty: Story = {
     selectedMatchID=&quot;match-001&quot;
     rows={[]}
     onRefresh={fn()}
-    onSelectMatchID={fn()}
-    onSelectSeat={fn()} /&gt;;</code></pre>
+    onSelectMatchID={fn()} /&gt;;</code></pre>
             </div>
         </div>
     
@@ -6058,12 +6042,9 @@ const meta: Meta&lt;typeof LobbyForm&gt; = {
   component: LobbyForm,
   args: {
     playerName: &quot;Jugador&quot;,
-    matchID: &quot;match-001&quot;,
-    playerID: &quot;0&quot;,
     numPlayers: 4,
     botPlayerIDs: [&quot;2&quot;],
     onCreate: fn(),
-    onJoin: fn(),
     onNumPlayersChange: fn(),
     onToggleBotPlayerID: fn()
   }
@@ -6074,10 +6055,10 @@ type Story = StoryObj&lt;typeof LobbyForm&gt;;
 
 export const Default: Story = {};
 
-export const ClickJoin: Story = {
+export const ClickCreate: Story = {
   play: async ({ canvas, args }) =&gt; {
-    await userEvent.click(canvas.getByRole(&quot;button&quot;, { name: &quot;Romper el hielo&quot; }));
-    await expect(args.onJoin).toHaveBeenCalled();
+    await userEvent.click(canvas.getByRole(&quot;button&quot;, { name: &quot;Crear partida&quot; }));
+    await expect(args.onCreate).toHaveBeenCalled();
   }
 };
 </code></pre></div>
@@ -6114,30 +6095,24 @@ export const ClickJoin: Story = {
               
               <pre><code>const Default = () =&gt; &lt;LobbyForm
     playerName=&quot;Jugador&quot;
-    matchID=&quot;match-001&quot;
-    playerID=&quot;0&quot;
     numPlayers={4}
     botPlayerIDs={[&quot;2&quot;]}
     onCreate={fn()}
-    onJoin={fn()}
     onNumPlayersChange={fn()}
     onToggleBotPlayerID={fn()} /&gt;;</code></pre>
             </div>
             <div class="note ok">
               <div class="row">
-                <span class="ex-name">Click Join</span>
+                <span class="ex-name">Click Create</span>
                 <span class="badge ok">story ok</span>
               </div>
               
               
-              <pre><code>const ClickJoin = () =&gt; &lt;LobbyForm
+              <pre><code>const ClickCreate = () =&gt; &lt;LobbyForm
     playerName=&quot;Jugador&quot;
-    matchID=&quot;match-001&quot;
-    playerID=&quot;0&quot;
     numPlayers={4}
     botPlayerIDs={[&quot;2&quot;]}
     onCreate={fn()}
-    onJoin={fn()}
     onNumPlayersChange={fn()}
     onToggleBotPlayerID={fn()} /&gt;;</code></pre>
             </div>
@@ -6298,8 +6273,6 @@ const meta: Meta&lt;typeof LobbyScreen&gt; = {
   component: LobbyScreen,
   args: {
     playerName: &quot;Jugador&quot;,
-    matchID: &quot;match-001&quot;,
-    playerID: &quot;0&quot;,
     numPlayers: 4,
     selectedBotPlayerIDs: [&quot;2&quot;],
     players: [&quot;Oz&quot;, &quot;BOT 1&quot;],
@@ -6363,8 +6336,6 @@ export const Default: Story = {};
               
               <pre><code>const Default = () =&gt; &lt;LobbyScreen
     playerName=&quot;Jugador&quot;
-    matchID=&quot;match-001&quot;
-    playerID=&quot;0&quot;
     numPlayers={4}
     selectedBotPlayerIDs={[&quot;2&quot;]}
     players={[&quot;Oz&quot;, &quot;BOT 1&quot;]}
@@ -7064,6 +7035,7 @@ const meta: Meta&lt;typeof RoomPlayersPanel&gt; = {
     selectedMatch: {
       matchID: &quot;match-001&quot;,
       totalPlayers: 4,
+      availableSeats: [&quot;2&quot;, &quot;3&quot;],
       occupiedPlayers: [
         { seat: &quot;0&quot;, name: &quot;Oz&quot;, isBot: false },
         { seat: &quot;1&quot;, name: &quot;BOT 1&quot;, isBot: true }
@@ -7115,6 +7087,7 @@ export const Empty: Story = { args: { players: [] } };
     selectedMatch={{
       matchID: &quot;match-001&quot;,
       totalPlayers: 4,
+      availableSeats: [&quot;2&quot;, &quot;3&quot;],
       occupiedPlayers: [
         { seat: &quot;0&quot;, name: &quot;Oz&quot;, isBot: false },
         { seat: &quot;1&quot;, name: &quot;BOT 1&quot;, isBot: true }
@@ -7134,6 +7107,7 @@ export const Empty: Story = { args: { players: [] } };
     selectedMatch={{
       matchID: &quot;match-001&quot;,
       totalPlayers: 4,
+      availableSeats: [&quot;2&quot;, &quot;3&quot;],
       occupiedPlayers: [
         { seat: &quot;0&quot;, name: &quot;Oz&quot;, isBot: false },
         { seat: &quot;1&quot;, name: &quot;BOT 1&quot;, isBot: true }
