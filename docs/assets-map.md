@@ -17,7 +17,7 @@ This map documents the new `web/public/assets` structure, what is already availa
 | Lobby background | `assets/backgrounds/lobby-bg.png` | Existing (mapped) | Copied from `web/src/assets/Lobby-background.png`. |
 | Board center decoration | `assets/backgrounds/ice-table-center.png` | Missing (future) | Reserved for premium center vignette. |
 | Card backs | `assets/cards/backs/frozen-dreamcatcher-back.png` | Existing (mapped) | Copied from `web/src/assets/cards/Reverso.png`. |
-| Card fronts | `assets/cards/fronts/{hearts,diamonds,clubs,spades}` | Partial | Existing gameplay card images copied to suit folder``s as temporary placements. Final suit-specific art still pending. |
+| Card fronts | `assets/cards/types/*` | Existing (mapped) | FrozenGuild uses custom card types only: Penguin, Walrus, Petrel, Sea Elephant, Krill, Orca, Seal-Bomb. No standard suits. |
 | Card state overlays | `assets/cards/states/*` | Partial | `card-hidden.png` currently mapped from placeholder; selected/disabled/highlighted are future assets. |
 | Lobby avatars | `assets/characters/avatars/*` | Missing (future) | Character portrait set pending. |
 | Opponent portraits | `assets/characters/opponents/*` | Missing (future) | Opponent badges/portraits pending. |
@@ -35,15 +35,15 @@ This map documents the new `web/public/assets` structure, what is already availa
 | `Lobby-background.png` | `backgrounds/lobby-bg.png` |
 | `cards/Reverso.png` | `cards/backs/frozen-dreamcatcher-back.png` |
 | `placeholder.png` | `cards/states/card-hidden.png` |
-| `cards/penguin-1.png` | `cards/fronts/spades/penguin-1.png` |
-| `cards/penguin-2.png` | `cards/fronts/spades/penguin-2.png` |
-| `cards/penguin-3.png` | `cards/fronts/spades/penguin-3.png` |
-| `cards/walrus.png` | `cards/fronts/hearts/walrus.png` |
-| `cards/petrel.png` | `cards/fronts/diamonds/petrel.png` |
-| `cards/sea-elephant.png` | `cards/fronts/clubs/sea-elephant.png` |
-| `cards/krill.png` | `cards/fronts/hearts/krill.png` |
-| `cards/orca.png` | `cards/fronts/clubs/orca.png` |
-| `cards/seal_bomb.png` | `cards/fronts/diamonds/seal-bomb.png` |
+| `cards/penguin-1.png` | `cards/types/penguin-1.png` |
+| `cards/penguin-2.png` | `cards/types/penguin-2.png` |
+| `cards/penguin-3.png` | `cards/types/penguin-3.png` |
+| `cards/walrus.png` | `cards/types/walrus.png` |
+| `cards/petrel.png` | `cards/types/petrel.png` |
+| `cards/sea-elephant.png` | `cards/types/sea-elephant.png` |
+| `cards/krill.png` | `cards/types/krill.png` |
+| `cards/orca.png` | `cards/types/orca.png` |
+| `cards/seal_bomb.png` | `cards/types/seal-bomb.png` |
 | `dice.png` | `ui/icons/dice.png` |
 | `fish.png` | `ui/icons/fish.png` |
 | `Icon-Pez.png` | `ui/icons/fish-alt.png` |
@@ -51,5 +51,7 @@ This map documents the new `web/public/assets` structure, what is already availa
 | `Marco.png` | `ui/frames/score-panel-frame.png` |
 
 ## Future migration note
+
+There is currently NO Mountain card in the active UI contract, mock data, or card-front asset expectations.
 
 Current game still reads card assets from `web/src/view-model/assetMap.ts` and `/src/assets/...` paths. That was intentionally kept untouched in this phase to avoid gameplay regressions. Later UI phases can migrate consumers to `assets.ts` incrementally.

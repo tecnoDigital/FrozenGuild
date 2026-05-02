@@ -1,0 +1,22 @@
+.panel {
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem;
+  border-radius: var(--fg-radius-md);
+  border: var(--fg-border-icy);
+  background: var(--fg-bg-panel);
+}
+
+.back {
+  inline-size: clamp(64px, 8vw, 90px);
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: var(--fg-radius-sm);
+}
+
+.count {
+  margin: 0;
+  color: var(--fg-color-ice-100);
+  font-size: var(--fg-font-size-xs);
+}

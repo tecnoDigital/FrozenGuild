@@ -1,0 +1,96 @@
+.field {
+  display: grid;
+  gap: 6px;
+}
+
+.optionGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.optionCard,
+.optionCardSelected {
+  border: 1px solid rgba(162, 216, 255, 0.35);
+  border-radius: 10px;
+  background: rgba(5, 20, 38, 0.62);
+  color: var(--text);
+  padding: 8px 6px;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+}
+
+.optionCardSelected {
+  border-color: var(--accent);
+}
+
+.optionAvatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+}
+
+.colorGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.colorSwatch,
+.colorSwatchSelected {
+  border: 1px solid rgba(162, 216, 255, 0.35);
+  border-radius: 10px;
+  background: rgba(5, 20, 38, 0.62);
+  color: var(--text);
+  padding: 8px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.colorSwatchSelected {
+  border-color: var(--accent);
+}
+
+.colorDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: var(--lobby-color, #63ece3);
+}
+
+.previewCard {
+  border: 1px solid rgba(162, 216, 255, 0.35);
+  border-radius: 12px;
+  background: rgba(5, 20, 38, 0.62);
+  padding: 10px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.previewAvatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+}
+
+.previewName {
+  margin: 0;
+  font-weight: 700;
+}
+
+.previewMeta {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.previewColor {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  box-shadow: 0 0 0 1px rgba(230, 245, 255, 0.3);
+}

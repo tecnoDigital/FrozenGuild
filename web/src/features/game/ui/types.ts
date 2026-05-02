@@ -5,8 +5,7 @@ export type FrozenGuildCardType =
   | "sea-elephant"
   | "krill"
   | "orca"
-  | "seal-bomb"
-  | "mountain";
+  | "seal-bomb";
 
 export type FrozenGuildCardVariant =
   | "penguin-1"
@@ -17,8 +16,7 @@ export type FrozenGuildCardVariant =
   | "sea-elephant"
   | "krill"
   | "orca"
-  | "seal-bomb"
-  | "mountain";
+  | "seal-bomb";
 
 export interface CardVisualProps {
   cardType: FrozenGuildCardType;
@@ -46,6 +44,11 @@ export interface PlayerSummaryProps {
 export interface OpponentRowProps extends PlayerSummaryProps {
   handCount: number;
   isCurrentTurn?: boolean;
+}
+
+export interface OpponentPanelProps {
+  title: string;
+  opponents: OpponentRowProps[];
 }
 
 export interface ScorePanelProps {

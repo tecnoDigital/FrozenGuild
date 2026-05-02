@@ -1,0 +1,37 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: var(--fg-border-icy-strong);
+  border-radius: var(--fg-radius-pill);
+  background: rgba(5, 22, 36, 0.9);
+  color: var(--fg-color-ice-100);
+  padding: 0.42rem 0.75rem;
+  font-size: var(--fg-font-size-xs);
+  transition: transform var(--fg-transition-fast);
+}
+
+.button:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+
+.button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.icon,
+.fallbackIcon {
+  inline-size: 1rem;
+  block-size: 1rem;
+}
+
+.icon {
+  object-fit: contain;
+}
+
+.fallbackIcon {
+  display: inline-grid;
+  place-items: center;
+  font-size: 0.7rem;
+}

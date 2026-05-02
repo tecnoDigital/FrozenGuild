@@ -50,4 +50,8 @@ describe("ui assets contract", () => {
     expect("diamonds" in assets.cards.fronts).toBe(false);
     expect("clubs" in assets.cards.fronts).toBe(false);
   });
+
+  it("does not expose a mountain card in current contract", () => {
+    expect("mountain" in assets.cards.fronts).toBe(false);
+  });
 });

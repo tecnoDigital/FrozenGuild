@@ -22,6 +22,13 @@ import { CenterBoardStage } from "../layout/CenterBoardStage.js";
 import { LeftStatusRail } from "../layout/LeftStatusRail.js";
 import { RightLedgerRail } from "../layout/RightLedgerRail.js";
 import { PlayerLedgerPanel } from "../players/PlayerLedgerPanel.js";
+import {
+  resolveLobbyAvatarSrc,
+  resolveLobbyColorValue,
+  selectLobbyAvatar,
+  selectLobbyColor,
+  useLobbyProfileStore
+} from "../../features/lobby/lobbyStore.js";
 
 export function LeftStatusRailContainer() {
   const playerName = useFrozenGuildStore(selectLocalPlayerName);
@@ -29,10 +36,14 @@ export function LeftStatusRailContainer() {
   const deckCount = useFrozenGuildStore(selectDeckCount);
   const discardCount = useFrozenGuildStore(selectDiscardCount);
   const tableActive = useFrozenGuildStore(selectTableActive);
+  const lobbyAvatar = useLobbyProfileStore(selectLobbyAvatar);
+  const lobbyColor = useLobbyProfileStore(selectLobbyColor);
 
   return (
     <LeftStatusRail
       playerName={playerName}
+      playerAvatarSrc={resolveLobbyAvatarSrc(lobbyAvatar)}
+      playerColorValue={resolveLobbyColorValue(lobbyColor)}
       turnLabel={turnLabel}
       deckCount={deckCount}
       discardCount={discardCount}

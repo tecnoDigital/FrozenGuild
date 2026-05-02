@@ -21,8 +21,7 @@ export const assets = {
       seaElephant: `${root}/cards/types/sea-elephant.png`,
       krill: `${root}/cards/types/krill.png`,
       orca: `${root}/cards/types/orca.png`,
-      sealBomb: `${root}/cards/types/seal-bomb.png`,
-      mountain: `${root}/cards/types/mountain.png`
+      sealBomb: `${root}/cards/types/seal-bomb.png`
     },
     states: {
       hidden: `${root}/cards/states/card-hidden.png`,

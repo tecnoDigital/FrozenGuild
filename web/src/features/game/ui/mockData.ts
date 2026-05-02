@@ -21,8 +21,7 @@ const cardImageByVariant: Record<FrozenGuildCardVariant, string> = {
   "sea-elephant": assets.cards.fronts.seaElephant,
   krill: assets.cards.fronts.krill,
   orca: assets.cards.fronts.orca,
-  "seal-bomb": assets.cards.fronts.sealBomb,
-  mountain: assets.cards.fronts.mountain
+  "seal-bomb": assets.cards.fronts.sealBomb
 };
 
 function createCard(seed: CardSeed): CardVisualProps {

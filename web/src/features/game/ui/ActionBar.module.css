@@ -1,0 +1,24 @@
+.bar {
+  position: relative;
+  border-radius: var(--fg-radius-lg);
+  border: var(--fg-border-icy);
+  padding: 0.65rem;
+  background: var(--fg-bg-panel-soft);
+  overflow: hidden;
+}
+
+.frame {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  opacity: 0.2;
+}
+
+.actions {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}

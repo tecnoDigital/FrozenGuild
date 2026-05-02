@@ -1,12 +1,21 @@
 import { Button } from "../shared/Button.js";
 import styles from "./Lobby.module.css";
+import { AvatarSelector } from "../../features/lobby/AvatarSelector.js";
+import { ColorSelector } from "../../features/lobby/ColorSelector.js";
+import { PlayerNameInput } from "../../features/lobby/PlayerNameInput.js";
+import { PlayerPreviewCard } from "../../features/lobby/PlayerPreviewCard.js";
+import type { LobbyAvatarID, LobbyColorID } from "../../features/lobby/lobbyStore.js";
 
 type LobbyFormProps = {
   playerName: string;
+  avatarID?: LobbyAvatarID;
+  colorID?: LobbyColorID;
   numPlayers?: number;
   botPlayerIDs?: string[];
   busy?: boolean;
   onPlayerNameChange?: (value: string) => void;
+  onAvatarChange?: (avatarID: LobbyAvatarID) => void;
+  onColorChange?: (colorID: LobbyColorID) => void;
   onNumPlayersChange?: (value: number) => void;
   onToggleBotPlayerID?: (playerID: string) => void;
   onCreate?: () => void;
@@ -14,10 +23,14 @@ type LobbyFormProps = {
 
 export function LobbyForm({
   playerName,
+  avatarID = "penguin1",
+  colorID = "ice",
   numPlayers = 2,
   botPlayerIDs = [],
   busy = false,
   onPlayerNameChange,
+  onAvatarChange,
+  onColorChange,
   onNumPlayersChange,
   onToggleBotPlayerID,
   onCreate
@@ -28,10 +41,16 @@ export function LobbyForm({
     <section className={styles.panel}>
       <h3 style={{ marginTop: 0 }}>Crear partida</h3>
       <div className={styles.list}>
-        <label>
-          Nombre
-          <input value={playerName} onChange={(e) => onPlayerNameChange?.(e.target.value)} />
-        </label>
+        <PlayerNameInput value={playerName} onChange={onPlayerNameChange} />
+        <div>
+          <strong>Avatar</strong>
+          <AvatarSelector value={avatarID} onChange={onAvatarChange} />
+        </div>
+        <div>
+          <strong>Color</strong>
+          <ColorSelector value={colorID} onChange={onColorChange} />
+        </div>
+        <PlayerPreviewCard name={playerName} avatarID={avatarID} colorID={colorID} />
         <label>
           Cantidad de jugadores
           <select value={numPlayers} onChange={(e) => onNumPlayersChange?.(Number(e.target.value))}>

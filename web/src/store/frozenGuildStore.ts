@@ -3,7 +3,7 @@ import type { FrozenGuildState } from "../../../shared/game/types.js";
 
 export type FrozenGuildSnapshot = {
   G: FrozenGuildState | null;
-  ctx: { currentPlayer: string } | null;
+  ctx: { currentPlayer: string; turn?: number } | null;
   gameover?: unknown;
   localPlayerID: string | null;
 };

@@ -1,0 +1,37 @@
+.panel {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  padding: 0.7rem;
+  border-radius: var(--fg-radius-md);
+  border: var(--fg-border-icy);
+  background: var(--fg-bg-panel-strong);
+  overflow: hidden;
+}
+
+.frame {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  opacity: 0.25;
+}
+
+.label,
+.value {
+  position: relative;
+  margin: 0;
+}
+
+.label {
+  color: var(--fg-color-frost);
+  font-size: var(--fg-font-size-xs);
+  text-transform: uppercase;
+}
+
+.value {
+  color: var(--fg-color-ice-100);
+  font-size: var(--fg-font-size-xl);
+  font-weight: 700;
+}

@@ -7,6 +7,12 @@ import { useFrozenGuildClient } from "./hooks/useFrozenGuildClient.js";
 import { GameScreen } from "./ui/screens/GameScreen.js";
 import { LobbyScreen } from "./ui/screens/LobbyScreen.js";
 import type { FrozenGuildState, SwapLocation } from "../../shared/game/types.js";
+import {
+  selectLobbyAvatar,
+  selectLobbyColor,
+  selectLobbyName,
+  useLobbyProfileStore
+} from "./features/lobby/lobbyStore.js";
 
 type LobbySession = {
   matchID: string;
@@ -172,7 +178,6 @@ function sameSwapLocation(a: SwapLocation | null, b: SwapLocation): boolean {
 }
 
 export function App() {
-  const [playerName, setPlayerName] = useState("Jugador");
   const [numPlayers, setNumPlayers] = useState(2);
   const [selectedBotPlayerIDs, setSelectedBotPlayerIDs] = useState<string[]>([]);
   const [botPulseNow, setBotPulseNow] = useState(() => Date.now());
@@ -200,6 +205,12 @@ export function App() {
     "1": 0
   });
   const { client, gameState } = useFrozenGuildClient({ serverUrl: SERVER_URL, session });
+  const playerName = useLobbyProfileStore(selectLobbyName);
+  const selectedAvatarID = useLobbyProfileStore(selectLobbyAvatar);
+  const selectedColorID = useLobbyProfileStore(selectLobbyColor);
+  const setLobbyName = useLobbyProfileStore((state) => state.setName);
+  const setLobbyAvatar = useLobbyProfileStore((state) => state.setAvatar);
+  const setLobbyColor = useLobbyProfileStore((state) => state.setColor);
 
   const adminClient0 = useMemo(() => {
     if (!adminSession) {
@@ -675,13 +686,17 @@ export function App() {
       <>
         <LobbyScreen
           playerName={playerName}
+          avatarID={selectedAvatarID}
+          colorID={selectedColorID}
           numPlayers={numPlayers}
           selectedBotPlayerIDs={selectedBotPlayerIDs}
           players={lobbyPlayersPreview}
           availableMatches={matches}
           selectedJoinMatchID={selectedJoinMatchID}
           busy={isBusy}
-          onPlayerNameChange={setPlayerName}
+          onPlayerNameChange={setLobbyName}
+          onAvatarChange={setLobbyAvatar}
+          onColorChange={setLobbyColor}
           onNumPlayersChange={setNumPlayers}
           onToggleBotPlayerID={toggleBotPlayerID}
           onSelectJoinMatchID={selectJoinMatch}
@@ -752,7 +767,7 @@ export function App() {
             id="player-name"
             className="select-control"
             value={playerName}
-            onChange={(event) => setPlayerName(event.target.value)}
+            onChange={(event) => setLobbyName(event.target.value)}
             placeholder="Jugador"
           />
 

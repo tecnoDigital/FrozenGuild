@@ -1,5 +1,6 @@
 import type { FrozenGuildUiStore } from "./frozenGuildStore.js";
 import type { SwapLocation } from "../../../shared/game/types.js";
+import { getCardById } from "../../../shared/game/cards.js";
 
 const EMPTY_LEDGER: Array<{ id: string; name: string; score: number; cards: number; cardIDs: string[] }> = [];
 const EMPTY_UNSTABLE: Array<{ id: string; name: string; status: "reconnecting" | "absent"; disconnectSeconds: number | null }> = [];
@@ -8,8 +9,43 @@ type PlayersMap = NonNullable<FrozenGuildUiStore["G"]>["players"];
 
 let lastPlayersRefForLedger: PlayersMap | null | undefined;
 let lastPlayersRefForUnstable: PlayersMap | null | undefined;
+let lastPlayersRefForOpponents: PlayersMap | null | undefined;
+let lastLocalPlayerIDForOpponents: string | null = null;
+let lastPlayersRefForOpponentHands: PlayersMap | null | undefined;
+let lastLocalPlayerIDForOpponentHands: string | null = null;
+let lastPlayersRefForLocalHand: PlayersMap | null | undefined;
+let lastLocalPlayerIDForLocalHand: string | null = null;
 let lastLedger = EMPTY_LEDGER;
 let lastUnstable = EMPTY_UNSTABLE;
+let lastOpponents: Array<{ id: string; name: string }> = [];
+let lastOpponentHands: Array<{ id: string; handCount: number }> = [];
+let lastLocalHand: { playerId: string; cards: Array<{ cardID: string; cardType: "penguin" | "walrus" | "petrel" | "sea-elephant" | "krill" | "orca" | "seal-bomb"; variant: "penguin-1" | "penguin-2" | "penguin-3" | "walrus" | "petrel" | "sea-elephant" | "krill" | "orca" | "seal-bomb" }> } = {
+  playerId: "local",
+  cards: []
+};
+
+function mapCardTypeToUiCardType(type: "penguin" | "walrus" | "petrel" | "sea_elephant" | "krill" | "orca" | "seal_bomb") {
+  if (type === "sea_elephant") return "sea-elephant";
+  if (type === "seal_bomb") return "seal-bomb";
+  return type;
+}
+
+function mapCardIdToVariant(cardID: string): "penguin-1" | "penguin-2" | "penguin-3" | "walrus" | "petrel" | "sea-elephant" | "krill" | "orca" | "seal-bomb" {
+  const card = getCardById(cardID);
+  if (!card) return "penguin-1";
+  if (card.type === "penguin") {
+    const fishValue = card.value ?? 1;
+    return fishValue === 2 ? "penguin-2" : fishValue === 3 ? "penguin-3" : "penguin-1";
+  }
+  return mapCardTypeToUiCardType(card.type);
+}
+
+let lastCurrentTurnKey = "";
+let lastCurrentTurnValue: { currentPlayerName: string; turnCount: number; currentPlayerID: string | null } = {
+  currentPlayerName: "Player -",
+  turnCount: 0,
+  currentPlayerID: null
+};
 
 let lastBannerKey = "";
 let lastBannerValue: { title: string; detail: string; severity: "neutral" | "your-turn" | "blocked" | "danger" | "success" } = {
@@ -135,6 +171,112 @@ export function selectTableActive(state: FrozenGuildUiStore): boolean {
 
 export function selectCurrentTurnLabel(state: FrozenGuildUiStore): string {
   return state.ctx?.currentPlayer ?? "-";
+}
+
+export function selectRoundBadgeLabel(state: FrozenGuildUiStore): string {
+  const round = state.ctx?.turn;
+  return typeof round === "number" ? `Round ${round}` : "Round -";
+}
+
+export function selectCurrentTurnView(state: FrozenGuildUiStore): {
+  currentPlayerName: string;
+  turnCount: number;
+  currentPlayerID: string | null;
+} {
+  const currentPlayerID = state.ctx?.currentPlayer ?? null;
+  const turnCount = typeof state.ctx?.turn === "number" ? state.ctx.turn : 0;
+  const currentPlayerName = currentPlayerID && state.G?.players[currentPlayerID]?.name
+    ? state.G.players[currentPlayerID].name
+    : "Player -";
+
+  const key = `${currentPlayerID ?? "-"}|${turnCount}|${currentPlayerName}`;
+  if (key === lastCurrentTurnKey) {
+    return lastCurrentTurnValue;
+  }
+
+  lastCurrentTurnKey = key;
+  lastCurrentTurnValue = { currentPlayerName, turnCount, currentPlayerID };
+  return lastCurrentTurnValue;
+}
+
+export function selectOpponentIdentities(state: FrozenGuildUiStore): Array<{ id: string; name: string }> {
+  if (!state.G) {
+    lastPlayersRefForOpponents = null;
+    lastLocalPlayerIDForOpponents = null;
+    lastOpponents = [];
+    return lastOpponents;
+  }
+
+  if (state.G.players === lastPlayersRefForOpponents && state.localPlayerID === lastLocalPlayerIDForOpponents) {
+    return lastOpponents;
+  }
+
+  lastPlayersRefForOpponents = state.G.players;
+  lastLocalPlayerIDForOpponents = state.localPlayerID;
+  lastOpponents = Object.entries(state.G.players)
+    .filter(([id]) => id !== state.localPlayerID)
+    .map(([id, player]) => ({ id, name: player.name }));
+
+  return lastOpponents;
+}
+
+export function selectOpponentHandCounts(state: FrozenGuildUiStore): Array<{ id: string; handCount: number }> {
+  if (!state.G) {
+    lastPlayersRefForOpponentHands = null;
+    lastLocalPlayerIDForOpponentHands = null;
+    lastOpponentHands = [];
+    return lastOpponentHands;
+  }
+
+  if (state.G.players === lastPlayersRefForOpponentHands && state.localPlayerID === lastLocalPlayerIDForOpponentHands) {
+    return lastOpponentHands;
+  }
+
+  lastPlayersRefForOpponentHands = state.G.players;
+  lastLocalPlayerIDForOpponentHands = state.localPlayerID;
+  lastOpponentHands = Object.entries(state.G.players)
+    .filter(([id]) => id !== state.localPlayerID)
+    .map(([id, player]) => ({ id, handCount: player.zone.length }));
+
+  return lastOpponentHands;
+}
+
+export function selectLocalPlayerHandView(state: FrozenGuildUiStore): {
+  playerId: string;
+  cards: Array<{
+    cardID: string;
+    cardType: "penguin" | "walrus" | "petrel" | "sea-elephant" | "krill" | "orca" | "seal-bomb";
+    variant: "penguin-1" | "penguin-2" | "penguin-3" | "walrus" | "petrel" | "sea-elephant" | "krill" | "orca" | "seal-bomb";
+  }>;
+} {
+  if (!state.G || !state.localPlayerID || !state.G.players[state.localPlayerID]) {
+    lastPlayersRefForLocalHand = null;
+    lastLocalPlayerIDForLocalHand = null;
+    lastLocalHand = { playerId: "local", cards: [] };
+    return lastLocalHand;
+  }
+
+  if (state.G.players === lastPlayersRefForLocalHand && state.localPlayerID === lastLocalPlayerIDForLocalHand) {
+    return lastLocalHand;
+  }
+
+  const localPlayer = state.G.players[state.localPlayerID];
+  lastPlayersRefForLocalHand = state.G.players;
+  lastLocalPlayerIDForLocalHand = state.localPlayerID;
+  lastLocalHand = {
+    playerId: state.localPlayerID,
+    cards: localPlayer.zone.map((cardID) => {
+      const card = getCardById(cardID);
+      const uiType = card ? mapCardTypeToUiCardType(card.type) : "penguin";
+      return {
+        cardID,
+        cardType: uiType,
+        variant: mapCardIdToVariant(cardID)
+      };
+    })
+  };
+
+  return lastLocalHand;
 }
 
 export function selectIceGrid(state: FrozenGuildUiStore) {

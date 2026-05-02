@@ -6,9 +6,12 @@ import { LobbyHero } from "../lobby/LobbyHero.js";
 import styles from "../lobby/Lobby.module.css";
 import { RoomPlayersPanel } from "../lobby/RoomPlayersPanel.js";
 import { AvailableMatchesPanel } from "../lobby/AvailableMatchesPanel.js";
+import type { LobbyAvatarID, LobbyColorID } from "../../features/lobby/lobbyStore.js";
 
 type LobbyScreenProps = {
   playerName: string;
+  avatarID: LobbyAvatarID;
+  colorID: LobbyColorID;
   numPlayers: number;
   selectedBotPlayerIDs: string[];
   players: string[];
@@ -22,6 +25,8 @@ type LobbyScreenProps = {
   selectedJoinMatchID: string;
   busy?: boolean;
   onPlayerNameChange?: (value: string) => void;
+  onAvatarChange?: (avatarID: LobbyAvatarID) => void;
+  onColorChange?: (colorID: LobbyColorID) => void;
   onNumPlayersChange?: (value: number) => void;
   onToggleBotPlayerID?: (playerID: string) => void;
   onSelectJoinMatchID?: (matchID: string) => void;

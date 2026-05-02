@@ -6,6 +6,8 @@ const meta: Meta<typeof LeftStatusRail> = {
   component: LeftStatusRail,
   args: {
     playerName: "Oz",
+    playerAvatarSrc: "/assets/characters/avatars/penguin-1.png",
+    playerColorValue: "#63ece3",
     turnLabel: "1",
     deckCount: 23,
     discardCount: 5,
