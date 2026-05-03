@@ -1,0 +1,70 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(2, 8, 24, 0.7);
+  backdrop-filter: blur(6px);
+  display: grid;
+  place-items: center;
+  pointer-events: all;
+}
+
+.card {
+  width: min(980px, calc(100vw - 32px));
+  border-radius: 24px;
+  border: 1px solid rgba(141, 214, 255, 0.6);
+  background: linear-gradient(180deg, rgba(5, 36, 77, 0.94), rgba(4, 23, 52, 0.96));
+  box-shadow: 0 26px 80px rgba(0, 0, 0, 0.45);
+  padding: 26px;
+  display: grid;
+  gap: 20px;
+  justify-items: center;
+}
+
+.title {
+  color: #d9f1ff;
+  letter-spacing: 0.1em;
+}
+
+.row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.playerCard {
+  border: 1px solid rgba(143, 198, 255, 0.38);
+  border-radius: 16px;
+  background: rgba(8, 25, 49, 0.88);
+  padding: 14px 12px;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+}
+
+.place {
+  color: #ffd79b;
+  font-weight: 700;
+}
+
+.avatar {
+  width: 70px;
+  height: 70px;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 2px solid rgba(143, 198, 255, 0.65);
+}
+
+.name {
+  color: #eef7ff;
+}
+
+.fishes {
+  margin: 0;
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  color: #f6d790;
+  font-weight: 700;
+}

@@ -1,7 +1,7 @@
 import type { ActivePlayersArg, Ctx } from "boardgame.io";
 import { getCardById } from "./cards.js";
 import { calculateFinalScores } from "./scoring.js";
-import type { FrozenGuildState, SwapLocation } from "./types.js";
+import type { FinalResults, FrozenGuildState, SwapLocation } from "./types.js";
 
 const INVALID_MOVE = "INVALID_MOVE" as const;
 export const DISCONNECT_GRACE_MS = 30_000;
@@ -80,6 +80,65 @@ function logEndTurnGuard(reason: string, details: Record<string, unknown>): void
 
 function isActivePlayer(ctx: Ctx, playerID?: string): boolean {
   return !!playerID && playerID === ctx.currentPlayer;
+}
+
+function calculateDensePlacements(players: Array<{ playerID: string; fishes: number }>): Map<string, number> {
+  let lastFishes: number | null = null;
+  let placement = 0;
+  const placements = new Map<string, number>();
+
+  for (const player of players) {
+    if (lastFishes === null || player.fishes !== lastFishes) {
+      placement += 1;
+      lastFishes = player.fishes;
+    }
+    placements.set(player.playerID, placement);
+  }
+
+  return placements;
+}
+
+function buildFinalResults(G: FrozenGuildState): FinalResults {
+  const byPlayer = calculateFinalScores(G.players);
+  const ranked = Object.entries(byPlayer)
+    .map(([playerID, score]) => ({
+      playerID,
+      nickname: G.players[playerID]?.name ?? `Player ${playerID}`,
+      avatarId: G.players[playerID]?.avatarId ?? "penguin1",
+      fishes: score.total
+    }))
+    .sort((a, b) => b.fishes - a.fishes || a.playerID.localeCompare(b.playerID));
+
+  const placementByPlayer = calculateDensePlacements(ranked);
+
+  return {
+    players: ranked.map((player) => ({
+      ...player,
+      placement: placementByPlayer.get(player.playerID) ?? 1
+    }))
+  };
+}
+
+export function setPlayerProfile(
+  { G, playerID }: MoveCtx,
+  profile: { nickname?: string; avatarId?: string }
+): typeof INVALID_MOVE | void {
+  if (!playerID) {
+    return INVALID_MOVE;
+  }
+
+  const player = G.players[playerID];
+  if (!player) {
+    return INVALID_MOVE;
+  }
+
+  if (typeof profile.nickname === "string" && profile.nickname.trim().length > 0) {
+    player.name = profile.nickname.trim().slice(0, 40);
+  }
+
+  if (typeof profile.avatarId === "string" && profile.avatarId.trim().length > 0) {
+    player.avatarId = profile.avatarId.trim().slice(0, 40);
+  }
 }
 
 export function isSealBombCard(cardID: string): boolean {
@@ -1190,7 +1249,7 @@ export function endTurn({ G, ctx, playerID, events }: MoveCtx): typeof INVALID_M
       });
       events?.endGame?.({
         reason: "NO_ICE_CARDS_AVAILABLE",
-        scores: calculateFinalScores(G.players)
+        finalResults: buildFinalResults(G)
       });
       return;
     }
@@ -1218,7 +1277,7 @@ export function endTurn({ G, ctx, playerID, events }: MoveCtx): typeof INVALID_M
       });
       events?.endGame?.({
         reason: "NO_ICE_CARDS_AVAILABLE",
-        scores: calculateFinalScores(G.players)
+        finalResults: buildFinalResults(G)
       });
       return;
     }
@@ -1246,7 +1305,7 @@ export function endTurn({ G, ctx, playerID, events }: MoveCtx): typeof INVALID_M
   if (!hasAnyIceCard(G)) {
     events?.endGame?.({
       reason: "NO_ICE_CARDS_AVAILABLE",
-      scores: calculateFinalScores(G.players)
+      finalResults: buildFinalResults(G)
     });
     return;
   }

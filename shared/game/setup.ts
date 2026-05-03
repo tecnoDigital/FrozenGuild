@@ -31,6 +31,7 @@ function createPlayers(
 ): Record<PlayerID, PlayerState> {
   const players: Record<PlayerID, PlayerState> = {};
   const botIds = new Set(setupData?.botPlayerIDs ?? []);
+  const avatarCycle = ["penguin1", "penguin2", "penguin3", "walrus"] as const;
 
 for (let index = 0; index < playerCount; index += 1) {
     const playerID = String(index);
@@ -38,6 +39,7 @@ for (let index = 0; index < playerCount; index += 1) {
     const playerName = isBot ? `BOT ${playerID}` : `Player ${index + 1}`;
     players[playerID] = {
       name: playerName,
+      avatarId: avatarCycle[index % avatarCycle.length] ?? "penguin1",
       zone: [],
       hasBombAtStart: false,
       hasBombAtEnd: false,

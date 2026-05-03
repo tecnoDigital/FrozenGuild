@@ -81,6 +81,6 @@ describe("full match critical flow", () => {
 
     expect(guard).toBeLessThan(500);
     expect(gameoverPayload).toMatchObject({ reason: "NO_ICE_CARDS_AVAILABLE" });
-    expect(gameoverPayload).toHaveProperty("scores");
+    expect(gameoverPayload).toHaveProperty("finalResults.players");
   });
 });

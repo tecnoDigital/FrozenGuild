@@ -145,6 +145,6 @@ describe("spy move", () => {
     expect(result).toBeUndefined();
     expect(endTurnCalls).toBe(0);
     expect(gameOverPayload).toMatchObject({ reason: "NO_ICE_CARDS_AVAILABLE" });
-    expect(gameOverPayload).toHaveProperty("scores");
+    expect(gameOverPayload).toHaveProperty("finalResults.players");
   });
 });

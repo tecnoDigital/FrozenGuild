@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { getCardById } from "../../shared/game/cards.js";
-import { calculateFinalScores } from "../../shared/game/scoring.js";
 import { createFrozenGuildClient } from "./boardgame/client.js";
 import { useSocketStatus } from "./hooks/useSocketStatus.js";
 import { useFrozenGuildClient } from "./hooks/useFrozenGuildClient.js";
 import { GameScreen } from "./ui/screens/GameScreen.js";
 import { LobbyScreen } from "./ui/screens/LobbyScreen.js";
-import type { FrozenGuildState, SwapLocation } from "../../shared/game/types.js";
+import type { FinalResults, FrozenGuildState, SwapLocation } from "../../shared/game/types.js";
 import {
   selectLobbyAvatar,
   selectLobbyColor,
@@ -476,6 +475,25 @@ export function App() {
     };
   }, [session]);
 
+  useEffect(() => {
+    if (!client || !session || !gameState) {
+      return;
+    }
+
+    const currentPlayerProfile = gameState.G.players[session.playerID];
+    if (
+      currentPlayerProfile?.name === session.playerName &&
+      currentPlayerProfile.avatarId === selectedAvatarID
+    ) {
+      return;
+    }
+
+    client.moves?.setPlayerProfile?.({
+      nickname: session.playerName,
+      avatarId: selectedAvatarID
+    });
+  }, [client, gameState, selectedAvatarID, session]);
+
   function selectJoinMatch(matchID: string) {
     setSelectedJoinMatchID(matchID);
   }
@@ -743,9 +761,14 @@ export function App() {
 
   if (import.meta.env.VITE_PREMIUM_GAME_UI !== "0") {
     const isGameOver = !!gameState.gameover;
+    const finalResults =
+      (gameState.gameover as { finalResults?: FinalResults } | undefined)?.finalResults ?? null;
 
     return (
       <GameScreen
+        finalResults={finalResults}
+        gameOver={isGameOver}
+        onReturnToLobby={leaveMatch}
         onRollDice={() => {
           if (isGameOver) return;
           client?.moves?.rollDice?.();
@@ -1353,13 +1376,13 @@ onFishFromIce={(slot) => {
             <div className="subpanel">
               <h3>Resultado final</h3>
               <div className="scoreboard-grid">
-                {Object.values(calculateFinalScores(gameState.G.players)).map((score) => (
+                {(((gameState.gameover as { finalResults?: FinalResults } | undefined)?.finalResults?.players ?? [])).map((score) => (
                   <article key={score.playerID} className="score-card">
                     <div className="score-card__header">
-                      <h4>Jugador {score.playerID}</h4>
+                      <h4>{score.nickname}</h4>
                       <div className="score-total">
-                        <span>Total</span>
-                        <strong>{score.total}</strong>
+                        <span>Peces</span>
+                        <strong>{score.fishes}</strong>
                       </div>
                     </div>
                   </article>

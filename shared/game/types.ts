@@ -27,11 +27,24 @@ export type IceGridSlot = CardId | HiddenCardView | null;
 
 export type PlayerState = {
   name: string;
+  avatarId: string;
   zone: CardId[];
   hasBombAtStart: boolean;
   hasBombAtEnd: boolean;
   connectionStatus: "connected" | "reconnecting" | "absent";
   disconnectStartedAt?: number;
+};
+
+export type FinalResultPlayer = {
+  playerID: PlayerID;
+  nickname: string;
+  avatarId: string;
+  fishes: number;
+  placement: number;
+};
+
+export type FinalResults = {
+  players: FinalResultPlayer[];
 };
 
 export type AutoResolveItem = {
