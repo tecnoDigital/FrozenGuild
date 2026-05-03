@@ -77,8 +77,14 @@ describe("fishing move", () => {
     const G = createInitialState(2, () => 0.3);
     const ctx = makeCtx("0");
     let gameOverPayload: unknown;
+    let endTurnCalls = 0;
 
     G.deck = [];
+    // Vaciar todos los slots excepto el 0 para que al pescar la última carta,
+    // el grid quede completamente vacío y el endgame se dispare al terminar el turno
+    for (let i = 1; i < G.iceGrid.length; i++) {
+      G.iceGrid[i] = null;
+    }
 
     rollDice({ G, ctx, playerID: "0", random: { D6: () => 3 } });
     const result = fishFromIce(
@@ -97,7 +103,25 @@ describe("fishing move", () => {
 
     expect(result).toBeUndefined();
     expect(G.iceGrid[0]).toBeNull();
-    expect(gameOverPayload).toMatchObject({ reason: "ICE_CANNOT_REFILL" });
+    // El juego NO termina en fishFromIce; el endgame se evalúa al finalizar el turno
+    expect(gameOverPayload).toBeUndefined();
+
+    endTurn({
+      G,
+      ctx,
+      playerID: "0",
+      events: {
+        endGame: (arg) => {
+          gameOverPayload = arg;
+        },
+        endTurn: () => {
+          endTurnCalls += 1;
+        }
+      }
+    });
+
+    expect(endTurnCalls).toBe(0);
+    expect(gameOverPayload).toMatchObject({ reason: "NO_ICE_CARDS_AVAILABLE" });
     expect(gameOverPayload).toHaveProperty("scores");
   });
 

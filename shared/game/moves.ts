@@ -497,7 +497,7 @@ function drawIceReplacementCard(G: FrozenGuildState): string | null {
 function refillIceSlotOrEndGame(
   G: FrozenGuildState,
   slot: number,
-  events?: MoveCtx["events"]
+  _events?: MoveCtx["events"]
 ): void {
   const replacement = drawIceReplacementCard(G);
   if (replacement !== null) {
@@ -506,10 +506,6 @@ function refillIceSlotOrEndGame(
   }
 
   G.iceGrid[slot] = null;
-  events?.endGame?.({
-    reason: "ICE_CANNOT_REFILL",
-    scores: calculateFinalScores(G.players)
-  });
 }
 
 export function fishFromIce(
@@ -1244,6 +1240,14 @@ export function endTurn({ G, ctx, playerID, events }: MoveCtx): typeof INVALID_M
   }
 
   if (playerID && triggerSealBombResolutionIfNeeded(G, playerID)) {
+    return;
+  }
+
+  if (!hasAnyIceCard(G)) {
+    events?.endGame?.({
+      reason: "NO_ICE_CARDS_AVAILABLE",
+      scores: calculateFinalScores(G.players)
+    });
     return;
   }
 

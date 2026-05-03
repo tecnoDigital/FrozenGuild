@@ -693,15 +693,6 @@ export function selectGameOverOverlayView(state: FrozenGuildUiStore): GameOverOv
     return lastGameOverOverlayValue;
   }
 
-  if (reason === "ICE_CANNOT_REFILL") {
-    lastGameOverOverlayKey = key;
-    lastGameOverOverlayValue = {
-      title: "Partida terminada",
-      detail: "No se pudo reponer El Hielo."
-    };
-    return lastGameOverOverlayValue;
-  }
-
   if (reason === "NO_ICE_CARDS_AVAILABLE") {
     lastGameOverOverlayKey = key;
     lastGameOverOverlayValue = {
