@@ -90,6 +90,8 @@ let lastOrcaKey = "";
 let lastOrcaValue: { orcaCardID: string; validTargetCardIDs: string[] } | null = null;
 let lastSealBombKey = "";
 let lastSealBombValue: { bombCardID: string; validTargetCardIDs: string[]; requiredDiscardCount: number } | null = null;
+let lastGameOverOverlayKey = "";
+let lastGameOverOverlayValue: GameOverOverlayView | null = null;
 
 export function selectIsMyTurn(state: FrozenGuildUiStore): boolean {
   if (!state.ctx || !state.localPlayerID) {
@@ -446,6 +448,16 @@ export function selectActionFlowView(state: FrozenGuildUiStore): ActionFlowView 
       canEndTurn: false,
       showPadrinoOptions: false
     };
+  } else if (state.gameover !== undefined) {
+    next = {
+      mode: "waiting",
+      helperText: "Partida terminada.",
+      diceValue,
+      isMyTurn,
+      canRoll: false,
+      canEndTurn: false,
+      showPadrinoOptions: false
+    };
   } else if (!state.G.activeTable) {
     next = {
       mode: "waiting",
@@ -659,6 +671,52 @@ export function selectOrcaResolutionView(state: FrozenGuildUiStore) {
     validTargetCardIDs: pending.validTargetCardIDs
   };
   return lastOrcaValue;
+}
+
+export type GameOverOverlayView = {
+  title: string;
+  detail: string;
+};
+
+export function selectGameOverOverlayView(state: FrozenGuildUiStore): GameOverOverlayView | null {
+  if (state.gameover === undefined) {
+    lastGameOverOverlayKey = "";
+    lastGameOverOverlayValue = null;
+    return null;
+  }
+
+  const payload = state.gameover as { reason?: unknown } | null;
+  const reason = typeof payload?.reason === "string" ? payload.reason : null;
+
+  const key = reason ?? "GENERIC";
+  if (key === lastGameOverOverlayKey && lastGameOverOverlayValue) {
+    return lastGameOverOverlayValue;
+  }
+
+  if (reason === "ICE_CANNOT_REFILL") {
+    lastGameOverOverlayKey = key;
+    lastGameOverOverlayValue = {
+      title: "Partida terminada",
+      detail: "No se pudo reponer El Hielo."
+    };
+    return lastGameOverOverlayValue;
+  }
+
+  if (reason === "NO_ICE_CARDS_AVAILABLE") {
+    lastGameOverOverlayKey = key;
+    lastGameOverOverlayValue = {
+      title: "Partida terminada",
+      detail: "No quedan cartas en El Hielo."
+    };
+    return lastGameOverOverlayValue;
+  }
+
+  lastGameOverOverlayKey = key;
+  lastGameOverOverlayValue = {
+    title: "Partida terminada",
+    detail: "La partida finalizo."
+  };
+  return lastGameOverOverlayValue;
 }
 
 export function selectSealBombResolutionView(state: FrozenGuildUiStore) {

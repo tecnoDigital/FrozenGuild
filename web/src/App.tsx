@@ -742,18 +742,53 @@ export function App() {
   }
 
   if (import.meta.env.VITE_PREMIUM_GAME_UI !== "0") {
+    const isGameOver = !!gameState.gameover;
+
     return (
       <GameScreen
-        onRollDice={() => client?.moves?.rollDice?.()}
-        onFishFromIce={(slot) => client?.moves?.fishFromIce?.(slot)}
-        onChoosePadrinoAction={(action) => client?.moves?.choosePadrinoAction?.(action)}
-        onEndTurn={() => client?.moves?.endTurn?.()}
-        onSwapCards={(source, target) => client?.moves?.swapCards?.(source, target)}
-        onResolveOrca={(targetCardID) => client?.moves?.resolveOrcaDestroy?.(targetCardID)}
-        onResolveSealBomb={(targetCardIDs) => client?.moves?.resolveSealBombExplosion?.(targetCardIDs)}
-        onSpyOnIce={(slots) => client?.moves?.spyOnIce?.(slots)}
-        onSpyGiveCard={(slot, targetPlayerID) => client?.moves?.spyGiveCard?.(slot, targetPlayerID)}
-        onCompleteSpy={() => client?.moves?.completeSpy?.()}
+        onRollDice={() => {
+          if (isGameOver) return;
+          client?.moves?.rollDice?.();
+        }}
+onFishFromIce={(slot) => {
+          if (isGameOver) {
+            console.log("[UI:BLOCKED] fishFromIce called after gameover", { slot, gameover: gameState.gameover });
+            return;
+          }
+          client?.moves?.fishFromIce?.(slot);
+        }}
+        onChoosePadrinoAction={(action) => {
+          if (isGameOver) return;
+          client?.moves?.choosePadrinoAction?.(action);
+        }}
+        onEndTurn={() => {
+          if (isGameOver) return;
+          client?.moves?.endTurn?.();
+        }}
+        onSwapCards={(source, target) => {
+          if (isGameOver) return;
+          client?.moves?.swapCards?.(source, target);
+        }}
+        onResolveOrca={(targetCardID) => {
+          if (isGameOver) return;
+          client?.moves?.resolveOrcaDestroy?.(targetCardID);
+        }}
+        onResolveSealBomb={(targetCardIDs) => {
+          if (isGameOver) return;
+          client?.moves?.resolveSealBombExplosion?.(targetCardIDs);
+        }}
+        onSpyOnIce={(slots) => {
+          if (isGameOver) return;
+          client?.moves?.spyOnIce?.(slots);
+        }}
+        onSpyGiveCard={(slot, targetPlayerID) => {
+          if (isGameOver) return;
+          client?.moves?.spyGiveCard?.(slot, targetPlayerID);
+        }}
+        onCompleteSpy={() => {
+          if (isGameOver) return;
+          client?.moves?.completeSpy?.();
+        }}
       />
     );
   }

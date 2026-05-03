@@ -62,6 +62,22 @@ function logInvalidSealBomb(reason: string, details: Record<string, unknown>): v
   console.warn(`[resolveSealBombExplosion:INVALID_MOVE] ${reason}`, details);
 }
 
+function logInvalidFish(reason: string, details: Record<string, unknown>): void {
+  if (!isDevRuntime()) {
+    return;
+  }
+
+  console.log(`[fishFromIce:INVALID_MOVE] ${reason}`, details);
+}
+
+function logEndTurnGuard(reason: string, details: Record<string, unknown>): void {
+  if (!isDevRuntime()) {
+    return;
+  }
+
+  console.log(`[endTurn:GUARD] ${reason}`, details);
+}
+
 function isActivePlayer(ctx: Ctx, playerID?: string): boolean {
   return !!playerID && playerID === ctx.currentPlayer;
 }
@@ -409,6 +425,10 @@ function requiresPadrinoSelection(G: FrozenGuildState): boolean {
   return G.dice.rolled && G.dice.value === 6 && G.turn.padrinoAction === null;
 }
 
+function hasAnyIceCard(G: FrozenGuildState): boolean {
+  return G.iceGrid.some((slot) => typeof slot === "string");
+}
+
 function isValidIceSlotIndex(slot: number, length: number): boolean {
   return Number.isInteger(slot) && slot >= 0 && slot < length;
 }
@@ -466,6 +486,10 @@ function writeCardToLocation(G: FrozenGuildState, location: SwapLocation, cardID
 }
 
 function drawIceReplacementCard(G: FrozenGuildState): string | null {
+  if (!G.deck || G.deck.length === 0) {
+    return null;
+  }
+
   const [replacement] = G.deck.splice(0, 1);
   return replacement ?? null;
 }
@@ -493,35 +517,59 @@ export function fishFromIce(
   slot: number
 ): typeof INVALID_MOVE | void {
   if (!playerID) {
+    logInvalidFish("MISSING_PLAYER_ID", { slot, currentPlayer: ctx.currentPlayer });
     return INVALID_MOVE;
   }
 
   if (hasPendingMandatoryResolution(G)) {
+    logInvalidFish("PENDING_MANDATORY_RESOLUTION", {
+      slot,
+      playerID,
+      pendingStage: G.pendingStage,
+      orcaResolution: G.orcaResolution,
+      sealBombResolution: G.sealBombResolution
+    });
     return INVALID_MOVE;
   }
 
   if (!isActivePlayer(ctx, playerID)) {
+    logInvalidFish("NOT_ACTIVE_PLAYER", { slot, playerID, currentPlayer: ctx.currentPlayer });
     return INVALID_MOVE;
   }
 
   if (!requiresFishingAction(G)) {
+    logInvalidFish("FISH_ACTION_NOT_REQUIRED", {
+      slot,
+      playerID,
+      dice: G.dice,
+      padrinoAction: G.turn.padrinoAction
+    });
     return INVALID_MOVE;
   }
 
   if (G.turn.actionCompleted) {
+    logInvalidFish("ACTION_ALREADY_COMPLETED", { slot, playerID, turn: G.turn });
     return INVALID_MOVE;
   }
 
   if (!isValidIceSlotIndex(slot, G.iceGrid.length)) {
+    logInvalidFish("INVALID_SLOT_INDEX", { slot, iceGridLength: G.iceGrid.length, playerID });
     return INVALID_MOVE;
   }
 
   const cardID = G.iceGrid[slot];
   if (typeof cardID !== "string") {
+    logInvalidFish("EMPTY_OR_INVALID_ICE_SLOT", {
+      slot,
+      playerID,
+      cardID,
+      iceGrid: G.iceGrid
+    });
     return INVALID_MOVE;
   }
 
   if (!G.players[playerID]) {
+    logInvalidFish("PLAYER_NOT_FOUND", { slot, playerID });
     return INVALID_MOVE;
   }
 
@@ -1135,10 +1183,59 @@ export function endTurn({ G, ctx, playerID, events }: MoveCtx): typeof INVALID_M
   }
 
   if (requiresFishingAction(G) && !G.turn.actionCompleted) {
+    if (!hasAnyIceCard(G)) {
+      logEndTurnGuard("END_GAME_NO_ICE_CARDS_REQUIRED_FISH", {
+        playerID,
+        currentPlayer: ctx.currentPlayer,
+        dice: G.dice,
+        turn: G.turn,
+        iceGrid: G.iceGrid,
+        deckLength: G.deck.length
+      });
+      events?.endGame?.({
+        reason: "NO_ICE_CARDS_AVAILABLE",
+        scores: calculateFinalScores(G.players)
+      });
+      return;
+    }
+
+    logEndTurnGuard("BLOCK_END_TURN_PENDING_FISH_ACTION", {
+      playerID,
+      currentPlayer: ctx.currentPlayer,
+      dice: G.dice,
+      turn: G.turn,
+      iceGrid: G.iceGrid
+    });
+
     return INVALID_MOVE;
   }
 
   if (requiresSpyAction(G) && !G.turn.actionCompleted) {
+    if (!hasAnyIceCard(G)) {
+      logEndTurnGuard("END_GAME_NO_ICE_CARDS_REQUIRED_SPY", {
+        playerID,
+        currentPlayer: ctx.currentPlayer,
+        dice: G.dice,
+        turn: G.turn,
+        iceGrid: G.iceGrid,
+        deckLength: G.deck.length
+      });
+      events?.endGame?.({
+        reason: "NO_ICE_CARDS_AVAILABLE",
+        scores: calculateFinalScores(G.players)
+      });
+      return;
+    }
+
+    logEndTurnGuard("BLOCK_END_TURN_PENDING_SPY_ACTION", {
+      playerID,
+      currentPlayer: ctx.currentPlayer,
+      dice: G.dice,
+      turn: G.turn,
+      iceGrid: G.iceGrid,
+      spy: G.spy
+    });
+
     return INVALID_MOVE;
   }
 

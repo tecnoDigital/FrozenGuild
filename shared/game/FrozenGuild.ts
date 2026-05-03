@@ -230,7 +230,32 @@ function runBasicBotTurn(args: {
       .filter((slot) => slot >= 0);
     const slot = randomPick(fishableSlots, randomFn);
     if (slot !== null) {
-      fishFromIce({ G, ctx, playerID, events }, slot);
+      const fishResult = fishFromIce({ G, ctx, playerID, events }, slot);
+      if (fishResult === INVALID_MOVE) {
+        console.log("[bot:fishFromIce:INVALID_MOVE]", {
+          playerID,
+          currentPlayer: ctx.currentPlayer,
+          slot,
+          fishableSlots,
+          dice: G.dice,
+          turn: G.turn,
+          pendingStage: G.pendingStage,
+          orcaResolution: G.orcaResolution,
+          sealBombResolution: G.sealBombResolution,
+          iceGrid: G.iceGrid,
+          deckLength: G.deck.length
+        });
+      }
+    } else {
+      console.log("[bot:no-fishable-slot]", {
+        playerID,
+        currentPlayer: ctx.currentPlayer,
+        action,
+        dice: G.dice,
+        turn: G.turn,
+        iceGrid: G.iceGrid,
+        deckLength: G.deck.length
+      });
     }
   } else if (action === 4) {
     const revealed = G.iceGrid

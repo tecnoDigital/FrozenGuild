@@ -7,6 +7,7 @@ import {
   selectCurrentTurnLabel,
   selectDeckCount,
   selectDiscardCount,
+  selectGameOverOverlayView,
   selectLocalPlayerName,
   selectOrcaResolutionView,
   selectSealBombResolutionView,
@@ -57,6 +58,7 @@ export function CenterBoardStageContainer({ onFishFromIce }: { onFishFromIce: (s
   const flow = useFrozenGuildStore(selectActionFlowView);
   const iceCards = useFrozenGuildStore(selectIceGridCardsView);
   const spy = useFrozenGuildStore(selectSpyResolutionView);
+  const gameOverOverlay = useFrozenGuildStore(selectGameOverOverlayView);
   const spyDraftSlots = useFrozenGuildStore((state) => state.spyDraftSlots);
   const spyDraftGiftSlot = useFrozenGuildStore((state) => state.spyDraftGiftSlot);
   const toggleSpyDraftSlot = useFrozenGuildStore((state) => state.toggleSpyDraftSlot);
@@ -65,16 +67,26 @@ export function CenterBoardStageContainer({ onFishFromIce }: { onFishFromIce: (s
   const swapTargetKey = useFrozenGuildStore((state) => state.swapDraftTargetKey);
   const setSwapSourceKey = useFrozenGuildStore((state) => state.setSwapDraftSourceKey);
   const setSwapTargetKey = useFrozenGuildStore((state) => state.setSwapDraftTargetKey);
-  const canFish = useFrozenGuildStore((state) => {
+const canFish = useFrozenGuildStore((state) => {
     if (!state.G || !state.ctx || !state.localPlayerID) {
+      console.log("[canFish:false] no state", { hasG: !!state.G, hasCtx: !!state.ctx, localPlayerID: state.localPlayerID });
+      return false;
+    }
+    if (state.gameover !== undefined) {
+      console.log("[canFish:false] gameover detected", { gameover: state.gameover });
       return false;
     }
     const isMyTurn = state.ctx.currentPlayer === state.localPlayerID;
     if (!isMyTurn || state.G.turn.actionCompleted) {
+      console.log("[canFish:false] not my turn or action completed", { isMyTurn, actionCompleted: state.G.turn.actionCompleted });
       return false;
     }
     const effectiveValue = state.G.dice.value === 6 ? state.G.turn.padrinoAction : state.G.dice.value;
-    return state.G.dice.rolled && effectiveValue !== null && effectiveValue >= 1 && effectiveValue <= 3;
+    const can = state.G.dice.rolled && effectiveValue !== null && effectiveValue >= 1 && effectiveValue <= 3;
+    if (!can) {
+      console.log("[canFish:false] dice not fishable", { diceRolled: state.G.dice.rolled, effectiveValue, diceValue: state.G.dice.value });
+    }
+    return can;
   });
 
   return (
@@ -135,6 +147,7 @@ export function CenterBoardStageContainer({ onFishFromIce }: { onFishFromIce: (s
           }
         }
       }}
+      gameOverOverlay={gameOverOverlay}
     />
   );
 }
