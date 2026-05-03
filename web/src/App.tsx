@@ -53,14 +53,22 @@ type AvailableLobbyMatch = {
 function mapAvailableLobbyMatches(payload: MatchListResponse): AvailableLobbyMatch[] {
   return payload.matches
     .map((match) => {
-      const totalPlayers = Math.max(1, Math.min(4, Number(match.setupData?.numPlayers ?? 4)));
-      const allSeats = Array.from({ length: totalPlayers }, (_, index) => String(index));
-
       const rawPlayers = Array.isArray(match.players)
         ? match.players
         : match.players
           ? Object.values(match.players)
           : [];
+
+      const inferredMaxSeat = rawPlayers
+        .map((player) => (player.id !== undefined && player.id !== null ? Number(player.id) : NaN))
+        .filter((id) => Number.isInteger(id) && id >= 0)
+        .reduce((max, id) => Math.max(max, id), -1);
+
+      const setupPlayers = Number(match.setupData?.numPlayers);
+      const setupPlayersSafe = Number.isInteger(setupPlayers) ? setupPlayers : null;
+      const inferredPlayers = Math.max(2, inferredMaxSeat + 1);
+      const totalPlayers = Math.max(2, Math.min(4, setupPlayersSafe ?? inferredPlayers));
+      const allSeats = Array.from({ length: totalPlayers }, (_, index) => String(index));
 
       const occupiedPlayers = rawPlayers
         .map((player) => ({

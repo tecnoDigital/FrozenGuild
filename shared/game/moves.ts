@@ -46,6 +46,22 @@ function logInvalidSwap(reason: string, details: Record<string, unknown>): void 
   console.warn(`[swapCards:INVALID_MOVE] ${reason}`, details);
 }
 
+function logInvalidOrca(reason: string, details: Record<string, unknown>): void {
+  if (!isDevRuntime()) {
+    return;
+  }
+
+  console.warn(`[resolveOrcaDestroy:INVALID_MOVE] ${reason}`, details);
+}
+
+function logInvalidSealBomb(reason: string, details: Record<string, unknown>): void {
+  if (!isDevRuntime()) {
+    return;
+  }
+
+  console.warn(`[resolveSealBombExplosion:INVALID_MOVE] ${reason}`, details);
+}
+
 function isActivePlayer(ctx: Ctx, playerID?: string): boolean {
   return !!playerID && playerID === ctx.currentPlayer;
 }
@@ -188,9 +204,8 @@ function triggerSealBombResolutionIfNeeded(G: FrozenGuildState, playerID: string
 
   const hasBombNow = player.zone.some((cardID) => isSealBombCard(cardID));
   const hadBombAtStart = player.hasBombAtStart;
-  const hadBombAtEnd = player.hasBombAtEnd;
 
-  if (!hadBombAtStart || !hadBombAtEnd || !hasBombNow) {
+  if (!hadBombAtStart || !hasBombNow) {
     player.hasBombAtStart = false;
     player.hasBombAtEnd = false;
     return false;
@@ -826,25 +841,61 @@ function resolveOrcaDestroyFromPendingStage(
 ): typeof INVALID_MOVE | void {
   const pending = G.pendingStage;
   if (!pending || pending.type !== "ORCA_DESTROY_SELECTION") {
+    logInvalidOrca("PENDING_STAGE_NOT_ORCA", {
+      reason: "pending stage missing or wrong type",
+      playerID,
+      pendingStage: G.pendingStage,
+      targetCardID
+    });
     return INVALID_MOVE;
   }
 
   if (!playerID || playerID !== pending.playerID) {
+    logInvalidOrca("PLAYER_MISMATCH", {
+      reason: "resolver is not pending owner",
+      playerID,
+      pendingPlayerID: pending.playerID,
+      pending: pending,
+      targetCardID,
+      validTargetCardIDs: pending.validTargets,
+      zone: pending.playerID ? G.players[pending.playerID]?.zone : undefined
+    });
     return INVALID_MOVE;
   }
 
   if (!pending.validTargets.includes(targetCardID)) {
+    logInvalidOrca("TARGET_NOT_VALID", {
+      reason: "target not in valid targets",
+      playerID,
+      pending,
+      targetCardID,
+      validTargetCardIDs: pending.validTargets,
+      zone: G.players[playerID]?.zone
+    });
     return INVALID_MOVE;
   }
 
   const player = G.players[playerID];
   if (!player) {
+    logInvalidOrca("PLAYER_NOT_FOUND", {
+      reason: "player does not exist",
+      playerID,
+      pending,
+      targetCardID
+    });
     return INVALID_MOVE;
   }
 
   const orcaIndex = player.zone.indexOf(pending.orcaCardID);
   if (orcaIndex === -1) {
     clearPendingStage(G, events);
+    logInvalidOrca("ORCA_NOT_IN_ZONE", {
+      reason: "orca card missing from zone",
+      playerID,
+      pending,
+      targetCardID,
+      zone: player.zone
+    });
     return INVALID_MOVE;
   }
 
@@ -855,6 +906,13 @@ function resolveOrcaDestroyFromPendingStage(
     const targetIndex = player.zone.indexOf(targetCardID);
     if (targetIndex === -1) {
       clearPendingStage(G, events);
+      logInvalidOrca("TARGET_NOT_IN_ZONE", {
+        reason: "target card missing from zone",
+        playerID,
+        pending,
+        targetCardID,
+        zone: player.zone
+      });
       return INVALID_MOVE;
     }
 
@@ -876,10 +934,26 @@ export function resolveOrcaDestroy(
 
   const pending = G.orcaResolution;
   if (!pending || !playerID || pending.playerID !== playerID) {
+    logInvalidOrca("MISSING_OR_WRONG_PENDING", {
+      reason: "missing pending or wrong player",
+      playerID,
+      pending,
+      targetCardID,
+      validTargetCardIDs: pending?.validTargetCardIDs,
+      zone: playerID ? G.players[playerID]?.zone : undefined
+    });
     return INVALID_MOVE;
   }
 
   if (!pending.validTargetCardIDs.includes(targetCardID)) {
+    logInvalidOrca("TARGET_NOT_VALID", {
+      reason: "target not in validTargetCardIDs",
+      playerID,
+      pending,
+      targetCardID,
+      validTargetCardIDs: pending.validTargetCardIDs,
+      zone: G.players[playerID]?.zone
+    });
     return INVALID_MOVE;
   }
 
@@ -887,6 +961,14 @@ export function resolveOrcaDestroy(
   const removedTarget = removeCardFromPlayerZoneById(G, playerID, targetCardID);
 
   if (!removedTarget) {
+    logInvalidOrca("TARGET_REMOVE_FAILED", {
+      reason: "target card could not be removed",
+      playerID,
+      pending,
+      targetCardID,
+      validTargetCardIDs: pending.validTargetCardIDs,
+      zone: G.players[playerID]?.zone
+    });
     return INVALID_MOVE;
   }
 
@@ -905,15 +987,42 @@ export function resolveSealBombExplosion(
 ): typeof INVALID_MOVE | void {
   const pending = G.sealBombResolution;
   if (!pending || !playerID || pending.playerID !== playerID) {
+    logInvalidSealBomb("MISSING_OR_WRONG_PENDING", {
+      reason: "missing pending or wrong player",
+      playerID,
+      pending,
+      targets: targetCardIDs,
+      requiredDiscardCount: pending?.requiredDiscardCount,
+      validTargetCardIDs: pending?.validTargetCardIDs,
+      zone: playerID ? G.players[playerID]?.zone : undefined
+    });
     return INVALID_MOVE;
   }
 
   if (!Array.isArray(targetCardIDs) || targetCardIDs.length !== pending.requiredDiscardCount) {
+    logInvalidSealBomb("INVALID_TARGET_COUNT", {
+      reason: "target count does not match requiredDiscardCount",
+      playerID,
+      pending,
+      targets: targetCardIDs,
+      requiredDiscardCount: pending.requiredDiscardCount,
+      validTargetCardIDs: pending.validTargetCardIDs,
+      zone: G.players[playerID]?.zone
+    });
     return INVALID_MOVE;
   }
 
   const uniqueTargets = [...new Set(targetCardIDs)];
   if (uniqueTargets.length !== targetCardIDs.length) {
+    logInvalidSealBomb("DUPLICATE_TARGETS", {
+      reason: "duplicate targets are not allowed",
+      playerID,
+      pending,
+      targets: targetCardIDs,
+      requiredDiscardCount: pending.requiredDiscardCount,
+      validTargetCardIDs: pending.validTargetCardIDs,
+      zone: G.players[playerID]?.zone
+    });
     return INVALID_MOVE;
   }
 
@@ -921,12 +1030,31 @@ export function resolveSealBombExplosion(
     (cardID) => !pending.validTargetCardIDs.includes(cardID)
   );
   if (invalidTarget) {
+    logInvalidSealBomb("INVALID_TARGET_CARD", {
+      reason: "at least one target is not part of validTargetCardIDs",
+      playerID,
+      pending,
+      targets: targetCardIDs,
+      requiredDiscardCount: pending.requiredDiscardCount,
+      validTargetCardIDs: pending.validTargetCardIDs,
+      zone: G.players[playerID]?.zone
+    });
     return INVALID_MOVE;
   }
 
   for (const targetCardID of uniqueTargets) {
     const removed = removeCardFromPlayerZoneById(G, playerID, targetCardID);
     if (!removed) {
+      logInvalidSealBomb("TARGET_REMOVE_FAILED", {
+        reason: "could not remove target from zone",
+        playerID,
+        pending,
+        targetCardID,
+        targets: targetCardIDs,
+        requiredDiscardCount: pending.requiredDiscardCount,
+        validTargetCardIDs: pending.validTargetCardIDs,
+        zone: G.players[playerID]?.zone
+      });
       return INVALID_MOVE;
     }
   }

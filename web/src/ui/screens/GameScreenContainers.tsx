@@ -328,7 +328,17 @@ export function CenterActionDockContainer({
         selectedCardID: orcaTarget,
         onSelectCardID: setOrcaTarget,
         onResolve: () => {
-          if (orcaTarget) {
+          const state = useFrozenGuildStore.getState();
+          const pending = state.G?.orcaResolution;
+          const localPlayerID = state.localPlayerID;
+
+          if (
+            orcaTarget
+            && pending
+            && !!localPlayerID
+            && pending.playerID === localPlayerID
+            && pending.validTargetCardIDs.includes(orcaTarget)
+          ) {
             onResolveOrca(orcaTarget);
             setOrcaTarget(null);
           }
@@ -340,7 +350,18 @@ export function CenterActionDockContainer({
         requiredDiscardCount: seal.requiredDiscardCount,
         onToggleCardID: onToggleSealTarget,
         onResolve: () => {
-          if (sealTargets.length === seal.requiredDiscardCount) {
+          const state = useFrozenGuildStore.getState();
+          const pending = state.G?.sealBombResolution;
+          const localPlayerID = state.localPlayerID;
+          const isValidSelection =
+            !!pending
+            && !!localPlayerID
+            && pending.playerID === localPlayerID
+            && sealTargets.length === pending.requiredDiscardCount
+            && new Set(sealTargets).size === sealTargets.length
+            && sealTargets.every((cardID) => pending.validTargetCardIDs.includes(cardID));
+
+          if (isValidSelection) {
             onResolveSealBomb(sealTargets);
             setSealTargets([]);
           }

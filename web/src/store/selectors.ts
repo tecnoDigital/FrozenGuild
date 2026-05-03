@@ -86,6 +86,10 @@ let lastActionFlowValue: ActionFlowView = {
 
 let lastSpyKey = "";
 let lastSpyValue: SpyResolutionView | null = null;
+let lastOrcaKey = "";
+let lastOrcaValue: { orcaCardID: string; validTargetCardIDs: string[] } | null = null;
+let lastSealBombKey = "";
+let lastSealBombValue: { bombCardID: string; validTargetCardIDs: string[]; requiredDiscardCount: number } | null = null;
 
 export function selectIsMyTurn(state: FrozenGuildUiStore): boolean {
   if (!state.ctx || !state.localPlayerID) {
@@ -639,24 +643,49 @@ export function selectSpyResolutionView(state: FrozenGuildUiStore): SpyResolutio
 export function selectOrcaResolutionView(state: FrozenGuildUiStore) {
   const pending = state.G?.orcaResolution;
   if (!pending || !state.localPlayerID || pending.playerID !== state.localPlayerID) {
+    lastOrcaKey = "";
+    lastOrcaValue = null;
     return null;
   }
-  return {
+
+  const key = [pending.orcaCardID, pending.validTargetCardIDs.join(",")].join("|");
+  if (key === lastOrcaKey && lastOrcaValue) {
+    return lastOrcaValue;
+  }
+
+  lastOrcaKey = key;
+  lastOrcaValue = {
     orcaCardID: pending.orcaCardID,
     validTargetCardIDs: pending.validTargetCardIDs
   };
+  return lastOrcaValue;
 }
 
 export function selectSealBombResolutionView(state: FrozenGuildUiStore) {
   const pending = state.G?.sealBombResolution;
   if (!pending || !state.localPlayerID || pending.playerID !== state.localPlayerID) {
+    lastSealBombKey = "";
+    lastSealBombValue = null;
     return null;
   }
-  return {
+
+  const key = [
+    pending.bombCardID,
+    pending.requiredDiscardCount,
+    pending.validTargetCardIDs.join(",")
+  ].join("|");
+
+  if (key === lastSealBombKey && lastSealBombValue) {
+    return lastSealBombValue;
+  }
+
+  lastSealBombKey = key;
+  lastSealBombValue = {
     bombCardID: pending.bombCardID,
     validTargetCardIDs: pending.validTargetCardIDs,
     requiredDiscardCount: pending.requiredDiscardCount
   };
+  return lastSealBombValue;
 }
 
 export function selectPlayersLedger(state: FrozenGuildUiStore) {

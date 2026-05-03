@@ -25,6 +25,20 @@ import type { FrozenGuildState } from "./types.js";
 
 const INVALID_MOVE = "INVALID_MOVE" as const;
 
+function isDevRuntime(): boolean {
+  const mode = (globalThis as { process?: { env?: { NODE_ENV?: string } } }).process?.env
+    ?.NODE_ENV;
+  return mode !== "production";
+}
+
+function logBotAutoResolve(reason: string, details: Record<string, unknown>): void {
+  if (!isDevRuntime()) {
+    return;
+  }
+
+  console.warn(`[bot:auto-resolve] ${reason}`, details);
+}
+
 function ensureBotActivity(G: FrozenGuildState): FrozenGuildState["botActivity"] {
   if (!G.botActivity) {
     G.botActivity = {
@@ -116,6 +130,85 @@ function runBasicBotTurn(args: {
     completedAt: null
   };
 
+  const resolvePendingForBot = (stage: "pre-action" | "post-action" | "post-endturn"): boolean => {
+    if (G.orcaResolution?.playerID === playerID) {
+      const candidates = [...G.orcaResolution.validTargetCardIDs];
+      const target = randomPick(candidates, randomFn);
+      if (!target) {
+        logBotAutoResolve("ORCA_NO_TARGET", {
+          stage,
+          playerID,
+          pending: G.orcaResolution,
+          validTargetCardIDs: candidates
+        });
+        return false;
+      }
+
+      const result = resolveOrcaDestroy({ G, ctx, playerID, events }, target);
+      if (result === INVALID_MOVE) {
+        logBotAutoResolve("ORCA_RESOLVE_INVALID_MOVE", {
+          stage,
+          playerID,
+          target,
+          pending: G.orcaResolution,
+          validTargetCardIDs: candidates
+        });
+        return false;
+      }
+    }
+
+    if (G.sealBombResolution?.playerID === playerID) {
+      const candidates = [...G.sealBombResolution.validTargetCardIDs];
+      const selected: string[] = [];
+      while (
+        selected.length < G.sealBombResolution.requiredDiscardCount &&
+        candidates.length > 0
+      ) {
+        const chosen = randomPick(candidates, randomFn);
+        if (!chosen) {
+          break;
+        }
+        selected.push(chosen);
+        const selectedIndex = candidates.indexOf(chosen);
+        if (selectedIndex >= 0) {
+          candidates.splice(selectedIndex, 1);
+        }
+      }
+
+      const result = resolveSealBombExplosion({ G, ctx, playerID }, selected);
+      if (result === INVALID_MOVE) {
+        logBotAutoResolve("SEAL_BOMB_RESOLVE_INVALID_MOVE", {
+          stage,
+          playerID,
+          targets: selected,
+          pending: G.sealBombResolution,
+          validTargetCardIDs: G.sealBombResolution.validTargetCardIDs,
+          requiredDiscardCount: G.sealBombResolution.requiredDiscardCount
+        });
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  const hasBlockingPending =
+    G.pendingStage !== null || G.orcaResolution !== null || G.sealBombResolution !== null;
+
+  if (hasBlockingPending && !resolvePendingForBot("pre-action")) {
+    return;
+  }
+
+  if (G.pendingStage !== null || G.orcaResolution !== null || G.sealBombResolution !== null) {
+    logBotAutoResolve("PENDING_NOT_RESOLVED_BEFORE_ACTION", {
+      playerID,
+      pendingStage: G.pendingStage,
+      orcaResolution: G.orcaResolution,
+      sealBombResolution: G.sealBombResolution
+    });
+    return;
+  }
+
   const rollResult = rollDice({ G, ctx, playerID, random });
   if (rollResult === INVALID_MOVE) {
     return;
@@ -192,22 +285,42 @@ function runBasicBotTurn(args: {
     }
   }
 
-  if (G.orcaResolution?.playerID === playerID) {
-    const target = G.orcaResolution.validTargetCardIDs[0];
-    if (target) {
-      resolveOrcaDestroy({ G, ctx, playerID, events }, target);
+  if (!resolvePendingForBot("post-action")) {
+    return;
+  }
+
+const firstEndTurnResult = endTurn({ G, ctx, playerID, events });
+  if (firstEndTurnResult === INVALID_MOVE) {
+    logBotAutoResolve("END_TURN_INVALID_MOVE", {
+      playerID,
+      pendingStage: G.pendingStage,
+      orcaResolution: G.orcaResolution,
+      sealBombResolution: G.sealBombResolution,
+      dice: G.dice,
+      turn: G.turn
+    });
+    return;
+  }
+
+  const bombTriggeredAfterEndTurn = Boolean(G.sealBombResolution) && (G.sealBombResolution as unknown as { playerID: string }).playerID === playerID;
+  if (bombTriggeredAfterEndTurn) {
+    if (!resolvePendingForBot("post-endturn")) {
+      return;
+    }
+
+    const secondEndTurnResult = endTurn({ G, ctx, playerID, events });
+    if (secondEndTurnResult === INVALID_MOVE) {
+      logBotAutoResolve("END_TURN_AFTER_SEAL_INVALID_MOVE", {
+        playerID,
+        pendingStage: G.pendingStage,
+        orcaResolution: G.orcaResolution,
+        sealBombResolution: G.sealBombResolution,
+        dice: G.dice,
+        turn: G.turn
+      });
+      return;
     }
   }
-
-  if (G.sealBombResolution?.playerID === playerID) {
-    const targets = G.sealBombResolution.validTargetCardIDs.slice(
-      0,
-      G.sealBombResolution.requiredDiscardCount
-    );
-    resolveSealBombExplosion({ G, ctx, playerID }, targets);
-  }
-
-  endTurn({ G, ctx, playerID, events });
 
   G.botActivity = {
     playerID,
