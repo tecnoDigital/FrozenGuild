@@ -7,7 +7,7 @@ const meta: Meta<typeof Card> = {
   args: {
     id: "penguin-001",
     label: "Pinguino 1",
-    image: "/src/assets/cards/penguin-1.png"
+    image: "/assets/cards/types/penguin-1.png"
   }
 };
 
@@ -18,7 +18,7 @@ export const Visible: Story = {};
 export const Hidden: Story = {
   args: {
     hidden: true,
-    image: "/src/assets/cards/Reverso.png"
+    image: "/assets/cards/backs/frozen-dreamcatcher-back.png"
   }
 };
 export const Selected: Story = { args: { selected: true } };

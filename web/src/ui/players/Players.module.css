@@ -1,64 +1,137 @@
 .panel {
   display: grid;
-  gap: 10px;
+  gap: clamp(7px, 0.8vw, 10px);
 }
 
 .row {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 10px;
-  background: var(--surface);
+  border: var(--fg-border-icy);
+  border-radius: var(--fg-radius-md);
+  padding: clamp(10px, 1vw, 12px);
+  background:
+    linear-gradient(160deg, rgba(234, 250, 255, 0.06), rgba(8, 26, 44, 0.9) 58%, rgba(5, 18, 32, 0.92)),
+    url("/assets/ui/frames/opponent-row-frame.png");
+  background-size: cover;
+  box-shadow: 0 10px 22px rgba(2, 8, 18, 0.4), inset 0 0 12px rgba(125, 220, 255, 0.1);
+}
+
+.rowLocal {
+  border-color: rgba(125, 220, 255, 0.58);
+  box-shadow: 0 12px 24px rgba(2, 8, 18, 0.45), 0 0 16px rgba(22, 217, 255, 0.24), inset 0 0 12px rgba(125, 220, 255, 0.16);
+}
+
+.rowActiveTurn {
+  border-color: rgba(253, 220, 120, 0.72);
+  box-shadow: 0 0 0 1px rgba(125, 239, 171, 0.45), 0 0 20px rgba(115, 220, 255, 0.4), 0 8px 20px rgba(20, 45, 37, 0.3);
+}
+
+.rowMain {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: clamp(8px, 1vw, 12px);
+  align-items: center;
+}
+
+.avatar {
+  width: clamp(44px, 3.3vw, 54px);
+  height: clamp(44px, 3.3vw, 54px);
+  border-radius: 999px;
+  border: 1px solid rgba(125, 220, 255, 0.42);
+  background: radial-gradient(circle at 20% 20%, rgba(160, 227, 255, 0.5), rgba(8, 30, 51, 0.95));
+  color: var(--fg-color-ice-100);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(0.9rem, 1vw, 1.1rem);
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-shadow: 0 1px 2px rgba(2, 8, 18, 0.9);
+  box-shadow: inset 0 0 12px rgba(125, 220, 255, 0.2), 0 0 12px rgba(22, 217, 255, 0.18);
+  overflow: hidden;
+}
+
+.avatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .rowHeader {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
+}
+
+.identityBlock {
+  display: grid;
+  gap: 4px;
+}
+
+.metaRow {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
 .name {
   margin: 0;
-  font-weight: 700;
+  font-weight: 800;
   display: flex;
   align-items: center;
   gap: 6px;
+  color: var(--fg-color-ice-100);
+  text-shadow: 0 1px 1px rgba(2, 8, 18, 0.95);
+  font-size: clamp(0.98rem, 0.98vw, 1.16rem);
 }
 
 .metaChip {
   border: 1px solid var(--border);
   border-radius: 999px;
   padding: 1px 7px;
-  font-size: 0.72rem;
+  font-size: clamp(0.66rem, 0.58vw, 0.74rem);
   font-weight: 600;
   color: var(--text);
   background: var(--surface-2);
 }
 
 .metaChipActive {
-  border: 1px solid rgba(125, 239, 171, 0.45);
+  border: 1px solid rgba(253, 220, 120, 0.7);
   border-radius: 999px;
-  padding: 1px 7px;
-  font-size: 0.72rem;
+  padding: 1px 9px;
+  font-size: clamp(0.66rem, 0.58vw, 0.74rem);
   font-weight: 700;
-  color: #8effbd;
-  background: rgba(20, 45, 37, 0.55);
+  color: #ffe39f;
+  background: rgba(72, 52, 12, 0.52);
+  box-shadow: 0 0 12px rgba(255, 208, 96, 0.24);
+}
+
+.metaChipMuted {
+  border: 1px solid rgba(125, 220, 255, 0.3);
+  border-radius: 999px;
+  padding: 1px 9px;
+  font-size: clamp(0.62rem, 0.56vw, 0.72rem);
+  font-weight: 600;
+  color: rgba(214, 242, 255, 0.75);
+  background: rgba(10, 27, 44, 0.5);
 }
 
 .hand {
   display: flex;
-  gap: 6px;
-  margin-top: 8px;
-  flex-wrap: wrap;
+  gap: 0;
+  margin-top: 12px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding: 2px 2px 4px;
 }
 
 .compactCard {
-  width: 38px;
-  height: 54px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface-2);
+  width: clamp(62px, 4vw, 82px);
+  height: clamp(94px, 6.3vw, 124px);
+  border: 1px solid rgba(125, 220, 255, 0.3);
+  border-radius: 10px;
+  background: linear-gradient(160deg, rgba(234, 250, 255, 0.08), rgba(8, 26, 44, 0.9));
   overflow: hidden;
+  box-shadow: 0 6px 16px rgba(2, 8, 18, 0.46), 0 0 10px rgba(125, 220, 255, 0.12);
 }
 
 .compactCardImg {
@@ -70,29 +143,179 @@
 .compactCardButton {
   appearance: none;
   border: 0;
-  padding: 3px;
+  padding: 2px;
   background: transparent;
-  border-radius: 8px;
-  min-width: 44px;
-  min-height: 60px;
+  border-radius: 10px;
+  margin-left: clamp(-22px, -1.2vw, -14px);
+  min-width: clamp(54px, 3.5vw, 70px);
+  min-height: clamp(96px, 6.4vw, 126px);
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  transition: transform var(--fg-transition-fast);
+}
+
+.compactCardButton:first-child {
+  margin-left: 0;
+}
+
+.compactCardButton:hover:not(:disabled) {
+  transform: translateY(-1px);
 }
 
 .compactCardButton:disabled {
   cursor: default;
+  opacity: 0.64;
 }
 
 .compactCardSelected {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--fg-color-cyan-glow);
   outline-offset: 1px;
+  box-shadow: 0 0 16px rgba(22, 217, 255, 0.34);
+}
+
+.compactCardClickable {
+  cursor: pointer;
+}
+
+.localHandFrame {
+  border: 1px solid rgba(125, 220, 255, 0.44);
+  border-radius: var(--fg-radius-lg);
+  padding: clamp(14px, 1.1vw, 18px) clamp(22px, 2vw, 34px);
+  min-height: clamp(210px, 24vh, 300px);
+  width: 100%;
+  background:
+    linear-gradient(180deg, rgba(14, 32, 52, 0.25), rgba(5, 17, 31, 0.66)),
+    url("/assets/ui/frames/player-hand-frame.png");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  box-shadow: 0 16px 26px rgba(2, 8, 18, 0.42), inset 0 0 16px rgba(125, 220, 255, 0.14);
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.localHandHeader {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.localHandTitle {
+  margin: 0;
+  color: #f2fbff;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  font-size: clamp(0.88rem, 0.95vw, 1.05rem);
+  text-shadow: 0 1px 2px rgba(2, 8, 18, 0.9);
+}
+
+.localHandMeta {
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: clamp(0.72rem, 0.74vw, 0.84rem);
+  color: rgba(224, 244, 255, 0.9);
+}
+
+.handLocal {
+  margin-top: 0;
+  align-items: end;
+  overflow-x: auto;
+  overflow-y: visible;
+  padding: 10px clamp(8px, 1.4vw, 18px) 8px;
+  justify-content: flex-end;
+}
+
+.compactCardLocal {
+  width: clamp(104px, 6.8vw, 142px);
+  height: clamp(152px, 9.8vw, 202px);
+}
+
+.compactCardButtonLocal {
+  margin-left: clamp(-34px, -1.9vw, -24px);
+  min-width: clamp(84px, 5.5vw, 114px);
+  min-height: clamp(154px, 10vw, 206px);
+}
+
+.compactCardButtonLocal:first-child {
+  margin-left: 0;
+}
+
+.scoreBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 214, 120, 0.56);
+  background: linear-gradient(145deg, rgba(95, 64, 9, 0.56), rgba(45, 32, 8, 0.72));
+  color: #ffe9b8;
+  padding: 4px 10px;
+  box-shadow: 0 0 0 1px rgba(255, 226, 148, 0.22), inset 0 0 8px rgba(255, 218, 120, 0.16);
+}
+
+.scoreIcon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
+.scoreValue {
+  font-size: clamp(1rem, 1.2vw, 1.24rem);
+  line-height: 1;
+  font-weight: 800;
+}
+
+.scoreUnit {
+  font-size: 0.74rem;
+  font-weight: 700;
+  opacity: 0.9;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .issue {
   margin-top: 8px;
   font-size: 0.84rem;
   color: var(--danger);
+}
+
+@media (max-height: 800px) and (min-width: 900px) {
+  .hand {
+    margin-top: 6px;
+    gap: 4px;
+  }
+
+  .rowHeader {
+    gap: 6px;
+  }
+
+  .compactCard {
+    width: clamp(54px, 3.5vw, 70px);
+    height: clamp(82px, 5.4vw, 106px);
+  }
+
+  .compactCardButton {
+    min-width: clamp(48px, 3.1vw, 62px);
+    min-height: clamp(84px, 5.5vw, 108px);
+    margin-left: clamp(-18px, -1vw, -12px);
+  }
+
+  .localHandFrame {
+    min-height: clamp(190px, 23vh, 250px);
+    padding-inline: clamp(18px, 1.6vw, 26px);
+  }
+
+  .compactCardLocal {
+    width: clamp(88px, 5.8vw, 120px);
+    height: clamp(130px, 8.2vw, 170px);
+  }
+
+  .compactCardButtonLocal {
+    min-width: clamp(74px, 4.8vw, 96px);
+    min-height: clamp(132px, 8.4vw, 172px);
+    margin-left: clamp(-28px, -1.55vw, -20px);
+  }
 }
 
 @media (max-width: 900px) {
@@ -104,6 +327,15 @@
     padding: 8px;
   }
 
+  .rowMain {
+    gap: 8px;
+  }
+
+  .avatar {
+    width: 42px;
+    height: 42px;
+  }
+
   .rowHeader {
     gap: 6px;
   }
@@ -113,12 +345,33 @@
   }
 
   .hand {
-    gap: 8px;
+    gap: 0;
     margin-top: 6px;
   }
 
   .compactCard {
-    width: 34px;
-    height: 48px;
+    width: 56px;
+    height: 84px;
+  }
+
+  .compactCardButton {
+    margin-left: -14px;
+    min-height: 86px;
+  }
+
+  .localHandFrame {
+    min-height: 200px;
+    padding: 12px;
+  }
+
+  .compactCardLocal {
+    width: 82px;
+    height: 120px;
+  }
+
+  .compactCardButtonLocal {
+    margin-left: -22px;
+    min-width: 68px;
+    min-height: 124px;
   }
 }

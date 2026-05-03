@@ -9,6 +9,7 @@ type PlayerLedgerPanelProps = {
     score: number;
     cards: number;
     cardIDs: string[];
+    avatarSrc?: string;
     isActiveTurn?: boolean;
     isLocalPlayer?: boolean;
     status?: "reconnecting" | "absent";
@@ -31,6 +32,7 @@ export function PlayerLedgerPanel({ players, clickableCardsByPlayerID = {}, sele
             score={player.score}
             cardCount={player.cards}
             cardIDs={player.cardIDs}
+            avatarSrc={player.avatarSrc}
             isActiveTurn={!!player.isActiveTurn}
             isLocalPlayer={!!player.isLocalPlayer}
             clickableCardIndexes={clickableCardsByPlayerID[player.id] ?? []}

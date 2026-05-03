@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import type { SwapLocation } from "../../../../shared/game/types.js";
 import type { ActionFlowView } from "../../store/selectors.js";
 import { PadrinoChoicePanel } from "./PadrinoChoicePanel.js";
@@ -68,9 +69,9 @@ function locationLabel(location: SwapLocation | null): string {
 export function ActionPanel({ flow, onChoosePadrinoAction, swap, orca, seal, spy, onEndTurn }: ActionPanelProps) {
   const modeIcon =
     flow.mode === "fish"
-      ? "/src/assets/fish.png"
+      ? "/assets/ui/icons/fish.png"
       : flow.mode === "orca"
-        ? "/src/assets/orca.png"
+        ? "/assets/ui/icons/orca.png"
         : null;
 
   const modeLabel =
@@ -92,11 +93,20 @@ export function ActionPanel({ flow, onChoosePadrinoAction, swap, orca, seal, spy
                     ? "Dado"
                     : "Espera";
 
+  const interactiveMode = flow.mode !== "waiting" && flow.mode !== "done";
+
   return (
     <div className={styles.panelBlock}>
       <p className={styles.helperRow}>
         {modeIcon ? <img className={styles.modeIcon} src={modeIcon} alt="" aria-hidden /> : null}
-        <span className={styles.modeChip}>{modeLabel}</span>
+        <motion.span
+          className={`${styles.modeChip} ${interactiveMode ? styles.modeChipInteractive : styles.modeChipWaiting}`}
+          initial={false}
+          animate={{ scale: interactiveMode ? 1.02 : 1, opacity: interactiveMode ? 1 : 0.75 }}
+          transition={{ duration: 0.16, ease: "easeOut" }}
+        >
+          {modeLabel}
+        </motion.span>
         <span>{flow.helperText}</span>
       </p>
 

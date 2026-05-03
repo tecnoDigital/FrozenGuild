@@ -6,9 +6,9 @@ const meta: Meta<typeof ExpeditionPreview> = {
   component: ExpeditionPreview,
   args: {
     cards: [
-      { id: "penguin-001", label: "Pinguino", image: "/src/assets/cards/penguin-1.png" },
-      { id: "orca-001", label: "Orca", image: "/src/assets/cards/orca.png" },
-      { id: "walrus-001", label: "Morsa", image: "/src/assets/cards/walrus.png" }
+      { id: "penguin-001", label: "Pinguino", image: "/assets/cards/types/penguin-1.png" },
+      { id: "orca-001", label: "Orca", image: "/assets/cards/types/orca.png" },
+      { id: "walrus-001", label: "Morsa", image: "/assets/cards/types/walrus.png" }
     ]
   }
 };

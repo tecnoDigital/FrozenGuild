@@ -1,33 +1,60 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  gap: clamp(5px, 0.62vw, 10px);
+  justify-items: center;
+  align-content: center;
 }
 
 .slot {
   appearance: none;
-  background: transparent;
+  background: linear-gradient(160deg, rgba(234, 250, 255, 0.08), rgba(8, 26, 44, 0.92));
   width: 100%;
-  padding: 6px;
-  border-radius: 14px;
-  border: 1px solid var(--border);
+  max-width: clamp(90px, 6vw, 118px);
+  padding: clamp(4px, 0.5vw, 7px);
+  border-radius: var(--fg-radius-md);
+  border: var(--fg-border-icy);
   cursor: pointer;
+  box-shadow: inset 0 0 14px rgba(125, 220, 255, 0.14);
+  transition: transform var(--fg-transition-fast), box-shadow var(--fg-transition-fast), border-color var(--fg-transition-fast);
+}
+
+.slot:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(125, 220, 255, 0.58);
+  box-shadow: 0 0 16px rgba(22, 217, 255, 0.24), inset 0 0 16px rgba(125, 220, 255, 0.18);
 }
 
 .slot:disabled {
   cursor: default;
 }
 
+.slotClickable {
+  cursor: pointer;
+}
+
+.slotDisabled {
+  opacity: 0.72;
+}
+
 .slotSelected {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--fg-color-cyan-glow);
   outline-offset: 1px;
+  box-shadow: 0 0 20px rgba(22, 217, 255, 0.38), inset 0 0 16px rgba(125, 220, 255, 0.22);
 }
 
 .empty {
-  min-height: 84px;
+  min-height: clamp(58px, 6vw, 76px);
   display: grid;
   place-items: center;
-  border-radius: 14px;
-  border: 1px dashed var(--border);
-  color: var(--muted);
+  border-radius: var(--fg-radius-md);
+  border: 1px dashed rgba(125, 220, 255, 0.3);
+  color: var(--fg-color-ice-200);
+  background: linear-gradient(155deg, rgba(234, 250, 255, 0.04), rgba(8, 26, 44, 0.84));
+}
+
+@media (max-height: 800px) and (min-width: 900px) {
+  .empty {
+    font-size: 0.84rem;
+  }
 }

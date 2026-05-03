@@ -21,7 +21,7 @@ import { CenterActionDock } from "../layout/CenterActionDock.js";
 import { CenterBoardStage } from "../layout/CenterBoardStage.js";
 import { LeftStatusRail } from "../layout/LeftStatusRail.js";
 import { RightLedgerRail } from "../layout/RightLedgerRail.js";
-import { PlayerLedgerPanel } from "../players/PlayerLedgerPanel.js";
+import { LocalPlayerHandPanel } from "../players/LocalPlayerHandPanel.js";
 import {
   resolveLobbyAvatarSrc,
   resolveLobbyColorValue,
@@ -392,8 +392,10 @@ export function RightLedgerRailContainer() {
   const clickableCardsByPlayerID: Record<string, number[]> = {};
   const selectedCardsByPlayerID: Record<string, number[]> = {};
 
+  const rivals = players.filter((player) => player.id !== localPlayerID);
+
   if (flow.mode === "swap") {
-    players.forEach((player) => {
+    rivals.forEach((player) => {
       clickableCardsByPlayerID[player.id] = player.cardIDs.map((_, index) => index);
     });
 
@@ -432,12 +434,12 @@ export function RightLedgerRailContainer() {
 
   return (
     <RightLedgerRail
-      players={players.map((player) => ({
+      players={rivals.map((player) => ({
         ...player,
-        isLocalPlayer: localPlayerID === player.id,
+        isLocalPlayer: false,
         isActiveTurn: currentTurnPlayerID === player.id
       }))}
-      unstablePlayers={unstablePlayers}
+      unstablePlayers={unstablePlayers.filter((player) => player.id !== localPlayerID)}
       clickableCardsByPlayerID={clickableCardsByPlayerID}
       selectedCardsByPlayerID={selectedCardsByPlayerID}
       onPlayerCardClick={onPlayerCardClick}
@@ -448,6 +450,11 @@ export function RightLedgerRailContainer() {
 export function LocalHandContainer() {
   const players = useFrozenGuildStore(selectPlayersLedger);
   const localPlayerID = useFrozenGuildStore((state) => state.localPlayerID);
+  const flow = useFrozenGuildStore(selectActionFlowView);
+  const swapSourceKey = useFrozenGuildStore((state) => state.swapDraftSourceKey);
+  const swapTargetKey = useFrozenGuildStore((state) => state.swapDraftTargetKey);
+  const setSwapSourceKey = useFrozenGuildStore((state) => state.setSwapDraftSourceKey);
+  const setSwapTargetKey = useFrozenGuildStore((state) => state.setSwapDraftTargetKey);
 
   const local = players.find((player) => player.id === localPlayerID) ?? null;
 
@@ -455,14 +462,47 @@ export function LocalHandContainer() {
     return <p>Sin mano local.</p>;
   }
 
+  const clickableCardIndexes = flow.mode === "swap" ? local.cardIDs.map((_, index) => index) : [];
+  const selectedCardIndexes: number[] = [];
+
+  [swapSourceKey, swapTargetKey].forEach((value) => {
+    if (!value.startsWith(`player:${local.id}:`)) {
+      return;
+    }
+    const index = Number(value.split(":")[2]);
+    if (Number.isInteger(index) && index >= 0) {
+      selectedCardIndexes.push(index);
+    }
+  });
+
+  const onLocalCardClick = (index: number) => {
+    if (flow.mode !== "swap") {
+      return;
+    }
+    const nextKey = `player:${local.id}:${index}`;
+    if (!swapSourceKey || swapSourceKey === nextKey) {
+      setSwapSourceKey(nextKey);
+      if (swapTargetKey === nextKey) {
+        setSwapTargetKey("");
+      }
+      return;
+    }
+    if (!swapTargetKey || swapTargetKey === nextKey) {
+      setSwapTargetKey(nextKey);
+      return;
+    }
+    setSwapSourceKey(nextKey);
+    setSwapTargetKey("");
+  };
+
   return (
-    <PlayerLedgerPanel
-      players={[
-        {
-          ...local,
-          isLocalPlayer: true
-        }
-      ]}
+    <LocalPlayerHandPanel
+      playerName={local.name}
+      score={local.score}
+      cardIDs={local.cardIDs}
+      clickableCardIndexes={clickableCardIndexes}
+      selectedCardIndexes={selectedCardIndexes}
+      onCardClick={onLocalCardClick}
     />
   );
 }

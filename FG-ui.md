@@ -760,19 +760,34 @@ Do not add drag and drop.
 
 ## Checklist
 
-- [ ] Round connected.
-- [ ] Players connected.
-- [ ] Current turn connected.
-- [ ] Scores connected.
-- [ ] Local player hand connected.
-- [ ] Opponent hands connected.
-- [ ] Deck/card count connected.
-- [ ] 3x3 board connected.
-- [ ] Dice result connected.
-- [ ] Available actions connected.
-- [ ] No full-store selectors.
-- [ ] No game rule changes.
-- [ ] No drag and drop.
+- [x] Round connected.
+- [x] Players connected.
+- [x] Current turn connected.
+- [x] Scores connected.
+- [x] Local player hand connected.
+- [x] Opponent hands connected.
+- [x] Deck/card count connected.
+- [x] 3x3 board connected.
+- [x] Dice result connected.
+- [x] Available actions connected.
+- [x] No full-store selectors.
+- [x] No game rule changes.
+- [x] No drag and drop.
+
+## Completion Notes
+
+Phase 6 was reviewed and accepted as complete on 2026-05-02.
+
+Evidence:
+
+- Zustand-connected containers are present for round, players, current turn, scores, local hand, opponent hands, deck count, board slots, dice result, and available actions.
+- `web/src/features/game/ui/mockData.ts` still exists as a Phase 3 artifact, but it is not imported by the active game screen path.
+- No empty `useFrozenGuildStore()` full-store subscriptions were found in `web/src`.
+- No drag-and-drop handlers or Tailwind usage were introduced for Phase 6.
+
+Architectural caution before Phase 7:
+
+- There are parallel UI trees under `web/src/features/game/ui` and `web/src/ui/screens`. Phase 7 should target the currently rendered canonical game screen path to avoid polishing the wrong surface.
 
 ## Acceptance Criteria
 
@@ -825,16 +840,28 @@ No game rule changes.
 
 ## Checklist
 
-- [ ] Active player visible.
-- [ ] Available action visible.
-- [ ] Disabled action clear.
-- [ ] Dice result emphasized.
-- [ ] Selected card state clear.
-- [ ] Hidden/revealed card states clear.
-- [ ] Score change animation subtle.
-- [ ] Turn change transition subtle.
-- [ ] No motion overload.
-- [ ] No animation resets from global store reads.
+- [x] Active player visible.
+- [x] Available action visible.
+- [x] Disabled action clear.
+- [x] Dice result emphasized.
+- [x] Selected card state clear.
+- [x] Hidden/revealed card states clear.
+- [x] Score change animation subtle.
+- [x] Turn change transition subtle.
+- [x] No motion overload.
+- [x] No animation resets from global store reads.
+
+## Completion Notes
+
+Phase 7 was reviewed and accepted as complete on 2026-05-02.
+
+Evidence:
+
+- Active player, available action, disabled action, dice result, selected card, hidden/revealed card, score delta, and turn-change feedback were added to the active rendered UI path under `web/src/ui`.
+- Motion is intentionally subtle and uses small transform/opacity transitions instead of heavy blur/backdrop animation.
+- No empty `useFrozenGuildStore()` full-store subscriptions were found in the active UI path.
+- Targeted verification passed: `npm run test -- tests/web/fg-ui-phase7-visual-feedback-contract.test.ts`.
+- Vite public asset path violations found during review were corrected to absolute `/assets/...` paths.
 
 ## Acceptance Criteria
 
@@ -898,16 +925,28 @@ No Tailwind.
 
 ## Checklist
 
-- [ ] Panels have depth.
-- [ ] Frames feel icy/premium.
-- [ ] Active elements glow.
-- [ ] Hover states are polished.
-- [ ] Text contrast improved.
-- [ ] Local hand is visually dominant.
-- [ ] Opponent panel feels integrated.
-- [ ] Board remains clean.
-- [ ] Background supports the UI instead of fighting it.
-- [ ] No unnecessary dependencies.
+- [x] Panels have depth.
+- [x] Frames feel icy/premium.
+- [x] Active elements glow.
+- [x] Hover states are polished.
+- [x] Text contrast improved.
+- [x] Local hand is visually dominant.
+- [x] Opponent panel feels integrated.
+- [x] Board remains clean.
+- [x] Background supports the UI instead of fighting it.
+- [x] No unnecessary dependencies.
+
+## Completion Notes
+
+Phase 8 was reviewed and accepted as complete on 2026-05-02.
+
+Evidence:
+
+- Premium polish was applied to the active rendered UI path under `web/src/ui`.
+- Panels, frames, hover states, active glows, player rails, board styling, and shared controls now use a more cohesive Frozen Guild ice/glass treatment.
+- No unnecessary dependencies were added.
+- No `/src/assets` references remain under `web/src/ui`; runtime asset references use Vite-safe `/assets/...` paths.
+- Targeted verification passed: `npm run test -- tests/web/fg-ui-phase7-visual-feedback-contract.test.ts`.
 
 ## Acceptance Criteria
 

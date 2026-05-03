@@ -16,6 +16,7 @@
     "dev:local": "npm run dev",
     "start:local": "bash ./scripts/start-local.sh",
     "start:ngrok": "bash ./scripts/start-ngrok.sh",
+    "start:ngrokps": "powershell -ExecutionPolicy Bypass -File ./scripts/start-ngrok.ps1",
     "stop": "bash ./scripts/stop.sh",
     "test:start": "npm run start:ngrok",
     "test:stop": "npm run stop",

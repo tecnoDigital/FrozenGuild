@@ -97,6 +97,11 @@ export function GameScreen({ onRollDice, onFishFromIce, onChoosePadrinoAction, o
       }
       center={centerBoard}
       actions={actionsDock}
+      hand={
+        <Profiler id="LocalHand" onRender={onRender}>
+          <LocalHandContainer />
+        </Profiler>
+      }
       right={
         <Profiler id="RightLedgerRail" onRender={onRender}>
           <RightLedgerRailContainer />

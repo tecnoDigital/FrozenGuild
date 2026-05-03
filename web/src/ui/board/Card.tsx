@@ -12,14 +12,28 @@ type CardProps = {
 
 export function Card({ id, label, image, selected = false, hidden = false, motionLayout = true }: CardProps) {
   const className = `${styles.card} ${selected ? styles.selected : ""}`.trim();
-  const content = <img src={image} alt={hidden ? "Carta oculta" : label} className={styles.img} />;
+  const content = (
+    <>
+      <img src={image} alt={hidden ? "Carta oculta" : label} className={`${styles.img} ${hidden ? styles.imgHidden : styles.imgRevealed}`} />
+      <span className={`${styles.visibilityTag} ${hidden ? styles.visibilityTagHidden : styles.visibilityTagRevealed}`} data-card-visibility={hidden ? "hidden" : "revealed"}>
+        {hidden ? "Oculta" : "Revelada"}
+      </span>
+    </>
+  );
 
   if (!motionLayout) {
     return <article className={className}>{content}</article>;
   }
 
   return (
-    <motion.article className={className} layout layoutId={`card-${id}`}>
+    <motion.article
+      className={className}
+      layout
+      layoutId={`card-${id}`}
+      initial={false}
+      animate={{ rotateY: hidden ? 0 : 2, scale: selected ? 1.02 : 1 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
+    >
       {content}
     </motion.article>
   );

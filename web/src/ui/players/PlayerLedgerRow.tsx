@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { CompactHand } from "./CompactHand.js";
 import { ConnectionIssueBadge } from "./ConnectionIssueBadge.js";
 import { DisconnectCountdown } from "./DisconnectCountdown.js";
@@ -10,6 +11,7 @@ type PlayerLedgerRowProps = {
   score: number;
   cardCount: number;
   cardIDs: string[];
+  avatarSrc?: string;
   isActiveTurn?: boolean;
   isLocalPlayer?: boolean;
   status?: "reconnecting" | "absent";
@@ -25,6 +27,7 @@ export function PlayerLedgerRow({
   score,
   cardCount,
   cardIDs,
+  avatarSrc,
   isActiveTurn = false,
   isLocalPlayer = false,
   status,
@@ -33,15 +36,31 @@ export function PlayerLedgerRow({
   selectedCardIndexes = [],
   onCardClick
 }: PlayerLedgerRowProps) {
+  const avatarFallback = name.trim().charAt(0).toUpperCase() || "?";
+
   return (
-    <article className={styles.row}>
-      <div className={styles.rowHeader}>
-        <p className={styles.name}>
-          {name}
-          {isLocalPlayer ? <span className={styles.metaChip}>Tu</span> : null}
-          {isActiveTurn ? <span className={styles.metaChipActive}>Turno</span> : null}
-        </p>
-        <ScoreBadge score={score} />
+    <motion.article
+      className={`${styles.row} ${isLocalPlayer ? styles.rowLocal : ""} ${isActiveTurn ? styles.rowActiveTurn : ""}`}
+      data-active-turn={isActiveTurn ? "true" : "false"}
+      data-player-ledger-row="true"
+      initial={false}
+      animate={{ scale: isActiveTurn ? 1.01 : 1, y: isActiveTurn ? -1 : 0 }}
+      transition={{ duration: 0.18, ease: "easeOut" }}
+    >
+      <div className={styles.rowMain}>
+        <div className={styles.avatar} aria-label={`Avatar de ${name}`} data-avatar-fallback={avatarSrc ? "false" : "true"}>
+          {avatarSrc ? <img src={avatarSrc} alt="" className={styles.avatarImg} /> : <span>{avatarFallback}</span>}
+        </div>
+        <div className={styles.rowHeader}>
+          <div className={styles.identityBlock}>
+            <p className={styles.name}>{name}</p>
+            <div className={styles.metaRow}>
+              {isLocalPlayer ? <span className={styles.metaChip}>Tu</span> : null}
+              {isActiveTurn ? <span className={styles.metaChipActive}>Turno actual</span> : <span className={styles.metaChipMuted}>En espera</span>}
+            </div>
+          </div>
+          <ScoreBadge score={score} />
+        </div>
       </div>
       <CompactHand
         cardIDs={cardIDs.slice(0, Math.max(1, cardCount))}
@@ -54,6 +73,6 @@ export function PlayerLedgerRow({
           <ConnectionIssueBadge status={status} /> {status === "reconnecting" && disconnectSeconds !== null ? <DisconnectCountdown seconds={disconnectSeconds} /> : null}
         </p>
       ) : null}
-    </article>
+    </motion.article>
   );
 }

@@ -63,15 +63,15 @@ export function LobbyScreen(props: LobbyScreenProps) {
         <div className={styles.secondaryColumn}>
           <ExpeditionPreview
             cards={[
-              { id: "penguin-001", label: "Pinguino", image: "/src/assets/cards/penguin-1.png" },
-              { id: "orca-001", label: "Orca", image: "/src/assets/cards/orca.png" },
-              { id: "walrus-001", label: "Morsa", image: "/src/assets/cards/walrus.png" }
+              { id: "penguin-001", label: "Pinguino", image: "/assets/cards/types/penguin-1.png" },
+              { id: "orca-001", label: "Orca", image: "/assets/cards/types/orca.png" },
+              { id: "walrus-001", label: "Morsa", image: "/assets/cards/types/walrus.png" }
             ]}
           />
           <FeaturedCardPreview
             id="featured-orca"
             label="Orca"
-            image="/src/assets/cards/orca.png"
+            image="/assets/cards/types/orca.png"
             detail="Destruye una carta propia para continuar."
           />
         </div>

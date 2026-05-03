@@ -264,7 +264,7 @@
 }
 
 .bg {
-  --lobby-bg-image: url("/src/assets/Lobby-background.png");
+  --lobby-bg-image: url("/assets/backgrounds/lobby-bg.png");
   position: fixed;
   inset: 0;
   z-index: -1;
