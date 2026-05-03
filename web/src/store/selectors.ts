@@ -52,6 +52,11 @@ function mapCardIdToVariant(cardID: string): UiCardVariant {
   return card.type;
 }
 
+function shouldSkipTwoPlayerSwap(players: PlayersMap): boolean {
+  const playerList = Object.values(players);
+  return playerList.length === 2 && playerList.some((player) => player.zone.length === 0);
+}
+
 let lastCurrentTurnKey = "";
 let lastCurrentTurnValue: { currentPlayerName: string; turnCount: number; currentPlayerID: string | null } = {
   currentPlayerName: "Player -",
@@ -556,7 +561,7 @@ export function selectActionFlowView(state: FrozenGuildUiStore): ActionFlowView 
           canEndTurn: false,
           showPadrinoOptions: false
         };
-      } else if (effectiveValue === 5) {
+      } else if (effectiveValue === 5 && !shouldSkipTwoPlayerSwap(state.G.players)) {
         next = {
           mode: "swap",
           helperText: "Intercambio: elige carta origen y luego destino.",

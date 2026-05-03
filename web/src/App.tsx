@@ -149,6 +149,11 @@ function isSpyTurn(G: FrozenGuildState): boolean {
 }
 
 function isSwapTurn(G: FrozenGuildState): boolean {
+  const players = Object.values(G.players);
+  if (players.length === 2 && players.some((player) => player.zone.length === 0)) {
+    return false;
+  }
+
   return G.dice.rolled && (G.dice.value === 5 || (G.dice.value === 6 && G.turn.padrinoAction === 5));
 }
 

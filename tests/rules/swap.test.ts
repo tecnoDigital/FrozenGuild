@@ -126,6 +126,53 @@ describe("swap move", () => {
     expect(endTurnCalls).toBe(1);
   });
 
+  it("allows ending a dice 5 turn with two players when one hand is empty", () => {
+    const G = createInitialState(2, () => 0.2);
+    const ctx = makeCtx("0");
+    let endTurnCalls = 0;
+
+    G.players["1"]!.zone = [];
+    rollDice({ G, ctx, playerID: "0", random: { D6: () => 5 } });
+
+    const result = endTurn({
+      G,
+      ctx,
+      playerID: "0",
+      events: {
+        endTurn: () => {
+          endTurnCalls += 1;
+        }
+      }
+    });
+
+    expect(result).toBeUndefined();
+    expect(endTurnCalls).toBe(1);
+    expect(G.turn.actionCompleted).toBe(false);
+  });
+
+  it("keeps blocking dice 5 with more than two players even when one hand is empty", () => {
+    const G = createInitialState(3, () => 0.2);
+    const ctx = makeCtx("0");
+    let endTurnCalls = 0;
+
+    G.players["1"]!.zone = [];
+    rollDice({ G, ctx, playerID: "0", random: { D6: () => 5 } });
+
+    const result = endTurn({
+      G,
+      ctx,
+      playerID: "0",
+      events: {
+        endTurn: () => {
+          endTurnCalls += 1;
+        }
+      }
+    });
+
+    expect(result).toBe("INVALID_MOVE");
+    expect(endTurnCalls).toBe(0);
+  });
+
   it("requires current player to be part of swap pair", () => {
     const G = createInitialState(3, () => 0.2);
     const ctx = makeCtx("0");

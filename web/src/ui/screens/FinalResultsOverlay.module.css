@@ -2,62 +2,109 @@
   position: fixed;
   inset: 0;
   z-index: 1200;
-  background: rgba(2, 8, 24, 0.7);
-  backdrop-filter: blur(6px);
+  background:
+    radial-gradient(circle at 50% 42%, rgba(54, 143, 219, 0.2), transparent 38%),
+    rgba(1, 5, 18, 0.74);
+  backdrop-filter: blur(12px) brightness(0.58) saturate(0.78);
+  -webkit-backdrop-filter: blur(12px) brightness(0.58) saturate(0.78);
   display: grid;
   place-items: center;
   pointer-events: all;
+  padding: 24px;
 }
 
 .card {
-  width: min(980px, calc(100vw - 32px));
-  border-radius: 24px;
-  border: 1px solid rgba(141, 214, 255, 0.6);
-  background: linear-gradient(180deg, rgba(5, 36, 77, 0.94), rgba(4, 23, 52, 0.96));
-  box-shadow: 0 26px 80px rgba(0, 0, 0, 0.45);
-  padding: 26px;
+  position: relative;
+  width: min(940px, calc(100vw - 28px));
+  aspect-ratio: 580 / 435;
+  border: 0;
+  background-image: url("../../assets/end-game-frame.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
+  filter: drop-shadow(0 34px 70px rgba(0, 0, 0, 0.68));
+  padding: clamp(84px, 19%, 176px) clamp(44px, 9%, 92px) clamp(70px, 16%, 132px);
   display: grid;
-  gap: 20px;
+  grid-template-rows: auto 1fr auto;
+  gap: clamp(10px, 2vw, 18px);
   justify-items: center;
+  isolation: isolate;
 }
 
 .title {
-  color: #d9f1ff;
-  letter-spacing: 0.1em;
+  position: absolute;
+  top: clamp(42px, 10.2%, 82px);
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  color: #f4fbff;
+  font-size: clamp(1.65rem, 4.4vw, 3.95rem);
+  line-height: 1;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  text-shadow:
+    0 2px 0 rgba(4, 24, 49, 0.92),
+    0 0 18px rgba(188, 231, 255, 0.86),
+    0 0 34px rgba(23, 118, 199, 0.75);
+  white-space: nowrap;
+  z-index: 1;
+}
+
+.content {
+  width: 100%;
+  min-height: 0;
+  display: grid;
+  align-items: center;
 }
 
 .row {
   width: 100%;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
+  gap: clamp(8px, 1.6vw, 16px);
 }
 
 .playerCard {
-  border: 1px solid rgba(143, 198, 255, 0.38);
-  border-radius: 16px;
-  background: rgba(8, 25, 49, 0.88);
-  padding: 14px 12px;
+  border: 1px solid rgba(172, 225, 255, 0.36);
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(12, 61, 105, 0.76), rgba(4, 21, 48, 0.84)),
+    rgba(8, 25, 49, 0.82);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 12px 24px rgba(0, 0, 0, 0.22);
+  padding: clamp(9px, 1.5vw, 14px) clamp(8px, 1.3vw, 12px);
   display: grid;
   justify-items: center;
-  gap: 8px;
+  gap: clamp(5px, 1vw, 8px);
+  min-width: 0;
 }
 
 .place {
   color: #ffd79b;
   font-weight: 700;
+  font-size: clamp(0.86rem, 1.5vw, 1.08rem);
+  text-shadow: 0 0 12px rgba(255, 181, 75, 0.56);
 }
 
 .avatar {
-  width: 70px;
-  height: 70px;
+  width: clamp(48px, 8vw, 78px);
+  height: clamp(48px, 8vw, 78px);
   border-radius: 999px;
   object-fit: cover;
   border: 2px solid rgba(143, 198, 255, 0.65);
+  background: rgba(3, 18, 39, 0.68);
+  box-shadow: 0 0 18px rgba(126, 214, 255, 0.26);
 }
 
 .name {
   color: #eef7ff;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: clamp(0.78rem, 1.5vw, 1rem);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.55);
 }
 
 .fishes {
@@ -66,5 +113,45 @@
   gap: 6px;
   align-items: center;
   color: #f6d790;
+  font-size: clamp(0.9rem, 1.7vw, 1.15rem);
   font-weight: 700;
+}
+
+.returnButton {
+  align-self: end;
+  border: 1px solid rgba(178, 228, 255, 0.58);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(24, 89, 139, 0.96), rgba(8, 39, 83, 0.98));
+  color: #f4fbff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 0 18px rgba(84, 185, 255, 0.2);
+  cursor: pointer;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  min-width: min(260px, 62vw);
+  padding: clamp(8px, 1.4vw, 12px) clamp(20px, 3vw, 34px);
+}
+
+.returnButton:hover,
+.returnButton:focus-visible {
+  background: linear-gradient(180deg, rgba(41, 124, 184, 0.98), rgba(10, 55, 111, 1));
+  outline: none;
+  box-shadow:
+    0 0 0 3px rgba(164, 226, 255, 0.28),
+    0 0 22px rgba(84, 185, 255, 0.32);
+}
+
+@media (max-width: 720px) {
+  .card {
+    width: min(100vw - 14px, 580px);
+    min-height: min(92vh, 620px);
+    aspect-ratio: auto;
+    background-size: 100% 100%;
+    padding: 88px 42px 72px;
+  }
+
+  .row {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
 }

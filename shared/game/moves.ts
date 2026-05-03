@@ -480,6 +480,11 @@ function requiresSwapAction(G: FrozenGuildState): boolean {
   return requiresActionForDiceValue(G, 5);
 }
 
+function shouldSkipTwoPlayerSwap(G: FrozenGuildState): boolean {
+  const players = Object.values(G.players);
+  return players.length === 2 && players.some((player) => player.zone.length === 0);
+}
+
 function requiresPadrinoSelection(G: FrozenGuildState): boolean {
   return G.dice.rolled && G.dice.value === 6 && G.turn.padrinoAction === null;
 }
@@ -1294,7 +1299,7 @@ export function endTurn({ G, ctx, playerID, events }: MoveCtx): typeof INVALID_M
     return INVALID_MOVE;
   }
 
-  if (requiresSwapAction(G) && !G.turn.actionCompleted) {
+  if (requiresSwapAction(G) && !G.turn.actionCompleted && !shouldSkipTwoPlayerSwap(G)) {
     return INVALID_MOVE;
   }
 
