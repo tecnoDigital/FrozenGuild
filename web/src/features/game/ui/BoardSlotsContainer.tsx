@@ -24,17 +24,17 @@ export function BoardSlotsContainer() {
         <BoardCardSlot
           key={slot.slotId}
           slotId={slot.slotId}
-          card={
-            slot.card
-              ? {
+          {...(slot.card
+            ? {
+                card: {
                   cardType: slot.card.cardType,
                   variant: slot.card.variant,
                   imageSrc: cardImageByVariant[slot.card.variant],
                   alt: `${slot.card.cardType} card`,
                   state: "default"
                 }
-              : undefined
-          }
+              }
+            : {})}
         />
       ))}
     </>

@@ -41,14 +41,14 @@ export function LobbyForm({
     <section className={styles.panel}>
       <h3 style={{ marginTop: 0 }}>Crear partida</h3>
       <div className={styles.list}>
-        <PlayerNameInput value={playerName} onChange={onPlayerNameChange} />
+        <PlayerNameInput value={playerName} {...(onPlayerNameChange ? { onChange: onPlayerNameChange } : {})} />
         <div>
           <strong>Avatar</strong>
-          <AvatarSelector value={avatarID} onChange={onAvatarChange} />
+          <AvatarSelector value={avatarID} {...(onAvatarChange ? { onChange: onAvatarChange } : {})} />
         </div>
         <div>
           <strong>Color</strong>
-          <ColorSelector value={colorID} onChange={onColorChange} />
+          <ColorSelector value={colorID} {...(onColorChange ? { onChange: onColorChange } : {})} />
         </div>
         <PlayerPreviewCard name={playerName} avatarID={avatarID} colorID={colorID} />
         <label>

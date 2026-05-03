@@ -26,7 +26,7 @@ export function OpponentPanelContainer() {
       opponents={identities.map((player, index) => ({
         id: player.id,
         name: player.name,
-        avatarSrc: avatarFallbacks[index % avatarFallbacks.length],
+        avatarSrc: avatarFallbacks[index % avatarFallbacks.length] ?? assets.characters.avatars.penguin2,
         score: scoresById.get(player.id) ?? 0,
         handCount: handCountById.get(player.id) ?? 0,
         isCurrentTurn: player.id === currentTurn.currentPlayerID

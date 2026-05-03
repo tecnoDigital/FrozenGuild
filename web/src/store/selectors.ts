@@ -6,6 +6,8 @@ const EMPTY_LEDGER: Array<{ id: string; name: string; score: number; cards: numb
 const EMPTY_UNSTABLE: Array<{ id: string; name: string; status: "reconnecting" | "absent"; disconnectSeconds: number | null }> = [];
 
 type PlayersMap = NonNullable<FrozenGuildUiStore["G"]>["players"];
+type UiCardType = "penguin" | "walrus" | "petrel" | "sea-elephant" | "krill" | "orca" | "seal-bomb";
+type UiCardVariant = "penguin-1" | "penguin-2" | "penguin-3" | "walrus" | "petrel" | "sea-elephant" | "krill" | "orca" | "seal-bomb";
 
 let lastPlayersRefForLedger: PlayersMap | null | undefined;
 let lastPlayersRefForUnstable: PlayersMap | null | undefined;
@@ -32,20 +34,22 @@ let lastBoardSlots: Array<{
   };
 }> = [];
 
-function mapCardTypeToUiCardType(type: "penguin" | "walrus" | "petrel" | "sea_elephant" | "krill" | "orca" | "seal_bomb") {
+function mapCardTypeToUiCardType(type: "penguin" | "walrus" | "petrel" | "sea_elephant" | "krill" | "orca" | "seal_bomb"): UiCardType {
   if (type === "sea_elephant") return "sea-elephant";
   if (type === "seal_bomb") return "seal-bomb";
   return type;
 }
 
-function mapCardIdToVariant(cardID: string): "penguin-1" | "penguin-2" | "penguin-3" | "walrus" | "petrel" | "sea-elephant" | "krill" | "orca" | "seal-bomb" {
+function mapCardIdToVariant(cardID: string): UiCardVariant {
   const card = getCardById(cardID);
   if (!card) return "penguin-1";
   if (card.type === "penguin") {
     const fishValue = card.value ?? 1;
     return fishValue === 2 ? "penguin-2" : fishValue === 3 ? "penguin-3" : "penguin-1";
   }
-  return mapCardTypeToUiCardType(card.type);
+  if (card.type === "sea_elephant") return "sea-elephant";
+  if (card.type === "seal_bomb") return "seal-bomb";
+  return card.type;
 }
 
 let lastCurrentTurnKey = "";
@@ -257,7 +261,15 @@ export function selectLocalPlayerHandView(state: FrozenGuildUiStore): {
     variant: "penguin-1" | "penguin-2" | "penguin-3" | "walrus" | "petrel" | "sea-elephant" | "krill" | "orca" | "seal-bomb";
   }>;
 } {
-  if (!state.G || !state.localPlayerID || !state.G.players[state.localPlayerID]) {
+  if (!state.G || !state.localPlayerID) {
+    lastPlayersRefForLocalHand = null;
+    lastLocalPlayerIDForLocalHand = null;
+    lastLocalHand = { playerId: "local", cards: [] };
+    return lastLocalHand;
+  }
+
+  const localPlayer = state.G.players[state.localPlayerID];
+  if (!localPlayer) {
     lastPlayersRefForLocalHand = null;
     lastLocalPlayerIDForLocalHand = null;
     lastLocalHand = { playerId: "local", cards: [] };
@@ -268,7 +280,6 @@ export function selectLocalPlayerHandView(state: FrozenGuildUiStore): {
     return lastLocalHand;
   }
 
-  const localPlayer = state.G.players[state.localPlayerID];
   lastPlayersRefForLocalHand = state.G.players;
   lastLocalPlayerIDForLocalHand = state.localPlayerID;
   lastLocalHand = {

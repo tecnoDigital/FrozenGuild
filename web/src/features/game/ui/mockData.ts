@@ -48,8 +48,8 @@ const boardSeeds: Array<CardSeed | null> = [
 
 const boardSlots: BoardCardSlotProps[] = boardSeeds.map((seed, index) => ({
   slotId: `slot-${index + 1}`,
-  card: seed ? createCard(seed) : undefined,
-  highlighted: index === 4
+  highlighted: index === 4,
+  ...(seed ? { card: createCard(seed) } : {})
 }));
 
 export const mockGameShell: GameShellProps = {

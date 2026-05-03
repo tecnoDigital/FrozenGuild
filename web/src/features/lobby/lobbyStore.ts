@@ -135,5 +135,5 @@ export function resolveLobbyAvatarSrc(id: LobbyAvatarID): string {
 }
 
 export function resolveLobbyColorValue(id: LobbyColorID): string {
-  return lobbyColorOptions.find((item) => item.id === id)?.value ?? lobbyColorOptions[0].value;
+  return lobbyColorOptions.find((item) => item.id === id)?.value ?? "#6ce4ff";
 }

@@ -32,11 +32,11 @@ export function PlayerLedgerPanel({ players, clickableCardsByPlayerID = {}, sele
             score={player.score}
             cardCount={player.cards}
             cardIDs={player.cardIDs}
-            avatarSrc={player.avatarSrc}
             isActiveTurn={!!player.isActiveTurn}
             isLocalPlayer={!!player.isLocalPlayer}
             clickableCardIndexes={clickableCardsByPlayerID[player.id] ?? []}
             selectedCardIndexes={selectedCardsByPlayerID[player.id] ?? []}
+            {...(player.avatarSrc ? { avatarSrc: player.avatarSrc } : {})}
             {...(onPlayerCardClick ? { onCardClick: onPlayerCardClick } : {})}
             {...(player.status ? { status: player.status } : {})}
             {...(player.disconnectSeconds !== undefined ? { disconnectSeconds: player.disconnectSeconds } : {})}

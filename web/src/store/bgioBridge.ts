@@ -16,7 +16,10 @@ export function pushBgioSnapshotToStore(state: BgioState | null, localPlayerID: 
 
   setSnapshot({
     G: state.G,
-    ctx: { currentPlayer: state.ctx.currentPlayer, turn: state.ctx.turn },
+    ctx: {
+      currentPlayer: state.ctx.currentPlayer,
+      ...(state.ctx.turn !== undefined ? { turn: state.ctx.turn } : {})
+    },
     gameover: state.ctx.gameover,
     localPlayerID
   });
