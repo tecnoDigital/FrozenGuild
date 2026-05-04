@@ -52,6 +52,17 @@ function mapCardIdToVariant(cardID: string): UiCardVariant {
   return card.type;
 }
 
+function calculatePenguinScore(cardIDs: string[]): number {
+  return cardIDs.reduce((score, cardID) => {
+    const card = getCardById(cardID);
+    if (card?.type !== "penguin") {
+      return score;
+    }
+
+    return score + (card.value ?? 1);
+  }, 0);
+}
+
 function shouldSkipTwoPlayerSwap(players: PlayersMap): boolean {
   const playerList = Object.values(players);
   return playerList.length === 2 && playerList.some((player) => player.zone.length === 0);
@@ -757,7 +768,7 @@ export function selectPlayersLedger(state: FrozenGuildUiStore) {
   lastLedger = Object.entries(state.G.players).map(([id, player]) => ({
     id,
     name: player.name,
-    score: player.zone.length,
+    score: calculatePenguinScore(player.zone),
     cards: player.zone.length,
     cardIDs: player.zone
   }));

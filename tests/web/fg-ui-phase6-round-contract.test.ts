@@ -24,6 +24,7 @@ import {
   selectPlayersLedger,
   selectRoundBadgeLabel
 } from "../../web/src/store/selectors";
+import { getCardAssetById } from "../../web/src/view-model/assetMap";
 
 function collectElements(node: ReactNode, bucket: unknown[] = []): unknown[] {
   if (!node) return bucket;
@@ -237,7 +238,7 @@ describe("fg phase 6 round connection contract", () => {
     expect(nodeTypes.has(ScorePanelContainer)).toBe(true);
   });
 
-  it("derives score ledger from snapshot player zones with safe fallback", () => {
+  it("derives score ledger from penguin values in snapshot player zones with safe fallback", () => {
     const ledger = selectPlayersLedger({
       G: {
         version: "v",
@@ -249,8 +250,8 @@ describe("fg phase 6 round connection contract", () => {
         discardPile: [],
         iceGrid: [],
         players: {
-          "0": { name: "Local Penguin", zone: ["c1", "c2", "c3"], hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" },
-          "1": { name: "Walrus Don", zone: ["c4"], hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" }
+          "0": { name: "Local Penguin", zone: ["penguin-001", "penguin-009", "penguin-016", "walrus-001"], hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" },
+          "1": { name: "Walrus Don", zone: ["walrus-002"], hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" }
         },
         pendingStage: null,
         autoResolveQueue: [],
@@ -295,10 +296,16 @@ describe("fg phase 6 round connection contract", () => {
     });
 
     expect(ledger).toEqual([
-      { id: "0", name: "Local Penguin", score: 3, cards: 3, cardIDs: ["c1", "c2", "c3"] },
-      { id: "1", name: "Walrus Don", score: 1, cards: 1, cardIDs: ["c4"] }
+      { id: "0", name: "Local Penguin", score: 6, cards: 4, cardIDs: ["penguin-001", "penguin-009", "penguin-016", "walrus-001"] },
+      { id: "1", name: "Walrus Don", score: 0, cards: 1, cardIDs: ["walrus-002"] }
     ]);
     expect(fallback).toEqual([]);
+  });
+
+  it("maps each penguin value to its own card asset", () => {
+    expect(getCardAssetById("penguin-001")).toBe("/assets/cards/types/penguin-1.png");
+    expect(getCardAssetById("penguin-009")).toBe("/assets/cards/types/penguin-2.png");
+    expect(getCardAssetById("penguin-016")).toBe("/assets/cards/types/penguin-3.png");
   });
 
   it("mounts local hand through a Zustand container boundary instead of static mock hand props", () => {

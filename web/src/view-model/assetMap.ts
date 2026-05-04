@@ -13,6 +13,12 @@ const CARD_ASSET_MAP: Record<CardType, string> = {
   seal_bomb: "/assets/cards/types/seal-bomb.png"
 };
 
+const PENGUIN_ASSET_BY_VALUE = {
+  1: "/assets/cards/types/penguin-1.png",
+  2: "/assets/cards/types/penguin-2.png",
+  3: "/assets/cards/types/penguin-3.png"
+} as const;
+
 export function getCardAssetByType(type: CardType): string {
   return CARD_ASSET_MAP[type] ?? CARD_FALLBACK;
 }
@@ -30,5 +36,10 @@ export function getCardAssetById(cardID: string): string {
   if (!card) {
     return CARD_FALLBACK;
   }
+
+  if (card.type === "penguin") {
+    return PENGUIN_ASSET_BY_VALUE[card.value ?? 1];
+  }
+
   return getCardAssetByType(card.type);
 }
