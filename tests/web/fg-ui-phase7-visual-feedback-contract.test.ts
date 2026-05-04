@@ -38,11 +38,11 @@ describe("fg phase 7 visual feedback contract", () => {
     const hiddenNodes = collectElements(hiddenTree);
     const revealedNodes = collectElements(revealedTree);
 
-    const hiddenStateNode = hiddenNodes.find((node) => (node as { props?: Record<string, unknown> }).props?.["data-card-visibility"] === "hidden");
-    const revealedStateNode = revealedNodes.find((node) => (node as { props?: Record<string, unknown> }).props?.["data-card-visibility"] === "revealed");
+    const imgHidden = hiddenNodes.find((node) => (node as { props?: Record<string, unknown> }).props?.["alt"] === "Carta oculta");
+    const imgRevealed = revealedNodes.find((node) => (node as { props?: Record<string, unknown> }).props?.["alt"] === "A♣");
 
-    expect(hiddenStateNode).toBeTruthy();
-    expect(revealedStateNode).toBeTruthy();
+    expect(imgHidden).toBeTruthy();
+    expect(imgRevealed).toBeTruthy();
   });
 
   it("marks active-turn player rows for immediate turn recognition", () => {

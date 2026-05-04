@@ -15,9 +15,7 @@ export function Card({ id, label, image, selected = false, hidden = false, motio
   const content = (
     <>
       <img src={image} alt={hidden ? "Carta oculta" : label} className={`${styles.img} ${hidden ? styles.imgHidden : styles.imgRevealed}`} />
-      <span className={`${styles.visibilityTag} ${hidden ? styles.visibilityTagHidden : styles.visibilityTagRevealed}`} data-card-visibility={hidden ? "hidden" : "revealed"}>
-        {hidden ? "Oculta" : "Revelada"}
-      </span>
+
     </>
   );
 
