@@ -165,7 +165,6 @@
 
 .compactCardButton:disabled {
   cursor: default;
-  opacity: 0.64;
 }
 
 .compactCardSelected {
@@ -269,7 +268,6 @@
 .scoreUnit {
   font-size: 0.74rem;
   font-weight: 700;
-  opacity: 0.9;
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }

@@ -9,7 +9,7 @@
   overflow: hidden;
   position: relative;
   box-shadow: var(--fg-shadow-card);
-  transition: transform var(--fg-transition-fast), box-shadow var(--fg-transition-fast), border-color var(--fg-transition-fast);
+  transition: transform 160ms ease, box-shadow var(--fg-transition-fast), border-color var(--fg-transition-fast);
 }
 
 .card:hover {
@@ -18,10 +18,37 @@
   box-shadow: 0 12px 24px rgba(2, 8, 18, 0.5), 0 0 18px rgba(22, 217, 255, 0.34);
 }
 
+.idle {
+  transform: scale(1);
+}
+
+.selectable {
+  transform: scale(1);
+  cursor: pointer;
+}
+
 .selected {
-  outline: 2px solid var(--fg-color-cyan-glow);
-  outline-offset: 1px;
-  box-shadow: 0 0 22px rgba(22, 217, 255, 0.42), 0 14px 26px rgba(2, 8, 18, 0.55);
+  transform: scale(1.1);
+  cursor: pointer;
+  z-index: 2;
+}
+
+.selected:hover {
+  transform: scale(1.1) translateY(-1px);
+}
+
+.disabled {
+  transform: scale(1);
+  pointer-events: none;
+}
+
+.selectionOverlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  border-radius: var(--fg-radius-md);
 }
 
 .img {

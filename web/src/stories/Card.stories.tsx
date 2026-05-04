@@ -7,18 +7,37 @@ const meta: Meta<typeof Card> = {
   args: {
     id: "penguin-001",
     label: "Pinguino 1",
-    image: "/assets/cards/types/penguin-1.png"
+    image: "/assets/cards/types/penguin-1.png",
+    interactionState: "idle",
   }
 };
 
 export default meta;
 type Story = StoryObj<typeof Card>;
 
-export const Visible: Story = {};
+export const Idle: Story = {};
+
 export const Hidden: Story = {
   args: {
     hidden: true,
     image: "/assets/cards/backs/frozen-dreamcatcher-back.png"
   }
 };
-export const Selected: Story = { args: { selected: true } };
+
+export const Selectable: Story = {
+  args: {
+    interactionState: "selectable",
+  }
+};
+
+export const Selected: Story = {
+  args: {
+    interactionState: "selected",
+  }
+};
+
+export const Disabled: Story = {
+  args: {
+    interactionState: "disabled",
+  }
+};

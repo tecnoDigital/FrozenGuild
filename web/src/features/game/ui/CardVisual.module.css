@@ -27,7 +27,6 @@
 
 .disabled {
   filter: grayscale(0.7) brightness(0.75);
-  opacity: 0.72;
 }
 
 .hidden {

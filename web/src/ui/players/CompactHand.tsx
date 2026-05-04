@@ -36,7 +36,7 @@ export function CompactHand({ cardIDs, clickableIndexes = [], selectedIndexes = 
               className={`${styles.compactCard} ${size === "local" ? styles.compactCardLocal : ""}`}
               title={cardID}
               initial={false}
-              animate={{ scale: isSelected ? 1.05 : 1, y: isSelected ? -1 : 0, opacity: size === "local" || canClick ? 1 : 0.72 }}
+              animate={{ scale: isSelected ? 1.05 : 1, y: isSelected ? -1 : 0 }}
               transition={{ duration: 0.15, ease: "easeOut" }}
             >
               <img className={styles.compactCardImg} src={getCardAssetById(cardID)} alt={cardID} />
