@@ -1,7 +1,7 @@
 import { PlayerLedgerPanel } from "../players/PlayerLedgerPanel.js";
 
 type RightLedgerRailProps = {
-  players: Array<{ id: string; name: string; score: number; cards: number; cardIDs: string[]; isActiveTurn?: boolean; isLocalPlayer?: boolean }>;
+  players: Array<{ id: string; name: string; score: number; cards: number; cardIDs: string[]; avatarId?: string; avatarSrc?: string; isActiveTurn?: boolean; isLocalPlayer?: boolean }>;
   unstablePlayers: Array<{ id: string; name: string; status: "reconnecting" | "absent"; disconnectSeconds: number | null }>;
   clickableCardsByPlayerID?: Record<string, number[]>;
   selectedCardsByPlayerID?: Record<string, number[]>;

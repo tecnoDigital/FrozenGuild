@@ -26,11 +26,34 @@ import { LocalPlayerHandPanel } from "../players/LocalPlayerHandPanel.js";
 import {
   resolveLobbyAvatarSrc,
   resolveLobbyColorValue,
+  type LobbyAvatarID,
   selectLobbyAvatar,
   selectLobbyColor,
   useLobbyProfileStore
 } from "../../features/lobby/lobbyStore.js";
 import { assets } from "../../ui/assets.js";
+import botAvatarSrc from "../../assets/avatars/avatar-bot.png";
+
+type LedgerAvatarPlayer = {
+  name: string;
+  avatarId?: string;
+};
+
+function isBotLedgerPlayer(player: LedgerAvatarPlayer) {
+  return player.name.trim().toUpperCase().startsWith("BOT ");
+}
+
+function resolveLedgerAvatarSrc(player: LedgerAvatarPlayer, isLocal: boolean, localAvatarSrc: string) {
+  if (isBotLedgerPlayer(player)) {
+    return botAvatarSrc;
+  }
+
+  if (isLocal) {
+    return localAvatarSrc;
+  }
+
+  return resolveLobbyAvatarSrc(player.avatarId as LobbyAvatarID);
+}
 
 export function LeftStatusRailContainer() {
   const playerName = useFrozenGuildStore(selectLocalPlayerName);
@@ -405,6 +428,8 @@ export function RightLedgerRailContainer() {
   const unstablePlayers = useFrozenGuildStore(selectUnstablePlayers);
   const localPlayerID = useFrozenGuildStore((state) => state.localPlayerID);
   const currentTurnPlayerID = useFrozenGuildStore((state) => state.ctx?.currentPlayer ?? null);
+  const lobbyAvatar = useLobbyProfileStore(selectLobbyAvatar);
+  const lobbyAvatarSrc = resolveLobbyAvatarSrc(lobbyAvatar);
   const flow = useFrozenGuildStore(selectActionFlowView);
   const swapSourceKey = useFrozenGuildStore((state) => state.swapDraftSourceKey);
   const swapTargetKey = useFrozenGuildStore((state) => state.swapDraftTargetKey);
@@ -458,6 +483,7 @@ export function RightLedgerRailContainer() {
     <RightLedgerRail
       players={rivals.map((player) => ({
         ...player,
+        avatarSrc: resolveLedgerAvatarSrc(player, false, lobbyAvatarSrc),
         isLocalPlayer: false,
         isActiveTurn: currentTurnPlayerID === player.id
       }))}
@@ -529,15 +555,6 @@ export function LocalHandContainer() {
   );
 }
 
-const ledgerAvatarFallbacks = [
-  assets.characters.avatars.penguin2,
-  assets.characters.avatars.walrus,
-  assets.characters.avatars.petrel,
-  assets.characters.avatars.seaElephant,
-  assets.characters.avatars.orca,
-  assets.characters.avatars.sealBomb
-];
-
 export function RivalsLedgerContainer() {
   const players = useFrozenGuildStore(selectPlayersLedger);
   const unstablePlayers = useFrozenGuildStore(selectUnstablePlayers);
@@ -546,18 +563,11 @@ export function RivalsLedgerContainer() {
   const lobbyAvatar = useLobbyProfileStore(selectLobbyAvatar);
   const lobbyAvatarSrc = resolveLobbyAvatarSrc(lobbyAvatar);
 
-  let fallbackIndex = 0;
-
   return (
     <RightLedgerRail
       players={players.map((player) => {
         const isLocal = player.id === localPlayerID;
-        const avatarSrc = isLocal
-          ? lobbyAvatarSrc
-          : (ledgerAvatarFallbacks[fallbackIndex % ledgerAvatarFallbacks.length] ?? assets.characters.avatars.penguin2);
-        if (!isLocal) {
-          fallbackIndex += 1;
-        }
+        const avatarSrc = resolveLedgerAvatarSrc(player, isLocal, lobbyAvatarSrc);
         return {
           ...player,
           isActiveTurn: currentTurnPlayerID === player.id,

@@ -768,6 +768,7 @@ export function selectPlayersLedger(state: FrozenGuildUiStore) {
   lastLedger = Object.entries(state.G.players).map(([id, player]) => ({
     id,
     name: player.name,
+    avatarId: player.avatarId,
     score: calculatePenguinScore(player.zone),
     cards: player.zone.length,
     cardIDs: player.zone

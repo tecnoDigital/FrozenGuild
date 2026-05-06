@@ -79,8 +79,8 @@
 }
 
 .avatar {
-  width: clamp(32px, 2.4vw, 42px);
-  height: clamp(32px, 2.4vw, 42px);
+  width: clamp(44px, 3.2vw, 58px);
+  height: clamp(44px, 3.2vw, 58px);
   border-radius: 999px;
   border: 1px solid rgba(125, 220, 255, 0.42);
   background: radial-gradient(circle at 20% 20%, rgba(160, 227, 255, 0.5), rgba(8, 30, 51, 0.95));
@@ -340,7 +340,7 @@
     var(--fg-bg-panel);
   box-shadow: var(--player-row-shadow);
   display: grid;
-  grid-template-columns: clamp(72px, 5.6vw, 88px) 1fr auto;
+  grid-template-columns: clamp(92px, 7vw, 112px) 1fr auto;
   align-items: center;
   gap: clamp(8px, 0.8vw, 12px);
 }
@@ -357,8 +357,8 @@
 
 /* Zone 1: Avatar */
 .hudAvatar {
-  width: clamp(68px, 5.2vw, 84px);
-  height: clamp(68px, 5.2vw, 84px);
+  width: clamp(88px, 6.6vw, 108px);
+  height: clamp(88px, 6.6vw, 108px);
   border-radius: 50%;
   overflow: hidden;
   border: 2px solid rgba(255, 196, 80, 0.8);
@@ -542,12 +542,12 @@
   .hudRow {
     padding: 6px 10px;
     gap: 8px;
-    grid-template-columns: clamp(60px, 5vw, 76px) 1fr auto;
+    grid-template-columns: clamp(78px, 6vw, 94px) 1fr auto;
   }
 
   .hudAvatar {
-    width: clamp(58px, 4.8vw, 72px);
-    height: clamp(58px, 4.8vw, 72px);
+    width: clamp(74px, 5.6vw, 90px);
+    height: clamp(74px, 5.6vw, 90px);
   }
 
   .hudName {
@@ -591,8 +591,8 @@
   }
 
   .avatar {
-    width: 30px;
-    height: 30px;
+    width: 42px;
+    height: 42px;
   }
 
   .identityInfo .name {

@@ -9,6 +9,7 @@ type PlayerLedgerPanelProps = {
     score: number;
     cards: number;
     cardIDs: string[];
+    avatarId?: string;
     avatarSrc?: string;
     isActiveTurn?: boolean;
     isLocalPlayer?: boolean;

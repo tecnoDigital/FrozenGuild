@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Frozen Guild — Lobby Preview</title>
+  <style>
+    :root {
+      --text: #e6f5ff;
+      --muted: #8db4d6;
+      --accent: #63ece3;
+      --border: rgba(162, 216, 255, 0.25);
+      --surface: rgba(9, 30, 55, 0.62);
+      --surface-2: rgba(5, 20, 38, 0.62);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --font: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      color: var(--text);
+      background:
+        linear-gradient(180deg, rgba(6, 16, 29, 0.28) 0%, rgba(11, 29, 54, 0.34) 55%, rgba(9, 21, 42, 0.48) 100%),
+        radial-gradient(circle at 20% 0%, rgba(120, 214, 255, 0.18), transparent 35%),
+        #071224;
+      background-attachment: fixed;
+    }
+
+    .screen {
+      min-height: 100vh;
+      padding: 18px;
+      display: grid;
+      place-items: start center;
+      position: relative;
+      isolation: isolate;
+    }
+
+    .lobbyFrame {
+      width: min(900px, 100%);
+      position: relative;
+      z-index: 1;
+      border: 1px solid rgba(164, 224, 255, 0.38);
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(6, 25, 46, 0.72), rgba(7, 28, 52, 0.72));
+      box-shadow: 0 12px 34px rgba(6, 17, 34, 0.45), inset 0 1px 0 rgba(185, 229, 255, 0.25);
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    @media (min-width: 901px) {
+      .lobbyFrame {
+        grid-template-columns: 1fr 320px;
+        grid-template-areas:
+          "hero   hero"
+          "primary secondary"
+          "cta    cta";
+      }
+      .hero    { grid-area: hero; }
+      .primaryColumn   { grid-area: primary; }
+      .secondaryColumn { grid-area: secondary; }
+      .ctaBreakIce { grid-area: cta; }
+    }
+
+    .hero {
+      border: 1px solid rgba(171, 224, 255, 0.28);
+      border-radius: 16px;
+      background: rgba(11, 39, 72, 0.45);
+      padding: 14px;
+    }
+    .heroBadge {
+      display: inline-flex;
+      padding: 3px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(173, 240, 255, 0.55);
+      background: rgba(37, 167, 187, 0.35);
+      font-size: 0.8rem;
+    }
+    .heroTitle { margin: 10px 0 0; font-size: clamp(1.6rem, 3vw, 2.25rem); line-height: 1.06; }
+    .heroClaim { margin: 10px 0 0; color: #c7e3fa; max-width: 58ch; }
+    .heroMeta  { margin: 8px 0 0; color: var(--muted); font-size: 0.85rem; }
+
+    .primaryColumn   { display: grid; gap: 12px; }
+    .secondaryColumn { display: grid; gap: 12px; align-content: start; }
+
+    .panel {
+      border: 1px solid rgba(162, 216, 255, 0.25);
+      border-radius: 14px;
+      background: var(--surface);
+      padding: 14px;
+    }
+    .panel h3 { margin: 0 0 10px; font-size: 1.05rem; }
+
+    .field { display: grid; gap: 6px; }
+    .field input, .field select {
+      width: 100%;
+      margin-top: 4px;
+      border: 1px solid rgba(162, 216, 255, 0.35);
+      border-radius: 10px;
+      background: var(--surface-2);
+      color: var(--text);
+      padding: 9px 10px;
+      font: inherit;
+    }
+
+    .optionGrid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .optionCard, .optionCardSelected {
+      border: 1px solid rgba(162, 216, 255, 0.35);
+      border-radius: 10px;
+      background: var(--surface-2);
+      color: var(--text);
+      padding: 8px 6px;
+      display: grid;
+      justify-items: center;
+      gap: 4px;
+      cursor: pointer;
+      font: inherit;
+    }
+    .optionCardSelected { border-color: var(--accent); box-shadow: 0 0 14px rgba(99, 236, 227, 0.35); }
+    .optionAvatar { width: 42px; height: 42px; border-radius: 50%; font-size: 28px; display: grid; place-items: center; }
+
+    .colorGrid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .colorSwatch, .colorSwatchSelected {
+      border: 1px solid rgba(162, 216, 255, 0.35);
+      border-radius: 10px;
+      background: var(--surface-2);
+      color: var(--text);
+      padding: 8px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      cursor: pointer;
+      font: inherit;
+    }
+    .colorSwatchSelected { border-color: var(--accent); box-shadow: 0 0 14px rgba(99, 236, 227, 0.35); }
+    .colorDot { width: 12px; height: 12px; border-radius: 999px; }
+
+    .previewCard {
+      border: 1px solid rgba(162, 216, 255, 0.35);
+      border-radius: 12px;
+      background: var(--surface-2);
+      padding: 10px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 10px;
+    }
+    .previewAvatar { width: 48px; height: 48px; border-radius: 50%; font-size: 36px; display: grid; place-items: center; }
+    .previewName { margin: 0; font-weight: 700; }
+    .previewMeta { margin: 3px 0 0; color: var(--muted); font-size: 0.82rem; }
+    .previewColor { width: 16px; height: 16px; border-radius: 999px; box-shadow: 0 0 0 1px rgba(230, 245, 255, 0.3); }
+
+    .botRow { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+    .botChip, .botChipActive {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface-2);
+      color: var(--text);
+      padding: 4px 10px;
+      cursor: pointer;
+      font: inherit;
+    }
+    .botChipActive {
+      border-color: var(--accent);
+      background-image: linear-gradient(135deg, rgba(99, 236, 227, 0.5), rgba(46, 200, 198, 0.5));
+      color: #63ece3;
+      font-weight: 700;
+      box-shadow: 0 0 14px rgba(99, 236, 227, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+
+    .actionRow { display: grid; gap: 10px; margin-top: 14px; }
+    .createBtnSmall {
+      width: 100%;
+      max-width: 220px;
+      justify-self: start;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 8px 18px rgba(5, 18, 33, 0.35);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface-2);
+      color: var(--text);
+      padding: 10px 14px;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 700;
+    }
+    .createBtnSmall:hover { border-color: var(--accent); }
+
+    .seatGrid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .seatCard {
+      border: 1px solid rgba(162, 216, 255, 0.24);
+      border-radius: 12px;
+      background: rgba(5, 22, 40, 0.56);
+      padding: 10px;
+      display: grid;
+      gap: 6px;
+      justify-items: center;
+      text-align: center;
+    }
+    .seatAvatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid rgba(127, 227, 255, 0.58);
+      background: radial-gradient(circle at 30% 20%, rgba(102, 231, 255, 0.32), rgba(9, 42, 74, 0.85));
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+    }
+    .seatStatusHuman { font-size: 0.82rem; color: #58f0a8; }
+    .seatStatusBot   { font-size: 0.82rem; color: #ffca75; font-weight: 700; }
+    .seatStatusMuted { font-size: 0.82rem; color: var(--muted); }
+
+    .panelHeaderRow { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .panelHeaderRow h3 { margin: 0; }
+    .inlineButton {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface-2);
+      color: var(--text);
+      padding: 4px 10px;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .matchRow {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 10px;
+      background: rgba(8, 20, 34, 0.55);
+      cursor: pointer;
+    }
+    .matchRowActive { border-color: var(--accent); box-shadow: 0 0 14px rgba(99, 236, 227, 0.25); }
+    .matchTitleButton { border: 0; background: transparent; color: var(--text); font-weight: 700; cursor: pointer; padding: 0; font: inherit; font-size: 1rem; }
+    .matchMeta { margin: 6px 0 0; color: var(--muted); font-size: 0.86rem; line-height: 1.3; }
+
+    .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .card {
+      border: 1px solid rgba(162, 216, 255, 0.35);
+      border-radius: 12px;
+      background: rgba(5, 20, 38, 0.62);
+      padding: 10px;
+      display: grid;
+      gap: 6px;
+      justify-items: center;
+      text-align: center;
+    }
+    .cardEmoji { font-size: 40px; }
+    .cardLabel { font-size: 0.82rem; color: var(--muted); }
+
+    .featuredCard .card { grid-template-columns: 1fr; }
+    .featuredDetail { margin: 10px 0 0; color: var(--muted); font-size: 0.9rem; }
+
+    .ctaBreakIce {
+      border: 1px solid rgba(129, 240, 255, 0.75);
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(79, 208, 255, 0.76), rgba(33, 143, 214, 0.92));
+      color: #eff9ff;
+      font-size: clamp(1.35rem, 3vw, 2rem);
+      font-weight: 800;
+      padding: 14px 18px;
+      margin-top: 4px;
+      text-shadow: 0 2px 0 rgba(11, 36, 61, 0.75);
+      box-shadow: 0 10px 22px rgba(8, 33, 58, 0.45), inset 0 1px 0 rgba(221, 251, 255, 0.65);
+      cursor: pointer;
+      font: inherit;
+    }
+    .ctaBreakIce:disabled { opacity: 0.7; cursor: default; }
+
+    @media (max-width: 900px) {
+      .lobbyFrame { padding: 12px; }
+      .secondaryColumn { display: none; }
+      .seatGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .panelHeaderRow { flex-direction: column; align-items: flex-start; }
+      .inlineButton, .matchTitleButton, .ctaBreakIce, .createBtnSmall { width: 100%; }
+      .matchTitleButton { text-align: left; }
+      .optionGrid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <main class="screen">
+    <section class="lobbyFrame">
+      <!-- HERO -->
+      <header class="hero">
+        <span class="heroBadge">Lobby unico</span>
+        <h1 class="heroTitle">Rompe el hielo sin leer testamento.</h1>
+        <p class="heroClaim">Introduce tu nombre, crea o unete a una sala y echa un vistazo a las cartas de la expedicion.</p>
+        <p class="heroMeta">Frozen Guild &middot; Rompe el hielo. Controla la mesa.</p>
+      </header>
+
+      <!-- COLUMNA PRINCIPAL -->
+      <div class="primaryColumn">
+        <!-- CREAR PARTIDA -->
+        <section class="panel">
+          <h3 style="margin-top:0">Crear partida</h3>
+          <div class="field" style="margin-bottom:10px">
+            <label>Nombre de jugador
+              <input type="text" value="Jugador" maxlength="24" />
+            </label>
+          </div>
+
+          <div style="margin-bottom:10px">
+            <strong>Avatar</strong>
+            <div class="optionGrid" style="margin-top:6px">
+              <button class="optionCardSelected" title="Penguin I">
+                <span class="optionAvatar">&#128039;</span>
+                <span>Penguin I</span>
+              </button>
+              <button class="optionCard" title="Penguin II">
+                <span class="optionAvatar">&#128039;</span>
+                <span>Penguin II</span>
+              </button>
+              <button class="optionCard" title="Penguin III">
+                <span class="optionAvatar">&#128039;</span>
+                <span>Penguin III</span>
+              </button>
+              <button class="optionCard" title="Walrus">
+                <span class="optionAvatar">&#129451;</span>
+                <span>Walrus</span>
+              </button>
+              <button class="optionCard" title="Petrel">
+                <span class="optionAvatar">&#128038;</span>
+                <span>Petrel</span>
+              </button>
+              <button class="optionCard" title="Sea Elephant">
+                <span class="optionAvatar">&#128011;</span>
+                <span>Sea Elephant</span>
+              </button>
+              <button class="optionCard" title="Orca">
+                <span class="optionAvatar">&#128011;</span>
+                <span>Orca</span>
+              </button>
+              <button class="optionCard" title="Seal-Bomb">
+                <span class="optionAvatar">&#128163;</span>
+                <span>Seal-Bomb</span>
+              </button>
+            </div>
+          </div>
+
+          <div style="margin-bottom:10px">
+            <strong>Color</strong>
+            <div class="colorGrid" style="margin-top:6px">
+              <button class="colorSwatchSelected">
+                <span class="colorDot" style="background:#63ece3"></span>
+                <span>Ice</span>
+              </button>
+              <button class="colorSwatch">
+                <span class="colorDot" style="background:#78e9ff"></span>
+                <span>Aurora</span>
+              </button>
+              <button class="colorSwatch">
+                <span class="colorDot" style="background:#a8c9ff"></span>
+                <span>Frost</span>
+              </button>
+              <button class="colorSwatch">
+                <span class="colorDot" style="background:#8ea6ff"></span>
+                <span>Midnight</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="previewCard" style="margin-bottom:10px">
+            <span class="previewAvatar">&#128039;</span>
+            <div>
+              <p class="previewName">Jugador</p>
+              <p class="previewMeta">Color</p>
+            </div>
+            <span class="previewColor" style="background:#63ece3" aria-hidden="true"></span>
+          </div>
+
+          <label class="field" style="margin-bottom:10px">
+            Cantidad de jugadores
+            <select>
+              <option>2</option>
+              <option>3</option>
+              <option selected>4</option>
+            </select>
+          </label>
+
+          <div>
+            <strong>Asientos BOT</strong>
+            <div class="botRow">
+              <button class="botChipActive">BOT 1 &#10003;</button>
+              <button class="botChip">BOT 2</button>
+              <button class="botChip">BOT 3</button>
+            </div>
+          </div>
+
+          <div class="actionRow">
+            <button class="createBtnSmall">Crear partida</button>
+          </div>
+        </section>
+
+        <!-- JUGADORES DE LA SALA -->
+        <section class="panel">
+          <h3 style="margin-top:0">Jugadores de la sala &middot; match-abc123</h3>
+          <div class="seatGrid">
+            <article class="seatCard">
+              <div class="seatAvatar">J</div>
+              <strong>Jugador</strong>
+              <span class="seatStatusHuman">Jugador</span>
+            </article>
+            <article class="seatCard">
+              <div class="seatAvatar">B</div>
+              <strong>BOT 1</strong>
+              <span class="seatStatusBot">BOT</span>
+            </article>
+            <article class="seatCard">
+              <div class="seatAvatar">B</div>
+              <strong>BOT 2</strong>
+              <span class="seatStatusBot">BOT</span>
+            </article>
+            <article class="seatCard">
+              <div class="seatAvatar">+</div>
+              <strong>Vacio</strong>
+              <span class="seatStatusMuted">Invitar</span>
+            </article>
+          </div>
+        </section>
+
+        <!-- PARTIDAS DISPONIBLES -->
+        <section class="panel">
+          <div class="panelHeaderRow">
+            <h3>Partidas con asientos disponibles</h3>
+            <button class="inlineButton">Actualizar</button>
+          </div>
+          <div class="matchRow matchRowActive">
+            <button class="matchTitleButton">Match match-abc123</button>
+            <p class="matchMeta">Ocupados: 0, 1 &middot; Libres: 2, 3</p>
+            <p class="matchMeta">Capacidad: 4 jugadores</p>
+          </div>
+          <div class="matchRow" style="margin-top:8px">
+            <button class="matchTitleButton">Match match-xyz789</button>
+            <p class="matchMeta">Ocupados: 0 &middot; Libres: 1, 2</p>
+            <p class="matchMeta">Capacidad: 3 jugadores</p>
+          </div>
+        </section>
+      </div>
+
+      <!-- COLUMNA SECUNDARIA -->
+      <div class="secondaryColumn">
+        <!-- EXPEDICION -->
+        <section class="panel">
+          <h3 style="margin-top:0">Expedicion</h3>
+          <div class="cards">
+            <div class="card">
+              <span class="cardEmoji">&#128039;</span>
+              <span class="cardLabel">Pinguino</span>
+            </div>
+            <div class="card">
+              <span class="cardEmoji">&#128011;</span>
+              <span class="cardLabel">Orca</span>
+            </div>
+            <div class="card">
+              <span class="cardEmoji">&#129451;</span>
+              <span class="cardLabel">Morsa</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- CARTA DESTACADA -->
+        <section class="panel featuredCard">
+          <h3 style="margin-top:0">Carta destacada</h3>
+          <div class="card">
+            <span class="cardEmoji">&#128011;</span>
+            <span class="cardLabel">Orca</span>
+          </div>
+          <p class="featuredDetail">Destruye una carta propia para continuar.</p>
+        </section>
+      </div>
+
+      <!-- CTA -->
+      <button type="button" class="ctaBreakIce" disabled>Unirse a la partida</button>
+    </section>
+  </main>
+</body>
+</html>
