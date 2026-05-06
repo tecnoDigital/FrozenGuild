@@ -19,13 +19,12 @@ export function RightLedgerRail({ players, unstablePlayers, clickableCardsByPlay
   });
 
   return (
-    <div>
-      <PlayerLedgerPanel
-        players={rows}
-        {...(clickableCardsByPlayerID ? { clickableCardsByPlayerID } : {})}
-        {...(selectedCardsByPlayerID ? { selectedCardsByPlayerID } : {})}
-        {...(onPlayerCardClick ? { onPlayerCardClick } : {})}
-      />
-    </div>
+    <PlayerLedgerPanel
+      players={rows}
+      variant="rail"
+      {...(clickableCardsByPlayerID ? { clickableCardsByPlayerID } : {})}
+      {...(selectedCardsByPlayerID ? { selectedCardsByPlayerID } : {})}
+      {...(onPlayerCardClick ? { onPlayerCardClick } : {})}
+    />
   );
 }

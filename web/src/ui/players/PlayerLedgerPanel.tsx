@@ -18,12 +18,21 @@ type PlayerLedgerPanelProps = {
   clickableCardsByPlayerID?: Record<string, number[]>;
   selectedCardsByPlayerID?: Record<string, number[]>;
   onPlayerCardClick?: (playerID: string, index: number) => void;
+  variant?: "default" | "rail";
 };
 
-export function PlayerLedgerPanel({ players, clickableCardsByPlayerID = {}, selectedCardsByPlayerID = {}, onPlayerCardClick }: PlayerLedgerPanelProps) {
+export function PlayerLedgerPanel({
+  players,
+  clickableCardsByPlayerID = {},
+  selectedCardsByPlayerID = {},
+  onPlayerCardClick,
+  variant = "default"
+}: PlayerLedgerPanelProps) {
+  const panelClass = variant === "rail" ? styles.panelRail : styles.panel;
+  const rowLayout = variant === "rail" ? "hud" : "default";
   return (
-    <Panel title="Ledger de jugadores">
-      <div className={styles.panel}>
+    <Panel title="Ledger de jugadores" variant={variant === "rail" ? "ghost" : "default"}>
+      <div className={panelClass}>
         {players.map((player) => (
           <PlayerLedgerRow
             key={player.id}
@@ -36,6 +45,7 @@ export function PlayerLedgerPanel({ players, clickableCardsByPlayerID = {}, sele
             isLocalPlayer={!!player.isLocalPlayer}
             clickableCardIndexes={clickableCardsByPlayerID[player.id] ?? []}
             selectedCardIndexes={selectedCardsByPlayerID[player.id] ?? []}
+            layout={rowLayout}
             {...(player.avatarSrc ? { avatarSrc: player.avatarSrc } : {})}
             {...(onPlayerCardClick ? { onCardClick: onPlayerCardClick } : {})}
             {...(player.status ? { status: player.status } : {})}

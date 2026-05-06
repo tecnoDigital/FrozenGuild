@@ -30,6 +30,7 @@ import {
   selectLobbyColor,
   useLobbyProfileStore
 } from "../../features/lobby/lobbyStore.js";
+import { assets } from "../../ui/assets.js";
 
 export function LeftStatusRailContainer() {
   const playerName = useFrozenGuildStore(selectLocalPlayerName);
@@ -68,25 +69,12 @@ export function CenterBoardStageContainer({ onFishFromIce }: { onFishFromIce: (s
   const setSwapSourceKey = useFrozenGuildStore((state) => state.setSwapDraftSourceKey);
   const setSwapTargetKey = useFrozenGuildStore((state) => state.setSwapDraftTargetKey);
 const canFish = useFrozenGuildStore((state) => {
-    if (!state.G || !state.ctx || !state.localPlayerID) {
-      console.log("[canFish:false] no state", { hasG: !!state.G, hasCtx: !!state.ctx, localPlayerID: state.localPlayerID });
-      return false;
-    }
-    if (state.gameover !== undefined) {
-      console.log("[canFish:false] gameover detected", { gameover: state.gameover });
-      return false;
-    }
+    if (!state.G || !state.ctx || !state.localPlayerID) return false;
+    if (state.gameover !== undefined) return false;
     const isMyTurn = state.ctx.currentPlayer === state.localPlayerID;
-    if (!isMyTurn || state.G.turn.actionCompleted) {
-      console.log("[canFish:false] not my turn or action completed", { isMyTurn, actionCompleted: state.G.turn.actionCompleted });
-      return false;
-    }
+    if (!isMyTurn || state.G.turn.actionCompleted) return false;
     const effectiveValue = state.G.dice.value === 6 ? state.G.turn.padrinoAction : state.G.dice.value;
-    const can = state.G.dice.rolled && effectiveValue !== null && effectiveValue >= 1 && effectiveValue <= 3;
-    if (!can) {
-      console.log("[canFish:false] dice not fishable", { diceRolled: state.G.dice.rolled, effectiveValue, diceValue: state.G.dice.value });
-    }
-    return can;
+    return state.G.dice.rolled && effectiveValue !== null && effectiveValue >= 1 && effectiveValue <= 3;
   });
 
   return (
@@ -541,22 +529,43 @@ export function LocalHandContainer() {
   );
 }
 
+const ledgerAvatarFallbacks = [
+  assets.characters.avatars.penguin2,
+  assets.characters.avatars.walrus,
+  assets.characters.avatars.petrel,
+  assets.characters.avatars.seaElephant,
+  assets.characters.avatars.orca,
+  assets.characters.avatars.sealBomb
+];
+
 export function RivalsLedgerContainer() {
   const players = useFrozenGuildStore(selectPlayersLedger);
   const unstablePlayers = useFrozenGuildStore(selectUnstablePlayers);
   const localPlayerID = useFrozenGuildStore((state) => state.localPlayerID);
   const currentTurnPlayerID = useFrozenGuildStore((state) => state.ctx?.currentPlayer ?? null);
+  const lobbyAvatar = useLobbyProfileStore(selectLobbyAvatar);
+  const lobbyAvatarSrc = resolveLobbyAvatarSrc(lobbyAvatar);
+
+  let fallbackIndex = 0;
 
   return (
     <RightLedgerRail
-      players={players
-        .filter((player) => player.id !== localPlayerID)
-        .map((player) => ({
+      players={players.map((player) => {
+        const isLocal = player.id === localPlayerID;
+        const avatarSrc = isLocal
+          ? lobbyAvatarSrc
+          : (ledgerAvatarFallbacks[fallbackIndex % ledgerAvatarFallbacks.length] ?? assets.characters.avatars.penguin2);
+        if (!isLocal) {
+          fallbackIndex += 1;
+        }
+        return {
           ...player,
           isActiveTurn: currentTurnPlayerID === player.id,
-          isLocalPlayer: false
-        }))}
-      unstablePlayers={unstablePlayers.filter((player) => player.id !== localPlayerID)}
+          isLocalPlayer: isLocal,
+          avatarSrc
+        };
+      })}
+      unstablePlayers={unstablePlayers}
     />
   );
 }

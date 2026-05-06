@@ -1,4 +1,8 @@
 .panel {
+  --player-row-inline-offset: clamp(0px, 6vw, 100px);
+  --player-row-justify: end;
+  --player-row-margin: auto;
+
   border: var(--fg-border-icy);
   border-radius: var(--fg-radius-lg);
   padding: clamp(12px, 1vw, 16px);
@@ -7,6 +11,15 @@
     var(--fg-bg-panel);
   box-shadow: var(--fg-shadow-panel);
   backdrop-filter: var(--fg-backdrop-filter-premium);
+}
+
+.panelGhost {
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .panelTitle {

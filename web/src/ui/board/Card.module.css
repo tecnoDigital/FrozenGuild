@@ -28,13 +28,13 @@
 }
 
 .selected {
-  transform: scale(1.1);
+  transform: scale(1.2);
   cursor: pointer;
   z-index: 2;
 }
 
 .selected:hover {
-  transform: scale(1.1) translateY(-1px);
+  transform: scale(1.2) translateY(-1px);
 }
 
 .disabled {

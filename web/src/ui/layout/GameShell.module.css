@@ -1,13 +1,14 @@
 .gameShell {
   display: grid;
-  grid-template-columns: clamp(220px, 15vw, 280px) minmax(420px, 0.82fr) clamp(420px, 34vw, 620px);
+  grid-template-columns: clamp(180px, 12vw, 240px) minmax(480px, 1fr) clamp(360px, 30vw, 460px);
   grid-template-rows: minmax(0, 1fr) auto;
   grid-template-areas:
     "left center right"
     "left actions hand";
   gap: clamp(10px, 1vw, 16px);
+  width: 100%;
   min-height: 100vh;
-  padding: clamp(10px, 1vw, 16px);
+  padding: clamp(10px, 1vw, 16px) 0 clamp(10px, 1vw, 16px) clamp(10px, 1vw, 16px);
   overflow-x: clip;
   background:
     radial-gradient(circle at 50% 8%, rgba(125, 220, 255, 0.12), transparent 46%),
@@ -67,9 +68,15 @@
   min-height: 0;
 }
 
-.left > *,
-.right > * {
+.left > * {
   flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.right > * {
+  flex: 0 1 auto;
+  max-height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -131,8 +138,8 @@
 @media (max-height: 800px) and (min-width: 900px) {
   .gameShell {
     gap: 8px;
-    padding: 8px;
-    grid-template-columns: clamp(200px, 14vw, 250px) minmax(360px, 0.76fr) clamp(400px, 36vw, 590px);
+    padding: 8px 0 8px 8px;
+    grid-template-columns: clamp(180px, 12vw, 240px) minmax(400px, 1fr) clamp(340px, 28vw, 440px);
   }
 
   .left,

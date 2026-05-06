@@ -2,14 +2,13 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: clamp(5px, 0.62vw, 10px);
-  justify-items: center;
+  justify-items: stretch;
   align-content: center;
 }
 
 .slot {
   background: linear-gradient(160deg, rgba(234, 250, 255, 0.08), rgba(8, 26, 44, 0.92));
   width: 100%;
-  max-width: clamp(90px, 6vw, 118px);
   padding: clamp(4px, 0.5vw, 7px);
   border-radius: var(--fg-radius-md);
   border: var(--fg-border-icy);

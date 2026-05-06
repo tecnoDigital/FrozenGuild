@@ -67,7 +67,7 @@ export function Card({
       layoutId={`card-${id}`}
       initial={false}
       animate={{ rotateY: hidden ? 0 : 2 }}
-      transition={{ duration: 0.2, ease: "easeOut" }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
       onClick={onClick}
     >
       {content}
