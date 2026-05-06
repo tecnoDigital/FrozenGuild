@@ -11,6 +11,7 @@ type PlayerLedgerPanelProps = {
     cardIDs: string[];
     avatarId?: string;
     avatarSrc?: string;
+    avatarColorValue?: string | undefined;
     isActiveTurn?: boolean;
     isLocalPlayer?: boolean;
     status?: "reconnecting" | "absent";
@@ -48,6 +49,7 @@ export function PlayerLedgerPanel({
             selectedCardIndexes={selectedCardsByPlayerID[player.id] ?? []}
             layout={rowLayout}
             {...(player.avatarSrc ? { avatarSrc: player.avatarSrc } : {})}
+            {...(player.avatarColorValue ? { avatarColorValue: player.avatarColorValue } : {})}
             {...(onPlayerCardClick ? { onCardClick: onPlayerCardClick } : {})}
             {...(player.status ? { status: player.status } : {})}
             {...(player.disconnectSeconds !== undefined ? { disconnectSeconds: player.disconnectSeconds } : {})}

@@ -2,7 +2,7 @@ import type { FrozenGuildUiStore } from "./frozenGuildStore.js";
 import type { SwapLocation } from "../../../shared/game/types.js";
 import { getCardById } from "../../../shared/game/cards.js";
 
-const EMPTY_LEDGER: Array<{ id: string; name: string; score: number; cards: number; cardIDs: string[] }> = [];
+const EMPTY_LEDGER: Array<{ id: string; name: string; avatarId: string; colorId: string; score: number; cards: number; cardIDs: string[] }> = [];
 const EMPTY_UNSTABLE: Array<{ id: string; name: string; status: "reconnecting" | "absent"; disconnectSeconds: number | null }> = [];
 
 type PlayersMap = NonNullable<FrozenGuildUiStore["G"]>["players"];
@@ -769,6 +769,7 @@ export function selectPlayersLedger(state: FrozenGuildUiStore) {
     id,
     name: player.name,
     avatarId: player.avatarId,
+    colorId: player.colorId,
     score: calculatePenguinScore(player.zone),
     cards: player.zone.length,
     cardIDs: player.zone

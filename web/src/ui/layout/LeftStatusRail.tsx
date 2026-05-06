@@ -1,51 +1,73 @@
-type LeftStatusRailProps = {
-  playerName: string;
-  playerAvatarSrc: string;
-  playerColorValue: string;
-  turnLabel: string;
-  deckCount: number;
-  discardCount: number;
-  tableStatus: "activa" | "pausada";
+import { motion } from "framer-motion";
+import { assets } from "../assets.js";
+import styles from "./LeftStatusRail.module.css";
+
+export type ScoreTablePlayer = {
+  id: string;
+  name: string;
+  avatarSrc: string;
+  colorValue: string;
+  score: number;
+  isActiveTurn: boolean;
 };
 
-export function LeftStatusRail({
-  playerName,
-  playerAvatarSrc,
-  playerColorValue,
-  turnLabel,
-  deckCount,
-  discardCount,
-  tableStatus
-}: LeftStatusRailProps) {
+type LeftStatusRailProps = {
+  players: ScoreTablePlayer[];
+};
+
+export function LeftStatusRail({ players }: LeftStatusRailProps) {
   return (
-    <div>
-      <h3>Estado</h3>
-      <img data-testid="left-status-avatar" src={playerAvatarSrc} alt={`${playerName} avatar`} width={42} height={42} />
-      <span
-        data-testid="left-status-color-chip"
-        title={`Color ${playerColorValue}`}
-        style={{ display: "inline-block", width: 12, height: 12, borderRadius: 999, background: playerColorValue, marginLeft: 8 }}
-      />
-      <p>Jugador: {playerName}</p>
-      <p>
-        Turno:{" "}
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.span
-            key={turnLabel}
-            initial={{ opacity: 0.6, y: 3 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0.6, y: -2 }}
-            transition={{ duration: 0.18, ease: "easeOut" }}
-            style={{ display: "inline-block" }}
-          >
-            {turnLabel}
-          </motion.span>
-        </AnimatePresence>
-      </p>
-      <p>Mesa: {tableStatus}</p>
-      <p>Mazo: {deckCount}</p>
-      <p>Descarte: {discardCount}</p>
+    <div className={styles.rail}>
+      <div className={styles.header}>
+        <img className={styles.trophy} src={assets.ui.icons.trophy} alt="" aria-hidden="true" />
+        <span>PUNTUACIÓN</span>
+      </div>
+
+      <div className={styles.list}>
+        {players.length === 0 ? (
+          <p className={styles.empty}>Sin jugadores</p>
+        ) : (
+          players.map((player) => (
+            <motion.div
+              key={player.id || `unknown-${player.name}`}
+              layout
+              transition={{ type: "spring", stiffness: 350, damping: 30 }}
+              className={`${styles.row} ${player.isActiveTurn ? styles.rowActive : ""}`}
+              data-testid={`score-row-${player.id || "unknown"}`}
+              data-active={player.isActiveTurn ? "true" : "false"}
+            >
+              <img
+                className={styles.avatar}
+                src={player.avatarSrc || assets.characters.opponents.bot}
+                alt={`Avatar de ${player.name || "jugador"}`}
+                width={38}
+                height={38}
+              />
+
+              <div className={styles.info}>
+                <span className={styles.name} title={player.name || "??"}>
+                  {player.name || "??"}
+                </span>
+                <span className={styles.meta}>
+                  <span
+                    className={styles.colorChip}
+                    style={{ backgroundColor: player.colorValue || "#667a89" }}
+                    title={`Color ${player.colorValue || "??"}`}
+                  />
+                  <span className={styles.id} title={player.id || "??"}>
+                    {player.id || "??"}
+                  </span>
+                </span>
+              </div>
+
+              <span className={styles.score}>
+                <img className={styles.fishIcon} src={assets.ui.icons.fish} alt="" aria-hidden="true" />
+                <span>{typeof player.score === "number" ? player.score : "??"}</span>
+              </span>
+            </motion.div>
+          ))
+        )}
+      </div>
     </div>
   );
 }
-import { motion, AnimatePresence } from "framer-motion";

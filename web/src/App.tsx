@@ -488,16 +488,18 @@ export function App() {
     const currentPlayerProfile = gameState.G.players[session.playerID];
     if (
       currentPlayerProfile?.name === session.playerName &&
-      currentPlayerProfile.avatarId === selectedAvatarID
+      currentPlayerProfile.avatarId === selectedAvatarID &&
+      currentPlayerProfile.colorId === selectedColorID
     ) {
       return;
     }
 
     client.moves?.setPlayerProfile?.({
       nickname: session.playerName,
-      avatarId: selectedAvatarID
+      avatarId: selectedAvatarID,
+      colorId: selectedColorID
     });
-  }, [client, gameState, selectedAvatarID, session]);
+  }, [client, gameState, selectedAvatarID, selectedColorID, session]);
 
   function selectJoinMatch(matchID: string) {
     setSelectedJoinMatchID(matchID);

@@ -12,6 +12,7 @@ type PlayerLedgerRowProps = {
   cardCount: number;
   cardIDs: string[];
   avatarSrc?: string;
+  avatarColorValue?: string | undefined;
   isActiveTurn?: boolean;
   isLocalPlayer?: boolean;
   status?: "reconnecting" | "absent";
@@ -29,6 +30,7 @@ export function PlayerLedgerRow({
   cardCount,
   cardIDs,
   avatarSrc,
+  avatarColorValue,
   isActiveTurn = false,
   isLocalPlayer = false,
   status,
@@ -58,9 +60,10 @@ export function PlayerLedgerRow({
         <>
           {/* Zone 1: Avatar */}
           <div
-            className={styles.hudAvatar}
+            className={`${styles.hudAvatar} ${avatarColorValue && avatarSrc ? styles.hudAvatarFilled : ""}`}
             aria-label={`Avatar de ${name}`}
             data-avatar-fallback={avatarSrc ? "false" : "true"}
+            style={avatarColorValue ? ({ "--hud-avatar-color": avatarColorValue } as React.CSSProperties) : undefined}
           >
             {avatarSrc ? (
               <img src={avatarSrc} alt="" className={styles.hudAvatarImg} />

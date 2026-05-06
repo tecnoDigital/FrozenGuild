@@ -1,6 +1,9 @@
 .gameShell {
+  --fg-shell-side-column: clamp(380px, 44vw, 540px);
+  --fg-shell-center-column: minmax(0, 1fr);
+
   display: grid;
-  grid-template-columns: clamp(180px, 12vw, 240px) minmax(480px, 1fr) clamp(360px, 30vw, 460px);
+  grid-template-columns: var(--fg-shell-side-column) var(--fg-shell-center-column) var(--fg-shell-side-column);
   grid-template-rows: minmax(0, 1fr) auto;
   grid-template-areas:
     "left center right"
@@ -110,7 +113,9 @@
 
 @media (max-width: 1200px) {
   .gameShell {
-    grid-template-columns: 220px minmax(0, 1fr);
+    --fg-shell-left-column: 250px;
+    --fg-shell-center-column: minmax(0, 1fr);
+    grid-template-columns: var(--fg-shell-left-column) var(--fg-shell-center-column);
     grid-template-rows: auto auto auto;
     grid-template-areas:
       "left center"
@@ -137,9 +142,11 @@
 
 @media (max-height: 800px) and (min-width: 900px) {
   .gameShell {
+    --fg-shell-side-column: clamp(320px, 40vw, 460px);
+    --fg-shell-center-column: minmax(0, 1fr);
+
     gap: 8px;
     padding: 8px 0 8px 8px;
-    grid-template-columns: clamp(180px, 12vw, 240px) minmax(400px, 1fr) clamp(340px, 28vw, 440px);
   }
 
   .left,

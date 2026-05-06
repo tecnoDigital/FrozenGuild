@@ -335,12 +335,13 @@
   border: var(--fg-border-icy);
   border-radius: var(--fg-radius-md);
   padding: 8px 14px;
-  background:
-    linear-gradient(152deg, rgba(234, 250, 255, 0.06), rgba(8, 26, 44, 0.86) 52%, rgba(5, 18, 32, 0.94) 100%),
-    var(--fg-bg-panel);
+  background: url("../../assets/opponet-row-frame .png");
+  background-size: 100% 80%;
+  background-repeat: no-repeat;
+  background-position: center;
   box-shadow: var(--player-row-shadow);
   display: grid;
-  grid-template-columns: clamp(92px, 7vw, 112px) 1fr auto;
+  grid-template-columns: clamp(96px, 7vw, 116px) 1fr auto;
   align-items: center;
   gap: clamp(8px, 0.8vw, 12px);
 }
@@ -357,8 +358,8 @@
 
 /* Zone 1: Avatar */
 .hudAvatar {
-  width: clamp(88px, 6.6vw, 108px);
-  height: clamp(88px, 6.6vw, 108px);
+  width: clamp(92px, 6.6vw, 112px);
+  height: clamp(92px, 6.6vw, 112px);
   border-radius: 50%;
   overflow: hidden;
   border: 2px solid rgba(255, 196, 80, 0.8);
@@ -366,13 +367,19 @@
   flex-shrink: 0;
   display: grid;
   place-items: center;
-  background: radial-gradient(circle at 20% 20%, rgba(160, 227, 255, 0.3), rgba(8, 30, 51, 0.95));
+  box-sizing: border-box;
+  background: var(--hud-avatar-color, radial-gradient(circle at 20% 20%, rgba(160, 227, 255, 0.3), rgba(8, 30, 51, 0.95)));
+}
+
+.hudAvatarFilled {
+  padding: clamp(4px, 0.5vw, 6px);
 }
 
 .hudAvatarImg {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transform: translateY(7px);
 }
 
 .hudAvatarFallback {
@@ -542,12 +549,12 @@
   .hudRow {
     padding: 6px 10px;
     gap: 8px;
-    grid-template-columns: clamp(78px, 6vw, 94px) 1fr auto;
+    grid-template-columns: clamp(82px, 6vw, 98px) 1fr auto;
   }
 
   .hudAvatar {
-    width: clamp(74px, 5.6vw, 90px);
-    height: clamp(74px, 5.6vw, 90px);
+    width: clamp(78px, 5.6vw, 94px);
+    height: clamp(78px, 5.6vw, 94px);
   }
 
   .hudName {
@@ -632,14 +639,14 @@
   }
 
   .hudRow {
-    grid-template-columns: clamp(56px, 14vw, 72px) 1fr auto;
+    grid-template-columns: clamp(60px, 14vw, 76px) 1fr auto;
     padding: 6px 10px;
     gap: 6px;
   }
 
   .hudAvatar {
-    width: clamp(52px, 12vw, 68px);
-    height: clamp(52px, 12vw, 68px);
+    width: clamp(56px, 12vw, 72px);
+    height: clamp(56px, 12vw, 72px);
   }
 
   .hudName {

@@ -112,8 +112,8 @@ describe("fg phase 6 round connection contract", () => {
         discardPile: [],
         iceGrid: [],
         players: {
-          "0": { name: "Local Penguin", zone: [], hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" },
-          "1": { name: "Walrus Don", zone: [], hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" }
+          "0": { name: "Local Penguin", zone: [], avatarId: "penguin1", colorId: "ice", hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" },
+          "1": { name: "Walrus Don", zone: [], avatarId: "penguin1", colorId: "ice", hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" }
         },
         pendingStage: null,
         autoResolveQueue: [],
@@ -181,8 +181,8 @@ describe("fg phase 6 round connection contract", () => {
         discardPile: [],
         iceGrid: [],
         players: {
-          "0": { name: "Local Penguin", zone: [], hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" },
-          "1": { name: "Walrus Don", zone: [], hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" }
+          "0": { name: "Local Penguin", zone: [], avatarId: "penguin1", colorId: "ice", hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" },
+          "1": { name: "Walrus Don", zone: [], avatarId: "penguin1", colorId: "ice", hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" }
         },
         pendingStage: null,
         autoResolveQueue: [],
@@ -250,8 +250,8 @@ describe("fg phase 6 round connection contract", () => {
         discardPile: [],
         iceGrid: [],
         players: {
-          "0": { name: "Local Penguin", zone: ["penguin-001", "penguin-009", "penguin-016", "walrus-001"], hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" },
-          "1": { name: "Walrus Don", zone: ["walrus-002"], hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" }
+          "0": { name: "Local Penguin", zone: ["penguin-001", "penguin-009", "penguin-016", "walrus-001"], avatarId: "penguin1", colorId: "ice", hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" },
+          "1": { name: "Walrus Don", zone: ["walrus-002"], avatarId: "penguin1", colorId: "ice", hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" }
         },
         pendingStage: null,
         autoResolveQueue: [],
@@ -296,8 +296,8 @@ describe("fg phase 6 round connection contract", () => {
     });
 
     expect(ledger).toEqual([
-      { id: "0", name: "Local Penguin", score: 6, cards: 4, cardIDs: ["penguin-001", "penguin-009", "penguin-016", "walrus-001"] },
-      { id: "1", name: "Walrus Don", score: 0, cards: 1, cardIDs: ["walrus-002"] }
+      { id: "0", name: "Local Penguin", avatarId: "penguin1", colorId: "ice", score: 6, cards: 4, cardIDs: ["penguin-001", "penguin-009", "penguin-016", "walrus-001"] },
+      { id: "1", name: "Walrus Don", avatarId: "penguin1", colorId: "ice", score: 0, cards: 1, cardIDs: ["walrus-002"] }
     ]);
     expect(fallback).toEqual([]);
   });
@@ -328,8 +328,8 @@ describe("fg phase 6 round connection contract", () => {
         discardPile: [],
         iceGrid: [],
         players: {
-          "0": { name: "Local Penguin", zone: ["penguin-001", "seal_bomb-001", "orca-001"], hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" },
-          "1": { name: "Walrus Don", zone: ["walrus-001"], hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" }
+          "0": { name: "Local Penguin", zone: ["penguin-001", "seal_bomb-001", "orca-001"], avatarId: "penguin1", colorId: "ice", hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" },
+          "1": { name: "Walrus Don", zone: ["walrus-001"], avatarId: "penguin1", colorId: "ice", hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" }
         },
         pendingStage: null,
         autoResolveQueue: [],
@@ -391,9 +391,9 @@ describe("fg phase 6 round connection contract", () => {
         discardPile: [],
         iceGrid: [],
         players: {
-          "0": { name: "Local Penguin", zone: ["penguin-001"], hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" },
-          "1": { name: "Walrus Don", zone: ["walrus-001", "orca-001"], hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" },
-          "2": { name: "Petrel", zone: [], hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" }
+          "0": { name: "Local Penguin", zone: ["penguin-001"], avatarId: "penguin1", colorId: "ice", hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" },
+          "1": { name: "Walrus Don", zone: ["walrus-001", "orca-001"], avatarId: "penguin1", colorId: "ice", hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" },
+          "2": { name: "Petrel", zone: [], avatarId: "penguin1", colorId: "ice", hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" }
         },
         pendingStage: null,
         autoResolveQueue: [],
@@ -461,7 +461,7 @@ describe("fg phase 6 round connection contract", () => {
         discardPile: [],
         iceGrid: [],
         players: {
-          "0": { name: "Local Penguin", zone: [], hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" }
+          "0": { name: "Local Penguin", zone: [], avatarId: "penguin1", colorId: "ice", hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" }
         },
         pendingStage: null,
         autoResolveQueue: [],
@@ -529,7 +529,7 @@ describe("fg phase 6 round connection contract", () => {
         discardPile: [],
         iceGrid: ["penguin-001", "walrus-001", "petrel-001", "sea_elephant-001", null, "krill-001", "orca-001", "seal_bomb-001", "penguin-002"],
         players: {
-          "0": { name: "Local Penguin", zone: [], hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" }
+          "0": { name: "Local Penguin", zone: [], avatarId: "penguin1", colorId: "ice", hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" }
         },
         pendingStage: null,
         autoResolveQueue: [],
@@ -612,7 +612,7 @@ describe("fg phase 6 round connection contract", () => {
         discardPile: [],
         iceGrid: [],
         players: {
-          "0": { name: "Local Penguin", zone: [], hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" }
+          "0": { name: "Local Penguin", zone: [], avatarId: "penguin1", colorId: "ice", hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" }
         },
         pendingStage: null,
         autoResolveQueue: [],
@@ -680,7 +680,7 @@ describe("fg phase 6 round connection contract", () => {
         discardPile: [],
         iceGrid: [],
         players: {
-          "0": { name: "Local Penguin", zone: [], hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" }
+          "0": { name: "Local Penguin", zone: [], avatarId: "penguin1", colorId: "ice", hasBombAtStart: false, hasBombAtEnd: false, connectionStatus: "connected" }
         },
         pendingStage: null,
         autoResolveQueue: [],

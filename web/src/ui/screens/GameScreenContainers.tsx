@@ -1,18 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import type { SwapLocation } from "../../../../shared/game/types.js";
+import { resolvePlayerColorValue } from "../../../../shared/game/playerColors.js";
 import { useFrozenGuildStore } from "../../store/frozenGuildStore.js";
 import {
   selectActionFlowView,
   selectCanChoosePadrino,
-  selectCurrentTurnLabel,
-  selectDeckCount,
-  selectDiscardCount,
   selectGameOverOverlayView,
-  selectLocalPlayerName,
   selectOrcaResolutionView,
   selectSealBombResolutionView,
   selectSpyResolutionView,
-  selectTableActive,
   selectActionBannerView,
   selectPlayersLedger,
   selectUnstablePlayers
@@ -25,10 +21,8 @@ import { RightLedgerRail } from "../layout/RightLedgerRail.js";
 import { LocalPlayerHandPanel } from "../players/LocalPlayerHandPanel.js";
 import {
   resolveLobbyAvatarSrc,
-  resolveLobbyColorValue,
   type LobbyAvatarID,
   selectLobbyAvatar,
-  selectLobbyColor,
   useLobbyProfileStore
 } from "../../features/lobby/lobbyStore.js";
 import { assets } from "../../ui/assets.js";
@@ -56,25 +50,25 @@ function resolveLedgerAvatarSrc(player: LedgerAvatarPlayer, isLocal: boolean, lo
 }
 
 export function LeftStatusRailContainer() {
-  const playerName = useFrozenGuildStore(selectLocalPlayerName);
-  const turnLabel = useFrozenGuildStore(selectCurrentTurnLabel);
-  const deckCount = useFrozenGuildStore(selectDeckCount);
-  const discardCount = useFrozenGuildStore(selectDiscardCount);
-  const tableActive = useFrozenGuildStore(selectTableActive);
+  const players = useFrozenGuildStore(selectPlayersLedger);
+  const currentTurnPlayerID = useFrozenGuildStore((state) => state.ctx?.currentPlayer ?? null);
+  const localPlayerID = useFrozenGuildStore((state) => state.localPlayerID);
   const lobbyAvatar = useLobbyProfileStore(selectLobbyAvatar);
-  const lobbyColor = useLobbyProfileStore(selectLobbyColor);
+  const lobbyAvatarSrc = resolveLobbyAvatarSrc(lobbyAvatar);
 
-  return (
-    <LeftStatusRail
-      playerName={playerName}
-      playerAvatarSrc={resolveLobbyAvatarSrc(lobbyAvatar)}
-      playerColorValue={resolveLobbyColorValue(lobbyColor)}
-      turnLabel={turnLabel}
-      deckCount={deckCount}
-      discardCount={discardCount}
-      tableStatus={tableActive ? "activa" : "pausada"}
-    />
-  );
+  const scorePlayers = useMemo(() => {
+    const sorted = [...players].sort((a, b) => b.score - a.score);
+    return sorted.map((player) => ({
+      id: player.id,
+      name: player.name,
+      avatarSrc: resolveLedgerAvatarSrc(player, player.id === localPlayerID, lobbyAvatarSrc),
+      colorValue: resolvePlayerColorValue(player.colorId),
+      score: player.score,
+      isActiveTurn: currentTurnPlayerID === player.id
+    }));
+  }, [players, currentTurnPlayerID, localPlayerID, lobbyAvatarSrc]);
+
+  return <LeftStatusRail players={scorePlayers} />;
 }
 
 export function CenterBoardStageContainer({ onFishFromIce }: { onFishFromIce: (slot: number) => void }) {
@@ -484,6 +478,7 @@ export function RightLedgerRailContainer() {
       players={rivals.map((player) => ({
         ...player,
         avatarSrc: resolveLedgerAvatarSrc(player, false, lobbyAvatarSrc),
+        avatarColorValue: resolvePlayerColorValue(player.colorId),
         isLocalPlayer: false,
         isActiveTurn: currentTurnPlayerID === player.id
       }))}
@@ -572,7 +567,8 @@ export function RivalsLedgerContainer() {
           ...player,
           isActiveTurn: currentTurnPlayerID === player.id,
           isLocalPlayer: isLocal,
-          avatarSrc
+          avatarSrc,
+          avatarColorValue: resolvePlayerColorValue(player.colorId)
         };
       })}
       unstablePlayers={unstablePlayers}

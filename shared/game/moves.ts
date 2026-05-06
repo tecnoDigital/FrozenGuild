@@ -1,6 +1,7 @@
 import type { ActivePlayersArg, Ctx } from "boardgame.io";
 import { getCardById } from "./cards.js";
 import { calculateFinalScores } from "./scoring.js";
+import { isValidPlayerColorID } from "./playerColors.js";
 import type { FinalResults, FrozenGuildState, SwapLocation } from "./types.js";
 
 const INVALID_MOVE = "INVALID_MOVE" as const;
@@ -121,7 +122,7 @@ function buildFinalResults(G: FrozenGuildState): FinalResults {
 
 export function setPlayerProfile(
   { G, playerID }: MoveCtx,
-  profile: { nickname?: string; avatarId?: string }
+  profile: { nickname?: string; avatarId?: string; colorId?: string }
 ): typeof INVALID_MOVE | void {
   if (!playerID) {
     return INVALID_MOVE;
@@ -138,6 +139,10 @@ export function setPlayerProfile(
 
   if (typeof profile.avatarId === "string" && profile.avatarId.trim().length > 0) {
     player.avatarId = profile.avatarId.trim().slice(0, 40);
+  }
+
+  if (typeof profile.colorId === "string" && isValidPlayerColorID(profile.colorId)) {
+    player.colorId = profile.colorId;
   }
 }
 

@@ -1,5 +1,11 @@
 import { create } from "zustand";
 import { assets } from "../../ui/assets";
+import {
+  type PlayerColorID,
+  playerColorOptions,
+  defaultPlayerColorID,
+  resolvePlayerColorValue
+} from "../../../../shared/game/playerColors.js";
 
 export const LOBBY_SESSION_STORAGE_KEY = "fg:lobby-profile:v1";
 
@@ -13,7 +19,7 @@ export type LobbyAvatarID =
   | "orca"
   | "sealBomb";
 
-export type LobbyColorID = "ice" | "aurora" | "frost" | "midnight";
+export type LobbyColorID = PlayerColorID;
 
 export const lobbyAvatarOptions: Array<{ id: LobbyAvatarID; label: string; src: string }> = [
   { id: "penguin1", label: "Penguin I", src: assets.characters.avatars.penguin1 },
@@ -26,17 +32,12 @@ export const lobbyAvatarOptions: Array<{ id: LobbyAvatarID; label: string; src: 
   { id: "sealBomb", label: "Seal-Bomb", src: assets.characters.avatars.sealBomb }
 ];
 
-export const lobbyColorOptions: Array<{ id: LobbyColorID; label: string; value: string }> = [
-  { id: "ice", label: "Ice", value: "#63ece3" },
-  { id: "aurora", label: "Aurora", value: "#78e9ff" },
-  { id: "frost", label: "Frost", value: "#a8c9ff" },
-  { id: "midnight", label: "Midnight", value: "#8ea6ff" }
-];
+export const lobbyColorOptions = playerColorOptions;
 
 export const defaultLobbyProfile = {
   name: "Jugador",
   avatar: "penguin1" as LobbyAvatarID,
-  color: "ice" as LobbyColorID
+  color: defaultPlayerColorID as LobbyColorID
 };
 
 type LobbyProfile = typeof defaultLobbyProfile;
@@ -135,5 +136,5 @@ export function resolveLobbyAvatarSrc(id: LobbyAvatarID): string {
 }
 
 export function resolveLobbyColorValue(id: LobbyColorID): string {
-  return lobbyColorOptions.find((item) => item.id === id)?.value ?? "#6ce4ff";
+  return resolvePlayerColorValue(id);
 }

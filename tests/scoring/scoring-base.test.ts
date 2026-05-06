@@ -9,8 +9,12 @@ import type { PlayerState } from "../../shared/game/types";
 function makePlayer(zone: string[]): PlayerState {
   return {
     name: "Player",
+    avatarId: "penguin1",
+    colorId: "ice",
     zone,
-    hasBombAtStart: false
+    hasBombAtStart: false,
+    hasBombAtEnd: false,
+    connectionStatus: "connected"
   };
 }
 

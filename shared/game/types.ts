@@ -28,6 +28,7 @@ export type IceGridSlot = CardId | HiddenCardView | null;
 export type PlayerState = {
   name: string;
   avatarId: string;
+  colorId: string;
   zone: CardId[];
   hasBombAtStart: boolean;
   hasBombAtEnd: boolean;
