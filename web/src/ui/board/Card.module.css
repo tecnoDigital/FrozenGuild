@@ -1,21 +1,64 @@
 .card {
-  width: clamp(78px, 5.2vw, 104px);
-  height: clamp(110px, 7.4vw, 146px);
-  border-radius: var(--fg-radius-md);
-  border: var(--fg-border-icy);
-  background: linear-gradient(165deg, rgba(234, 250, 255, 0.1), rgba(8, 26, 44, 0.9) 48%, rgba(5, 18, 32, 0.94));
+  width: clamp(118px, 8.4vw, 174px);
+  height: clamp(160px, 12.05vw, 244px);
+  border-radius: clamp(12px, 0.9vw, 18px);
+  border: 3px solid rgba(236, 250, 255, 0.92);
+  background:
+    radial-gradient(circle at 50% 26%, rgba(45, 150, 220, 0.32), transparent 42%),
+    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.15), transparent 13%),
+    linear-gradient(155deg, #0a3a67 0%, #061833 56%, #030a18 100%);
   display: grid;
   place-items: center;
   overflow: hidden;
   position: relative;
-  box-shadow: var(--fg-shadow-card);
+  box-shadow:
+    inset 0 0 0 3px rgba(8, 47, 86, 0.92),
+    inset 0 0 0 6px rgba(226, 251, 255, 0.72),
+    inset 0 0 28px rgba(87, 202, 255, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.32),
+    var(--fg-shadow-card);
   transition: transform 160ms ease, box-shadow var(--fg-transition-fast), border-color var(--fg-transition-fast);
 }
 
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  border: 1.5px solid rgba(205, 244, 255, 0.45);
+  border-radius: 9px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+@media (max-width: 1200px) {
+  .card {
+    width: clamp(108px, 11.6vw, 156px);
+    height: clamp(148px, 16.2vw, 220px);
+  }
+}
+
+@media (max-width: 900px) {
+  .card {
+    width: clamp(92px, 27vw, 146px);
+    height: clamp(126px, 38vw, 202px);
+  }
+}
+
+@media (max-height: 800px) and (min-width: 900px) {
+  .card {
+    width: clamp(106px, 7.2vw, 152px);
+    height: clamp(145px, 10.45vw, 214px);
+  }
+}
+
 .card:hover {
-  transform: translateY(-1px);
   border-color: rgba(125, 220, 255, 0.58);
-  box-shadow: 0 12px 24px rgba(2, 8, 18, 0.5), 0 0 18px rgba(22, 217, 255, 0.34);
+  box-shadow:
+    inset 0 0 0 3px rgba(8, 47, 86, 0.92),
+    inset 0 0 0 6px rgba(226, 251, 255, 0.72),
+    inset 0 0 28px rgba(87, 202, 255, 0.3),
+    0 12px 24px rgba(2, 8, 18, 0.5),
+    0 0 18px rgba(22, 217, 255, 0.34);
 }
 
 .idle {
@@ -51,18 +94,95 @@
   border-radius: var(--fg-radius-md);
 }
 
+.cardFrostLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background:
+    radial-gradient(circle, rgba(255, 255, 255, 0.9) 0 1px, transparent 1.6px) 18% 22% / 34px 34px,
+    radial-gradient(circle, rgba(155, 225, 255, 0.75) 0 1px, transparent 1.8px) 72% 64% / 42px 42px,
+    radial-gradient(circle, rgba(255, 255, 255, 0.55) 0 1px, transparent 1.5px) 48% 78% / 28px 28px;
+  opacity: 0.58;
+}
+
+.cardShine {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.36), transparent 18% 82%, rgba(255, 255, 255, 0.18)),
+    radial-gradient(circle at 50% 50%, transparent 0 58%, rgba(0, 0, 0, 0.2) 100%);
+}
+
+.corner {
+  position: absolute;
+  width: clamp(20px, 1.6vw, 28px);
+  height: clamp(20px, 1.6vw, 28px);
+  z-index: 3;
+  pointer-events: none;
+}
+
+.corner::before,
+.corner::after {
+  content: "";
+  position: absolute;
+  background: rgba(235, 250, 255, 0.95);
+  box-shadow: 0 0 8px rgba(125, 225, 255, 0.6);
+}
+
+.corner::before {
+  width: clamp(16px, 1.3vw, 24px);
+  height: clamp(2px, 0.2vw, 3px);
+  top: 0;
+  left: 0;
+}
+
+.corner::after {
+  width: clamp(2px, 0.2vw, 3px);
+  height: clamp(16px, 1.3vw, 24px);
+  top: 0;
+  left: 0;
+}
+
+.cornerTl {
+  top: clamp(8px, 0.62vw, 11px);
+  left: clamp(8px, 0.62vw, 11px);
+}
+
+.cornerTr {
+  top: clamp(8px, 0.62vw, 11px);
+  right: clamp(8px, 0.62vw, 11px);
+  transform: rotate(90deg);
+}
+
+.cornerBl {
+  bottom: clamp(8px, 0.62vw, 11px);
+  left: clamp(8px, 0.62vw, 11px);
+  transform: rotate(-90deg);
+}
+
+.cornerBr {
+  bottom: clamp(8px, 0.62vw, 11px);
+  right: clamp(8px, 0.62vw, 11px);
+  transform: rotate(180deg);
+}
+
 .img {
+  position: relative;
+  z-index: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
 .imgHidden {
-  filter: saturate(0.72) brightness(0.88);
+  filter: saturate(0.86) brightness(0.94);
 }
 
 .imgRevealed {
-  filter: saturate(1.05) brightness(1.03);
+  filter: saturate(1.04) brightness(1.02);
 }
 
 .visibilityTag {

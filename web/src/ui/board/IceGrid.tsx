@@ -25,19 +25,21 @@ export function IceGrid({ cards, clickableSlots = [], selectedSlots = [], onSlot
   const selected = new Set(selectedSlots);
 
   return (
-    <div className={styles.grid}>
-      {cards.map((card, index) => (
-        <IceSlot
-          key={`${card.id}-${index}`}
-          cardId={card.id}
-          label={card.label}
-          hidden={card.hidden}
-          image={card.image}
-          empty={card.empty}
-          interactionState={getInteractionState(index, clickable, selected)}
-          {...(onSlotClick && clickable.has(index) ? { onClick: () => onSlotClick(index) } : {})}
-        />
-      ))}
+    <div className={styles.tableCamera}>
+      <div className={styles.grid}>
+        {cards.map((card, index) => (
+          <IceSlot
+            key={`${card.id}-${index}`}
+            cardId={card.id}
+            label={card.label}
+            hidden={card.hidden}
+            image={card.image}
+            empty={card.empty}
+            interactionState={getInteractionState(index, clickable, selected)}
+            {...(onSlotClick && clickable.has(index) ? { onClick: () => onSlotClick(index) } : {})}
+          />
+        ))}
+      </div>
     </div>
   );
 }

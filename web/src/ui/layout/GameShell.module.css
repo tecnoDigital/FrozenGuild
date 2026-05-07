@@ -1,6 +1,7 @@
 .gameShell {
-  --fg-shell-side-column: clamp(380px, 44vw, 540px);
+  --fg-shell-side-column: clamp(300px, 28vw, 420px);
   --fg-shell-center-column: minmax(0, 1fr);
+  --fg-shell-gutter: clamp(10px, 1vw, 16px);
 
   display: grid;
   grid-template-columns: var(--fg-shell-side-column) var(--fg-shell-center-column) var(--fg-shell-side-column);
@@ -11,7 +12,7 @@
   gap: clamp(10px, 1vw, 16px);
   width: 100%;
   min-height: 100vh;
-  padding: clamp(10px, 1vw, 16px) 0 clamp(10px, 1vw, 16px) clamp(10px, 1vw, 16px);
+  padding: var(--fg-shell-gutter);
   overflow-x: clip;
   background:
     radial-gradient(circle at 50% 8%, rgba(125, 220, 255, 0.12), transparent 46%),
@@ -25,7 +26,18 @@
 
 .center {
   grid-area: center;
-  justify-content: center;
+  justify-self: stretch;
+  justify-content: flex-start;
+  align-items: stretch;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  padding: 0;
+}
+
+.center::before {
+  content: none;
 }
 
 .actions {
@@ -135,18 +147,20 @@
       "actions"
       "hand"
       "right";
-    padding: 8px;
+    --fg-shell-gutter: 8px;
+    padding: var(--fg-shell-gutter);
     gap: 8px;
   }
 }
 
 @media (max-height: 800px) and (min-width: 900px) {
   .gameShell {
-    --fg-shell-side-column: clamp(320px, 40vw, 460px);
+    --fg-shell-side-column: clamp(280px, 26vw, 360px);
     --fg-shell-center-column: minmax(0, 1fr);
+    --fg-shell-gutter: 8px;
 
     gap: 8px;
-    padding: 8px 0 8px 8px;
+    padding: var(--fg-shell-gutter);
   }
 
   .left,

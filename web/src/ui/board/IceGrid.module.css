@@ -1,22 +1,134 @@
+.tableCamera {
+  /* Camera layer: perspective/depth only (no layout compensation). */
+  --fg-board-size: min(800px, 92vw, 78vh);
+  --fg-perspective: 1400px;
+  --fg-perspective-origin: 50% 52%;
+  --fg-tilt: 42deg;
+  --fg-board-lift: clamp(-180px, -18vh, -96px);
+  --fg-grid-padding: clamp(28px, 3vw, 44px);
+  --fg-gap-col: clamp(18px, 2vw, 30px);
+  --fg-gap-row: clamp(34px, 4vw, 56px);
+
+  perspective: var(--fg-perspective);
+  perspective-origin: var(--fg-perspective-origin);
+
+  /* Explicit square visual bound */
+  width: var(--fg-board-size);
+  aspect-ratio: 1 / 1;
+
+  margin-inline: auto;
+  margin-top: var(--fg-board-lift);
+  display: grid;
+  place-items: center;
+  overflow: visible;
+}
+
 .grid {
+  position: relative;
+  z-index: 1;
+
+  /* Grid width is ~90% of the square bound so that after rotateX(42deg)
+     the projected visual height fits neatly inside the container */
+  width: 90%;
+  /* Natural ratio of a 3×3 grid of vertical playing cards (~2:3) */
+  aspect-ratio: 2 / 3;
+
+  box-sizing: border-box;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(5px, 0.62vw, 10px);
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+
+  column-gap: var(--fg-gap-col);
+  row-gap: var(--fg-gap-row);
+
+  padding: var(--fg-grid-padding);
+
   justify-items: stretch;
+  align-items: stretch;
   align-content: center;
+
+  transform-style: preserve-3d;
+  transform-origin: center bottom;
+  transform: rotateX(var(--fg-tilt)) scale(1);
 }
 
 .slot {
-  background: linear-gradient(160deg, rgba(234, 250, 255, 0.08), rgba(8, 26, 44, 0.92));
+  --x-angle: 0deg;
+  --base-lift: 0px;
+  --base-depth: 0px;
+  --hover-lift: 0px;
+  --hover-depth: 0px;
+  --scale: 1;
+  --shadow-y: 18px;
+  --shadow-blur: 18px;
+  --shadow-alpha: 0.34;
+
+  background: transparent;
   width: 100%;
-  padding: clamp(4px, 0.5vw, 7px);
-  border-radius: var(--fg-radius-md);
-  border: var(--fg-border-icy);
-  box-shadow: inset 0 0 14px rgba(125, 220, 255, 0.14);
+  position: relative;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 0;
+  border: 0;
+  box-shadow: none;
+  transform-style: preserve-3d;
+  transform:
+    translateY(calc(var(--base-lift) + var(--hover-lift)))
+    translateZ(calc(var(--base-depth) + var(--hover-depth)))
+    rotateZ(var(--x-angle))
+    scale(var(--scale));
+  transition: transform 180ms cubic-bezier(.2, .8, .2, 1), filter 180ms cubic-bezier(.2, .8, .2, 1);
+  filter: drop-shadow(0 var(--shadow-y) var(--shadow-blur) rgba(0, 0, 0, var(--shadow-alpha)));
+  pointer-events: auto;
+}
+
+.slotSelectable {}
+
+.slotSelected {}
+
+.slotDisabled {}
+
+.slot:nth-child(1) { --base-lift: -24px; --base-depth: -35px; --x-angle: -1deg; --shadow-y: 7px; --shadow-blur: 9px; --shadow-alpha: 0.22; }
+.slot:nth-child(2) { --base-lift: -28px; --base-depth: -31px; --x-angle: 0deg;   --shadow-y: 7px; --shadow-blur: 9px; --shadow-alpha: 0.22; }
+.slot:nth-child(3) { --base-lift: -26px; --base-depth: -27px; --x-angle: 1deg;  --shadow-y: 7px; --shadow-blur: 9px; --shadow-alpha: 0.22; }
+
+.slot:nth-child(4) { --base-lift: 10px; --base-depth: -4px; --x-angle: -0.5deg; --shadow-y: 14px; --shadow-blur: 14px; --shadow-alpha: 0.30; }
+.slot:nth-child(5) { --base-lift: 12px; --base-depth: 0px;  --x-angle: 0deg;    --shadow-y: 14px; --shadow-blur: 14px; --shadow-alpha: 0.30; }
+.slot:nth-child(6) { --base-lift: 10px; --base-depth: -4px; --x-angle: 0.5deg;  --shadow-y: 14px; --shadow-blur: 14px; --shadow-alpha: 0.30; }
+
+.slot:nth-child(7) { --base-lift: 40px; --base-depth: 27px; --x-angle: -1deg; --shadow-y: 22px; --shadow-blur: 20px; --shadow-alpha: 0.36; }
+.slot:nth-child(8) { --base-lift: 44px; --base-depth: 31px; --x-angle: 0deg;   --shadow-y: 24px; --shadow-blur: 22px; --shadow-alpha: 0.38; }
+.slot:nth-child(9) { --base-lift: 40px; --base-depth: 27px; --x-angle: 1deg;  --shadow-y: 22px; --shadow-blur: 20px; --shadow-alpha: 0.36; }
+
+.slot:hover,
+.slot:focus-within {
+  --hover-lift: -12px;
+  --hover-depth: 28px;
+  --scale: 1.055;
+  --shadow-y: 28px;
+  --shadow-blur: 22px;
+  --shadow-alpha: 0.42;
+}
+
+.slotSelected,
+.slotSelected:hover,
+.slotSelected:focus-within {
+  --hover-lift: 0px;
+  --hover-depth: 0px;
+  --scale: 1;
+}
+
+.slotDisabled,
+.slotDisabled:hover,
+.slotDisabled:focus-within {
+  --hover-lift: 0px;
+  --hover-depth: 0px;
+  --scale: 1;
 }
 
 .empty {
-  min-height: clamp(58px, 6vw, 76px);
+  min-height: clamp(130px, 10.5vw, 210px);
   display: grid;
   place-items: center;
   border-radius: var(--fg-radius-md);
@@ -25,7 +137,50 @@
   background: linear-gradient(155deg, rgba(234, 250, 255, 0.04), rgba(8, 26, 44, 0.84));
 }
 
+@media (max-width: 900px) {
+  .tableCamera {
+    --fg-board-size: min(100vw, 720px, 84vh);
+    --fg-board-lift: clamp(-92px, -11vh, -44px);
+    --fg-grid-padding: clamp(20px, 4vw, 32px);
+    --fg-gap-col: clamp(12px, 3vw, 20px);
+    --fg-gap-row: clamp(24px, 5vw, 40px);
+  }
+
+  .grid {
+    width: 92%;
+    aspect-ratio: 2 / 3;
+    transform: rotateX(var(--fg-tilt)) scale(1);
+  }
+}
+
+@media (max-width: 1200px) and (min-width: 901px) {
+  .tableCamera {
+    --fg-board-lift: clamp(-132px, -14vh, -64px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slot,
+  .slot:hover,
+  .slot:focus-within,
+  .slotSelected,
+  .slotSelected:hover,
+  .slotSelected:focus-within,
+  .slotDisabled,
+  .slotDisabled:hover,
+  .slotDisabled:focus-within {
+    --hover-lift: 0px;
+    --hover-depth: 0px;
+    --scale: 1;
+    transition: none;
+  }
+}
+
 @media (max-height: 800px) and (min-width: 900px) {
+  .tableCamera {
+    --fg-board-size: min(800px, 92vw, 78vh);
+  }
+
   .empty {
     font-size: 0.84rem;
   }

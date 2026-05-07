@@ -91,6 +91,11 @@ function botCanSwap(G: FrozenGuildState): boolean {
   return playersWithCards >= 2;
 }
 
+function botShouldSkipSwapTurn(G: FrozenGuildState): boolean {
+  const players = Object.values(G.players);
+  return players.length === 2 && players.some((player) => player.zone.length === 0);
+}
+
 function readSetupData(value: unknown): SetupData | undefined {
   if (!value || typeof value !== "object") {
     return undefined;
@@ -287,6 +292,10 @@ function runBasicBotTurn(args: {
       }
     }
   } else if (action === 5) {
+    if (botShouldSkipSwapTurn(G)) {
+      // Isolated 2-player edge case: one hand is empty, so swap cannot execute.
+      // Let endTurn run and close the turn cleanly.
+    } else {
     const candidates = Object.entries(G.players)
       .filter(([, player]) => player.zone.length > 0)
       .map(([id]) => id);
@@ -308,6 +317,7 @@ function runBasicBotTurn(args: {
         { area: "player_zone", playerID: firstPlayerID, index: firstIndex },
         { area: "player_zone", playerID: secondPlayerID, index: secondIndex }
       );
+    }
     }
   }
 

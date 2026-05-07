@@ -204,8 +204,7 @@ function triggerOrcaResolutionOnReceive(
   G: FrozenGuildState,
   playerID: string,
   cardID: string,
-  events?: MoveCtx["events"],
-  random?: MoveCtx["random"]
+  events?: MoveCtx["events"]
 ): void {
   const card = getCardById(cardID);
   if (!card || card.type !== "orca") {
@@ -228,20 +227,6 @@ function triggerOrcaResolutionOnReceive(
     return;
   }
 
-  if (random) {
-    const idx = random.D6() % validTargetCardIDs.length;
-    const discardCardID = validTargetCardIDs[idx];
-    if (discardCardID && removeCardFromPlayerZoneById(G, playerID, discardCardID)) {
-      G.discardPile.push(discardCardID);
-    }
-    if (removeCardFromPlayerZoneById(G, playerID, cardID)) {
-      G.discardPile.push(cardID);
-    }
-    G.orcaResolution = null;
-    clearPendingStage(G, events);
-    return;
-  }
-
   G.orcaResolution = {
     playerID,
     orcaCardID: cardID,
@@ -254,8 +239,7 @@ function addCardToPlayerZoneWithEffects(
   G: FrozenGuildState,
   playerID: string,
   cardID: string,
-  events?: MoveCtx["events"],
-  random?: MoveCtx["random"]
+  events?: MoveCtx["events"]
 ): void {
   const player = G.players[playerID];
   if (!player) {
@@ -263,7 +247,7 @@ function addCardToPlayerZoneWithEffects(
   }
 
   player.zone.push(cardID);
-  triggerOrcaResolutionOnReceive(G, playerID, cardID, events, random);
+  triggerOrcaResolutionOnReceive(G, playerID, cardID, events);
 }
 
 export function setBombAtTurnStart(G: FrozenGuildState, playerID: string): void {
@@ -638,7 +622,7 @@ export function fishFromIce(
     return INVALID_MOVE;
   }
 
-  addCardToPlayerZoneWithEffects(G, playerID, cardID, events, random);
+  addCardToPlayerZoneWithEffects(G, playerID, cardID, events);
   refillIceSlotOrEndGame(G, slot, events);
   G.turn.actionCompleted = true;
 }
@@ -741,7 +725,7 @@ export function spyGiveCard(
     return INVALID_MOVE;
   }
 
-  addCardToPlayerZoneWithEffects(G, targetPlayerID, cardID, events, random);
+  addCardToPlayerZoneWithEffects(G, targetPlayerID, cardID, events);
   refillIceSlotOrEndGame(G, slot, events);
   G.spy = null;
   G.turn.actionCompleted = true;
@@ -811,9 +795,9 @@ function swapCardsByLocation(
   writeCardToLocation(G, source, targetCard);
   writeCardToLocation(G, target, sourceCard);
 
-  triggerOrcaResolutionOnReceive(G, source.playerID, targetCard, events, random);
+  triggerOrcaResolutionOnReceive(G, source.playerID, targetCard, events);
   if (!G.orcaResolution) {
-    triggerOrcaResolutionOnReceive(G, target.playerID, sourceCard, events, random);
+    triggerOrcaResolutionOnReceive(G, target.playerID, sourceCard, events);
   }
 
   G.turn.actionCompleted = true;
@@ -922,9 +906,9 @@ function swapCardsLegacy(
   firstPlayer.zone[firstIndex] = secondCardID;
   secondPlayer.zone[secondIndex] = firstCardID;
 
-  triggerOrcaResolutionOnReceive(G, firstPlayerID, secondCardID, events, random);
+  triggerOrcaResolutionOnReceive(G, firstPlayerID, secondCardID, events);
   if (!G.orcaResolution) {
-    triggerOrcaResolutionOnReceive(G, secondPlayerID, firstCardID, events, random);
+    triggerOrcaResolutionOnReceive(G, secondPlayerID, firstCardID, events);
   }
 
   G.turn.actionCompleted = true;

@@ -85,7 +85,9 @@ export function CenterBoardStageContainer({ onFishFromIce }: { onFishFromIce: (s
   const swapTargetKey = useFrozenGuildStore((state) => state.swapDraftTargetKey);
   const setSwapSourceKey = useFrozenGuildStore((state) => state.setSwapDraftSourceKey);
   const setSwapTargetKey = useFrozenGuildStore((state) => state.setSwapDraftTargetKey);
-const canFish = useFrozenGuildStore((state) => {
+  const [pendingFishSlot, setPendingFishSlot] = useState<number | null>(null);
+
+  const canFish = useFrozenGuildStore((state) => {
     if (!state.G || !state.ctx || !state.localPlayerID) return false;
     if (state.gameover !== undefined) return false;
     const isMyTurn = state.ctx.currentPlayer === state.localPlayerID;
@@ -93,6 +95,22 @@ const canFish = useFrozenGuildStore((state) => {
     const effectiveValue = state.G.dice.value === 6 ? state.G.turn.padrinoAction : state.G.dice.value;
     return state.G.dice.rolled && effectiveValue !== null && effectiveValue >= 1 && effectiveValue <= 3;
   });
+
+  useEffect(() => {
+    if (!canFish) {
+      setPendingFishSlot(null);
+      return;
+    }
+
+    if (pendingFishSlot === null) {
+      return;
+    }
+
+    const pendingCard = iceCards[pendingFishSlot];
+    if (!pendingCard || pendingCard.empty) {
+      setPendingFishSlot(null);
+    }
+  }, [canFish, pendingFishSlot, iceCards]);
 
   return (
     <CenterBoardStage
@@ -103,7 +121,7 @@ const canFish = useFrozenGuildStore((state) => {
       cards={iceCards}
       clickableSlots={
         canFish
-          ? iceCards.map((card, index) => (card.empty ? -1 : index)).filter((slot) => slot >= 0)
+          ? iceCards.map((card, index) => (card.empty ? -1 : index)).filter((slot) => slot >= 0 && slot !== pendingFishSlot)
           : flow.mode === "swap"
             ? iceCards.map((card, index) => (card.empty ? -1 : index)).filter((slot) => slot >= 0)
           : flow.mode === "spy" && spy
@@ -122,6 +140,10 @@ const canFish = useFrozenGuildStore((state) => {
       }
       onSlotClick={(slot) => {
         if (canFish) {
+          if (pendingFishSlot !== null) {
+            return;
+          }
+          setPendingFishSlot(slot);
           onFishFromIce(slot);
           return;
         }
@@ -228,7 +250,8 @@ export function CenterActionDockContainer({
   const setSwapSourceKey = useFrozenGuildStore((state) => state.setSwapDraftSourceKey);
   const setSwapTargetKey = useFrozenGuildStore((state) => state.setSwapDraftTargetKey);
   const clearSwapDraft = useFrozenGuildStore((state) => state.clearSwapDraft);
-  const [orcaTarget, setOrcaTarget] = useState<string | null>(null);
+  const orcaTarget = useFrozenGuildStore((state) => state.orcaDraftCardID);
+  const setOrcaTarget = useFrozenGuildStore((state) => state.setOrcaDraftCardID);
   const [sealTargets, setSealTargets] = useState<string[]>([]);
   const spySlots = useFrozenGuildStore((state) => state.spyDraftSlots);
   const spyGiftSlot = useFrozenGuildStore((state) => state.spyDraftGiftSlot);
@@ -252,7 +275,7 @@ export function CenterActionDockContainer({
     if (flow.mode !== "spy") {
       clearSpyDraft();
     }
-  }, [clearSpyDraft, clearSwapDraft, flow.mode]);
+  }, [clearSpyDraft, clearSwapDraft, flow.mode, setOrcaTarget]);
 
   useEffect(() => {
     if (!spy || spy.targetPlayerIDs.length === 0) {
@@ -494,6 +517,9 @@ export function LocalHandContainer() {
   const players = useFrozenGuildStore(selectPlayersLedger);
   const localPlayerID = useFrozenGuildStore((state) => state.localPlayerID);
   const flow = useFrozenGuildStore(selectActionFlowView);
+  const orca = useFrozenGuildStore(selectOrcaResolutionView);
+  const orcaTarget = useFrozenGuildStore((state) => state.orcaDraftCardID);
+  const setOrcaTarget = useFrozenGuildStore((state) => state.setOrcaDraftCardID);
   const swapSourceKey = useFrozenGuildStore((state) => state.swapDraftSourceKey);
   const swapTargetKey = useFrozenGuildStore((state) => state.swapDraftTargetKey);
   const setSwapSourceKey = useFrozenGuildStore((state) => state.setSwapDraftSourceKey);
@@ -505,7 +531,14 @@ export function LocalHandContainer() {
     return <p>Sin mano local.</p>;
   }
 
-  const clickableCardIndexes = flow.mode === "swap" ? local.cardIDs.map((_, index) => index) : [];
+  const clickableCardIndexes =
+    flow.mode === "swap"
+      ? local.cardIDs.map((_, index) => index)
+      : flow.mode === "orca" && orca
+        ? local.cardIDs
+            .map((cardID, index) => (orca.validTargetCardIDs.includes(cardID) ? index : -1))
+            .filter((index) => index >= 0)
+        : [];
   const selectedCardIndexes: number[] = [];
 
   [swapSourceKey, swapTargetKey].forEach((value) => {
@@ -518,24 +551,39 @@ export function LocalHandContainer() {
     }
   });
 
+  if (flow.mode === "orca" && orcaTarget) {
+    const selectedIndex = local.cardIDs.findIndex((cardID) => cardID === orcaTarget);
+    if (selectedIndex >= 0) {
+      selectedCardIndexes.push(selectedIndex);
+    }
+  }
+
   const onLocalCardClick = (index: number) => {
-    if (flow.mode !== "swap") {
-      return;
-    }
-    const nextKey = `player:${local.id}:${index}`;
-    if (!swapSourceKey || swapSourceKey === nextKey) {
-      setSwapSourceKey(nextKey);
-      if (swapTargetKey === nextKey) {
-        setSwapTargetKey("");
+    if (flow.mode === "swap") {
+      const nextKey = `player:${local.id}:${index}`;
+      if (!swapSourceKey || swapSourceKey === nextKey) {
+        setSwapSourceKey(nextKey);
+        if (swapTargetKey === nextKey) {
+          setSwapTargetKey("");
+        }
+        return;
       }
+      if (!swapTargetKey || swapTargetKey === nextKey) {
+        setSwapTargetKey(nextKey);
+        return;
+      }
+      setSwapSourceKey(nextKey);
+      setSwapTargetKey("");
       return;
     }
-    if (!swapTargetKey || swapTargetKey === nextKey) {
-      setSwapTargetKey(nextKey);
-      return;
+
+    if (flow.mode === "orca" && orca) {
+      const cardID = local.cardIDs[index];
+      if (!cardID || !orca.validTargetCardIDs.includes(cardID)) {
+        return;
+      }
+      setOrcaTarget(orcaTarget === cardID ? null : cardID);
     }
-    setSwapSourceKey(nextKey);
-    setSwapTargetKey("");
   };
 
   return (

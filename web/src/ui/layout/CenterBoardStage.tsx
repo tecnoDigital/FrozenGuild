@@ -1,6 +1,8 @@
-import { ActionBanner } from "../actions/ActionBanner.js";
+import type { CSSProperties, PointerEvent } from "react";
 import { IceGrid } from "../board/IceGrid.js";
 import type { IceGridCardView } from "../../view-model/iceGridView.js";
+import { assets } from "../assets.js";
+import styles from "./CenterBoardStage.module.css";
 
 type CenterBoardStageProps = {
   title: string;
@@ -17,38 +19,48 @@ type CenterBoardStageProps = {
   } | null;
 };
 
+type BoardStageStyle = CSSProperties & {
+  "--fg-board-backdrop": string;
+  "--fg-stage-parallax-x"?: string;
+  "--fg-stage-parallax-y"?: string;
+};
+
+function handleBoardPointerMove(event: PointerEvent<HTMLDivElement>) {
+  const bounds = event.currentTarget.getBoundingClientRect();
+  const x = (event.clientX - bounds.left) / bounds.width - 0.5;
+  const y = (event.clientY - bounds.top) / bounds.height - 0.5;
+
+  event.currentTarget.style.setProperty("--fg-stage-parallax-x", `${(x * 10).toFixed(2)}px`);
+  event.currentTarget.style.setProperty("--fg-stage-parallax-y", `${(y * 8).toFixed(2)}px`);
+}
+
+function handleBoardPointerLeave(event: PointerEvent<HTMLDivElement>) {
+  event.currentTarget.style.setProperty("--fg-stage-parallax-x", "0px");
+  event.currentTarget.style.setProperty("--fg-stage-parallax-y", "0px");
+}
+
 export function CenterBoardStage({ title, detail, severity = "neutral", mode = "waiting", cards, clickableSlots = [], selectedSlots = [], onSlotClick, gameOverOverlay = null }: CenterBoardStageProps) {
+  void title;
+  void detail;
+  void severity;
+  void mode;
+
+  const boardStyle: BoardStageStyle = {
+    "--fg-board-backdrop": `url(${assets.backgrounds.iceTableCenter})`,
+    "--fg-stage-parallax-x": "0px",
+    "--fg-stage-parallax-y": "0px"
+  };
+
   return (
-    <div>
-      <ActionBanner title={title} detail={detail} severity={severity} mode={mode} />
-      <div style={{ marginTop: 12, position: "relative" }}>
+    <div className={styles.stage}>
+      <div className={styles.boardFrame} style={boardStyle} onPointerMove={handleBoardPointerMove} onPointerLeave={handleBoardPointerLeave}>
+        <div className={styles.boardBackdrop} aria-hidden="true" />
         <IceGrid cards={cards} clickableSlots={clickableSlots} selectedSlots={selectedSlots} {...(onSlotClick ? { onSlotClick } : {})} />
         {gameOverOverlay ? (
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: "rgba(7, 16, 32, 0.72)",
-              borderRadius: 12,
-              pointerEvents: "none",
-              textAlign: "center",
-              padding: 16
-            }}
-          >
-            <div
-              style={{
-                background: "rgba(12, 22, 40, 0.95)",
-                border: "1px solid rgba(255, 255, 255, 0.18)",
-                borderRadius: 12,
-                padding: "14px 16px",
-                maxWidth: 320
-              }}
-            >
-              <strong style={{ display: "block", fontSize: 16 }}>{gameOverOverlay.title}</strong>
-              <span style={{ display: "block", marginTop: 6, opacity: 0.92 }}>{gameOverOverlay.detail}</span>
+          <div className={styles.localOverlay}>
+            <div className={styles.localOverlayCard}>
+              <strong className={styles.localOverlayTitle}>{gameOverOverlay.title}</strong>
+              <span className={styles.localOverlayDetail}>{gameOverOverlay.detail}</span>
             </div>
           </div>
         ) : null}

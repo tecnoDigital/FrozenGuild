@@ -13,6 +13,7 @@ export type FrozenGuildUiStore = FrozenGuildSnapshot & {
   spyDraftGiftSlot: number | null;
   swapDraftSourceKey: string;
   swapDraftTargetKey: string;
+  orcaDraftCardID: string | null;
   setSnapshot: (snapshot: FrozenGuildSnapshot) => void;
   toggleSpyDraftSlot: (slot: number) => void;
   setSpyDraftGiftSlot: (slot: number | null) => void;
@@ -20,6 +21,7 @@ export type FrozenGuildUiStore = FrozenGuildSnapshot & {
   setSwapDraftSourceKey: (key: string) => void;
   setSwapDraftTargetKey: (key: string) => void;
   clearSwapDraft: () => void;
+  setOrcaDraftCardID: (cardID: string | null) => void;
 };
 
 export const useFrozenGuildStore = create<FrozenGuildUiStore>((set) => ({
@@ -31,6 +33,7 @@ export const useFrozenGuildStore = create<FrozenGuildUiStore>((set) => ({
   spyDraftGiftSlot: null,
   swapDraftSourceKey: "",
   swapDraftTargetKey: "",
+  orcaDraftCardID: null,
   setSnapshot: (snapshot) => set(snapshot),
   toggleSpyDraftSlot: (slot) =>
     set((state) => {
@@ -46,5 +49,6 @@ export const useFrozenGuildStore = create<FrozenGuildUiStore>((set) => ({
   clearSpyDraft: () => set({ spyDraftSlots: [], spyDraftGiftSlot: null }),
   setSwapDraftSourceKey: (key) => set({ swapDraftSourceKey: key }),
   setSwapDraftTargetKey: (key) => set({ swapDraftTargetKey: key }),
-  clearSwapDraft: () => set({ swapDraftSourceKey: "", swapDraftTargetKey: "" })
+  clearSwapDraft: () => set({ swapDraftSourceKey: "", swapDraftTargetKey: "" }),
+  setOrcaDraftCardID: (cardID) => set({ orcaDraftCardID: cardID })
 }));

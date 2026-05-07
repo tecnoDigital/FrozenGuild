@@ -25,8 +25,15 @@ export function IceSlot({
     return <div className={styles.empty}>Vacio</div>;
   }
 
+  const slotStateClass = {
+    idle: "",
+    selectable: styles.slotSelectable,
+    selected: styles.slotSelected,
+    disabled: styles.slotDisabled,
+  }[interactionState];
+
   return (
-    <div className={styles.slot}>
+    <div className={`${styles.slot} ${slotStateClass}`.trim()}>
       <Card
         id={cardId}
         label={label}
