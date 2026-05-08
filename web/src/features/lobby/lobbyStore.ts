@@ -17,7 +17,11 @@ export type LobbyAvatarID =
   | "petrel"
   | "seaElephant"
   | "orca"
-  | "sealBomb";
+  | "sealBomb"
+  | "donKrill"
+  | "ladyMorsa"
+  | "capitanPetrel"
+  | "srBomba";
 
 export type LobbyColorID = PlayerColorID;
 
@@ -29,7 +33,11 @@ export const lobbyAvatarOptions: Array<{ id: LobbyAvatarID; label: string; src: 
   { id: "petrel", label: "Petrel", src: assets.characters.avatars.petrel },
   { id: "seaElephant", label: "Sea Elephant", src: assets.characters.avatars.seaElephant },
   { id: "orca", label: "Orca", src: assets.characters.avatars.orca },
-  { id: "sealBomb", label: "Seal-Bomb", src: assets.characters.avatars.sealBomb }
+  { id: "sealBomb", label: "Seal-Bomb", src: assets.characters.avatars.sealBomb },
+  { id: "donKrill", label: "Don Krill", src: assets.characters.avatars.donKrill },
+  { id: "ladyMorsa", label: "Lady Morsa", src: assets.characters.avatars.ladyMorsa },
+  { id: "capitanPetrel", label: "Capitan Petrel", src: assets.characters.avatars.capitanPetrel },
+  { id: "srBomba", label: "Sr Bomba", src: assets.characters.avatars.srBomba }
 ];
 
 export const lobbyColorOptions = playerColorOptions;

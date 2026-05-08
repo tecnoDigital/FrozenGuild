@@ -1,7 +1,7 @@
 .stage {
   flex: 1 1 auto;
   min-height: 0;
-  max-height: 600px;
+  max-height: clamp(340px, 62dvh, 600px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -22,6 +22,7 @@
   place-items: center;
   isolation: isolate;
   overflow: visible;
+  transform: translateY(-110px);
 
   --fg-grid-width-min: 48vw;
   --fg-grid-width-base: 52vw;
@@ -105,25 +106,68 @@
 }
 
 @media (max-width: 900px) {
+  .stage {
+    max-height: clamp(280px, 54dvh, 480px);
+  }
+
   .boardFrame {
-    min-height: clamp(40px, 44vh, 200px);
-    padding: clamp(12px, 4vw, 22px);
+    min-height: clamp(40px, 38vh, 160px);
+    padding: clamp(10px, 3vw, 18px);
+    transform: translateY(-120px);
   }
 
   .gridSurface {
     width: min(100%, 560px);
     transform: translate3d(calc(var(--fg-stage-parallax-x) * 0.45), calc(var(--fg-stage-parallax-y) * 0.45), 0);
   }
+
+  .gridTilt {
+    transform: rotateX(34deg) rotateZ(-0.5deg) translateY(14px) scale(0.98);
+  }
 }
 
 @media (max-height: 800px) and (min-width: 900px) {
   .boardFrame {
-    min-height: clamp(60px, 36vh, 250px);
+    min-height: clamp(60px, 34vh, 220px);
     padding: clamp(14px, 1.8vw, 28px);
   }
 
   .gridSurface {
     width: min(100%, clamp(var(--fg-grid-width-min), var(--fg-grid-width-base), var(--fg-grid-width-max)));
+  }
+
+  .gridTilt {
+    transform: rotateX(36deg) rotateZ(-0.6deg) translateY(18px) scale(1.02);
+  }
+}
+
+@media (max-height: 700px) {
+  .stage {
+    max-height: clamp(240px, 48dvh, 400px);
+  }
+
+  .boardFrame {
+    min-height: clamp(40px, 34vh, 140px);
+    padding: clamp(8px, 2.5vw, 16px);
+    transform: translateY(-90px);
+  }
+
+  .gridTilt {
+    transform: rotateX(30deg) rotateZ(-0.4deg) translateY(10px) scale(0.96);
+  }
+}
+
+@media (max-height: 700px) and (min-width: 900px) {
+  .boardFrame {
+    min-height: clamp(50px, 30vh, 180px);
+  }
+
+  .icePlate {
+    transform: rotateX(38deg) translateY(18px) scale(0.96);
+  }
+
+  .gridTilt {
+    transform: rotateX(32deg) rotateZ(-0.5deg) translateY(14px) scale(0.98);
   }
 }
 
@@ -276,11 +320,11 @@
 @media (max-width: 900px) {
   .icePlate {
     inset: 11% 6% 9%;
-    transform: rotateX(40deg) translateY(22px) scale(1.02);
+    transform: rotateX(36deg) translateY(16px) scale(0.98);
   }
 
   .gridTilt {
-    transform: rotateX(38deg) rotateZ(-0.6deg) translateY(18px) scale(1.02);
+    transform: rotateX(34deg) rotateZ(-0.5deg) translateY(14px) scale(0.98);
   }
 
   .iceCornerA { top: -10px; left: -8px; }
@@ -292,11 +336,11 @@
 @media (max-height: 800px) and (min-width: 900px) {
   .icePlate {
     inset: 10% 8% 9%;
-    transform: rotateX(46deg) translateY(28px) scale(0.98);
+    transform: rotateX(42deg) translateY(24px) scale(0.98);
   }
 
   .gridTilt {
-    transform: rotateX(40deg) rotateZ(-0.7deg) translateY(22px) scale(1.04);
+    transform: rotateX(36deg) rotateZ(-0.6deg) translateY(18px) scale(1.02);
   }
 }
 

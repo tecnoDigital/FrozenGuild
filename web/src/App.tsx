@@ -485,6 +485,15 @@ export function App() {
       return;
     }
 
+    if (!gameState.ctx || !gameState.G?.players) {
+      return;
+    }
+
+    const isMyTurn = gameState.ctx.currentPlayer === session.playerID;
+    if (!isMyTurn) {
+      return;
+    }
+
     const currentPlayerProfile = gameState.G.players[session.playerID];
     if (
       currentPlayerProfile?.name === session.playerName &&

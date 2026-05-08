@@ -296,28 +296,27 @@ function runBasicBotTurn(args: {
       // Isolated 2-player edge case: one hand is empty, so swap cannot execute.
       // Let endTurn run and close the turn cleanly.
     } else {
-    const candidates = Object.entries(G.players)
-      .filter(([, player]) => player.zone.length > 0)
-      .map(([id]) => id);
+      const localPlayer = G.players[playerID];
+      if (!localPlayer || localPlayer.zone.length === 0) {
+        // Bot sin cartas: no puede intercambiar bajo la regla local -> rival.
+      } else {
+        const rivalsWithCards = Object.entries(G.players)
+          .filter(([id, player]) => id !== playerID && player.zone.length > 0)
+          .map(([id]) => id);
 
-    const firstPlayerID = randomPick(candidates, randomFn);
-    const secondPlayerID = randomPick(
-      candidates.filter((id) => id !== firstPlayerID),
-      randomFn
-    );
+        const targetPlayerID = randomPick(rivalsWithCards, randomFn);
+        if (targetPlayerID) {
+          const targetPlayer = G.players[targetPlayerID]!;
+          const sourceIndex = Math.floor(randomFn() * localPlayer.zone.length);
+          const targetIndex = Math.floor(randomFn() * targetPlayer.zone.length);
 
-    if (firstPlayerID && secondPlayerID) {
-      const firstPlayer = G.players[firstPlayerID]!;
-      const secondPlayer = G.players[secondPlayerID]!;
-      const firstIndex = Math.floor(randomFn() * firstPlayer.zone.length);
-      const secondIndex = Math.floor(randomFn() * secondPlayer.zone.length);
-
-      swapCards(
-        { G, ctx, playerID, events },
-        { area: "player_zone", playerID: firstPlayerID, index: firstIndex },
-        { area: "player_zone", playerID: secondPlayerID, index: secondIndex }
-      );
-    }
+          swapCards(
+            { G, ctx, playerID, events },
+            { area: "player_zone", playerID, index: sourceIndex },
+            { area: "player_zone", playerID: targetPlayerID, index: targetIndex }
+          );
+        }
+      }
     }
   }
 

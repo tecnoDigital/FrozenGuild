@@ -13,7 +13,8 @@ type SwapConfirmPanelProps = {
   targetLabel: string;
   canConfirm: boolean;
   helperText: string;
-  options: SwapOption[];
+  sourceOptions: SwapOption[];
+  targetOptions: SwapOption[];
   sourceKey: string;
   targetKey: string;
   onSourceKeyChange: (key: string) => void;
@@ -27,7 +28,8 @@ export function SwapConfirmPanel({
   targetLabel,
   canConfirm,
   helperText,
-  options,
+  sourceOptions,
+  targetOptions,
   sourceKey,
   targetKey,
   onSourceKeyChange,
@@ -45,7 +47,7 @@ export function SwapConfirmPanel({
         Origen
         <select className={styles.select} value={sourceKey} onChange={(event) => onSourceKeyChange(event.target.value)}>
           <option value="">Selecciona origen</option>
-          {options.map((option) => (
+          {sourceOptions.map((option) => (
             <option key={`source-${option.key}`} value={option.key}>{option.label}</option>
           ))}
         </select>
@@ -54,7 +56,7 @@ export function SwapConfirmPanel({
         Destino
         <select className={styles.select} value={targetKey} onChange={(event) => onTargetKeyChange(event.target.value)}>
           <option value="">Selecciona destino</option>
-          {options.map((option) => (
+          {targetOptions.map((option) => (
             <option key={`target-${option.key}`} value={option.key}>{option.label}</option>
           ))}
         </select>

@@ -19,7 +19,8 @@ type ActionPanelProps = {
     helperText: string;
     sourceKey: string;
     targetKey: string;
-    options: Array<{ key: string; label: string; location: SwapLocation }>;
+    sourceOptions: Array<{ key: string; label: string; location: SwapLocation }>;
+    targetOptions: Array<{ key: string; label: string; location: SwapLocation }>;
     onSourceKeyChange: (key: string) => void;
     onTargetKeyChange: (key: string) => void;
     onConfirm: () => void;
@@ -120,7 +121,8 @@ export function ActionPanel({ flow, onChoosePadrinoAction, swap, orca, seal, spy
           helperText={swap.helperText}
           sourceKey={swap.sourceKey}
           targetKey={swap.targetKey}
-          options={swap.options}
+          sourceOptions={swap.sourceOptions}
+          targetOptions={swap.targetOptions}
           onSourceKeyChange={swap.onSourceKeyChange}
           onTargetKeyChange={swap.onTargetKeyChange}
           onConfirm={swap.onConfirm}

@@ -18,7 +18,8 @@ type CenterActionDockProps = {
     helperText: string;
     sourceKey: string;
     targetKey: string;
-    options: Array<{ key: string; label: string; location: SwapLocation }>;
+    sourceOptions: Array<{ key: string; label: string; location: SwapLocation }>;
+    targetOptions: Array<{ key: string; label: string; location: SwapLocation }>;
     onSourceKeyChange: (key: string) => void;
     onTargetKeyChange: (key: string) => void;
     onConfirm: () => void;

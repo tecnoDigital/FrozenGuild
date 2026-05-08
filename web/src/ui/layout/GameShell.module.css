@@ -11,7 +11,7 @@
     "left actions hand";
   gap: clamp(10px, 1vw, 16px);
   width: 100%;
-  min-height: 100vh;
+  min-height: 100dvh;
   padding: var(--fg-shell-gutter);
   overflow-x: clip;
   background:
@@ -128,7 +128,7 @@
     --fg-shell-left-column: 250px;
     --fg-shell-center-column: minmax(0, 1fr);
     grid-template-columns: var(--fg-shell-left-column) var(--fg-shell-center-column);
-    grid-template-rows: auto auto auto;
+    grid-template-rows: auto auto auto auto;
     grid-template-areas:
       "left center"
       "left actions"
@@ -140,7 +140,7 @@
 @media (max-width: 900px) {
   .gameShell {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto auto auto auto;
+    grid-template-rows: auto minmax(0, 1fr) auto auto auto;
     grid-template-areas:
       "left"
       "center"
@@ -169,5 +169,15 @@
   .hand,
   .right {
     padding: 10px;
+  }
+}
+
+@media (max-height: 800px) and (max-width: 900px) {
+  .left,
+  .center,
+  .actions,
+  .hand,
+  .right {
+    padding: 8px;
   }
 }

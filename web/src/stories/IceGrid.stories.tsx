@@ -26,3 +26,33 @@ export default meta;
 type Story = StoryObj<typeof IceGrid>;
 
 export const Default: Story = {};
+
+export const IPhoneSE: Story = {
+  parameters: {
+    viewport: { defaultViewport: "iphoneSe" }
+  }
+};
+
+export const IPhone14: Story = {
+  parameters: {
+    viewport: { defaultViewport: "iphone14" }
+  }
+};
+
+export const IPadMini: Story = {
+  parameters: {
+    viewport: { defaultViewport: "ipadMini" }
+  }
+};
+
+export const Laptop1366: Story = {
+  parameters: {
+    viewport: { defaultViewport: "laptop" }
+  }
+};
+
+export const DesktopFHD: Story = {
+  parameters: {
+    viewport: { defaultViewport: "fhd" }
+  }
+};

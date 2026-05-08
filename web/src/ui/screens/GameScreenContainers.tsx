@@ -123,7 +123,7 @@ export function CenterBoardStageContainer({ onFishFromIce }: { onFishFromIce: (s
         canFish
           ? iceCards.map((card, index) => (card.empty ? -1 : index)).filter((slot) => slot >= 0 && slot !== pendingFishSlot)
           : flow.mode === "swap"
-            ? iceCards.map((card, index) => (card.empty ? -1 : index)).filter((slot) => slot >= 0)
+            ? []
           : flow.mode === "spy" && spy
             ? (spy.active ? spy.revealedSlots : spy.availableSlots)
             : []
@@ -148,20 +148,6 @@ export function CenterBoardStageContainer({ onFishFromIce }: { onFishFromIce: (s
           return;
         }
         if (flow.mode === "swap") {
-          const slotKey = `ice:${slot}`;
-          if (!swapSourceKey || swapSourceKey === slotKey) {
-            setSwapSourceKey(slotKey);
-            if (swapTargetKey === slotKey) {
-              setSwapTargetKey("");
-            }
-            return;
-          }
-          if (!swapTargetKey || swapTargetKey === slotKey) {
-            setSwapTargetKey(slotKey);
-            return;
-          }
-          setSwapSourceKey(slotKey);
-          setSwapTargetKey("");
           return;
         }
         if (flow.mode === "spy" && spy) {
@@ -212,20 +198,13 @@ export function CenterActionDockContainer({
   const diceDisabled = !flow.canRoll;
   const canChoosePadrino = useFrozenGuildStore(selectCanChoosePadrino);
   const localPlayerID = useFrozenGuildStore((state) => state.localPlayerID);
-  const iceGrid = useFrozenGuildStore((state) => state.G?.iceGrid ?? null);
   const playersMap = useFrozenGuildStore((state) => state.G?.players ?? null);
   const swapOptions = useMemo(() => {
-    if (!iceGrid || !playersMap) {
+    if (!playersMap) {
       return [] as Array<{ key: string; label: string; location: SwapLocation }>;
     }
 
     const options: Array<{ key: string; label: string; location: SwapLocation }> = [];
-
-    iceGrid.forEach((slot, index) => {
-      if (typeof slot === "string") {
-        options.push({ key: `ice:${index}`, label: `Hielo ${index + 1}`, location: { area: "ice_grid", slot: index } });
-      }
-    });
 
     Object.entries(playersMap).forEach(([playerID, player]) => {
       player.zone.forEach((cardID, index) => {
@@ -238,7 +217,15 @@ export function CenterActionDockContainer({
     });
 
     return options;
-  }, [iceGrid, playersMap]);
+  }, [playersMap]);
+  const swapSourceOptions = useMemo(
+    () => swapOptions.filter((item) => item.location.area === "player_zone" && item.location.playerID === localPlayerID),
+    [localPlayerID, swapOptions]
+  );
+  const swapTargetOptions = useMemo(
+    () => swapOptions.filter((item) => item.location.area === "player_zone" && item.location.playerID !== localPlayerID),
+    [localPlayerID, swapOptions]
+  );
   const orca = useFrozenGuildStore(selectOrcaResolutionView);
   const seal = useFrozenGuildStore(selectSealBombResolutionView);
   const spy = useFrozenGuildStore(selectSpyResolutionView);
@@ -317,10 +304,17 @@ export function CenterActionDockContainer({
     }
   }, [flow.mode, localPlayerID, swapOptions, swapSourceKey]);
 
-  const swapCanConfirm = !!(swapSource && swapTarget);
+  const swapCanConfirm = !!(
+    swapSource
+    && swapTarget
+    && swapSource.area === "player_zone"
+    && swapTarget.area === "player_zone"
+    && swapSource.playerID === localPlayerID
+    && swapTarget.playerID !== localPlayerID
+  );
   const swapHelperText = swapCanConfirm
     ? "Listo para confirmar intercambio."
-    : "Selecciona origen y destino para intercambiar.";
+    : "Selecciona una carta de tu mano como origen y otra de un rival como destino.";
 
   const onToggleSealTarget = (cardID: string) => {
     setSealTargets((current) => {
@@ -347,11 +341,12 @@ export function CenterActionDockContainer({
         helperText: canChoosePadrino ? "" : swapHelperText,
         sourceKey: swapSourceKey,
         targetKey: swapTargetKey,
-        options: swapOptions,
+        sourceOptions: swapSourceOptions,
+        targetOptions: swapTargetOptions,
         onSourceKeyChange: setSwapSourceKey,
         onTargetKeyChange: setSwapTargetKey,
         onConfirm: () => {
-          if (swapSource && swapTarget) {
+          if (swapCanConfirm && swapSource && swapTarget) {
             onSwapCards(swapSource, swapTarget);
             setSwapSource(null);
             setSwapTarget(null);
@@ -451,7 +446,6 @@ export function RightLedgerRailContainer() {
   const swapSourceKey = useFrozenGuildStore((state) => state.swapDraftSourceKey);
   const swapTargetKey = useFrozenGuildStore((state) => state.swapDraftTargetKey);
   const setSwapSourceKey = useFrozenGuildStore((state) => state.setSwapDraftSourceKey);
-  const setSwapTargetKey = useFrozenGuildStore((state) => state.setSwapDraftTargetKey);
 
   const clickableCardsByPlayerID: Record<string, number[]> = {};
   const selectedCardsByPlayerID: Record<string, number[]> = {};
@@ -481,19 +475,7 @@ export function RightLedgerRailContainer() {
       return;
     }
     const nextKey = `player:${playerID}:${index}`;
-    if (!swapSourceKey || swapSourceKey === nextKey) {
-      setSwapSourceKey(nextKey);
-      if (swapTargetKey === nextKey) {
-        setSwapTargetKey("");
-      }
-      return;
-    }
-    if (!swapTargetKey || swapTargetKey === nextKey) {
-      setSwapTargetKey(nextKey);
-      return;
-    }
-    setSwapSourceKey(nextKey);
-    setSwapTargetKey("");
+    setSwapTargetKey(nextKey);
   };
 
   return (
@@ -561,19 +543,7 @@ export function LocalHandContainer() {
   const onLocalCardClick = (index: number) => {
     if (flow.mode === "swap") {
       const nextKey = `player:${local.id}:${index}`;
-      if (!swapSourceKey || swapSourceKey === nextKey) {
-        setSwapSourceKey(nextKey);
-        if (swapTargetKey === nextKey) {
-          setSwapTargetKey("");
-        }
-        return;
-      }
-      if (!swapTargetKey || swapTargetKey === nextKey) {
-        setSwapTargetKey(nextKey);
-        return;
-      }
       setSwapSourceKey(nextKey);
-      setSwapTargetKey("");
       return;
     }
 

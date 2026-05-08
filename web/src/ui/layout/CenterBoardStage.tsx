@@ -1,4 +1,4 @@
-import type { CSSProperties, PointerEvent } from "react";
+import type { CSSProperties } from "react";
 import { IceGrid } from "../board/IceGrid.js";
 import type { IceGridCardView } from "../../view-model/iceGridView.js";
 import { assets } from "../assets.js";
@@ -21,23 +21,7 @@ type CenterBoardStageProps = {
 
 type BoardStageStyle = CSSProperties & {
   "--fg-board-backdrop": string;
-  "--fg-stage-parallax-x"?: string;
-  "--fg-stage-parallax-y"?: string;
 };
-
-function handleBoardPointerMove(event: PointerEvent<HTMLDivElement>) {
-  const bounds = event.currentTarget.getBoundingClientRect();
-  const x = (event.clientX - bounds.left) / bounds.width - 0.5;
-  const y = (event.clientY - bounds.top) / bounds.height - 0.5;
-
-  event.currentTarget.style.setProperty("--fg-stage-parallax-x", `${(x * 10).toFixed(2)}px`);
-  event.currentTarget.style.setProperty("--fg-stage-parallax-y", `${(y * 8).toFixed(2)}px`);
-}
-
-function handleBoardPointerLeave(event: PointerEvent<HTMLDivElement>) {
-  event.currentTarget.style.setProperty("--fg-stage-parallax-x", "0px");
-  event.currentTarget.style.setProperty("--fg-stage-parallax-y", "0px");
-}
 
 export function CenterBoardStage({ title, detail, severity = "neutral", mode = "waiting", cards, clickableSlots = [], selectedSlots = [], onSlotClick, gameOverOverlay = null }: CenterBoardStageProps) {
   void title;
@@ -46,14 +30,12 @@ export function CenterBoardStage({ title, detail, severity = "neutral", mode = "
   void mode;
 
   const boardStyle: BoardStageStyle = {
-    "--fg-board-backdrop": `url(${assets.backgrounds.iceTableCenter})`,
-    "--fg-stage-parallax-x": "0px",
-    "--fg-stage-parallax-y": "0px"
+    "--fg-board-backdrop": `url(${assets.backgrounds.iceTableCenter})`
   };
 
   return (
     <div className={styles.stage}>
-      <div className={styles.boardFrame} style={boardStyle} onPointerMove={handleBoardPointerMove} onPointerLeave={handleBoardPointerLeave}>
+      <div className={styles.boardFrame} style={boardStyle}>
         <div className={styles.boardBackdrop} aria-hidden="true" />
         <IceGrid cards={cards} clickableSlots={clickableSlots} selectedSlots={selectedSlots} {...(onSlotClick ? { onSlotClick } : {})} />
         {gameOverOverlay ? (
