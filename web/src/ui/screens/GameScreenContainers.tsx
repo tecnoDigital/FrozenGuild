@@ -13,9 +13,7 @@ import {
   selectPlayersLedger,
   selectUnstablePlayers
 } from "../../store/selectors.js";
-import { selectIceGridCardsView } from "../../view-model/iceGridView.js";
 import { CenterActionDock } from "../layout/CenterActionDock.js";
-import { CenterBoardStage } from "../layout/CenterBoardStage.js";
 import { LeftStatusRail } from "../layout/LeftStatusRail.js";
 import { RightLedgerRail } from "../layout/RightLedgerRail.js";
 import { LocalPlayerHandPanel } from "../players/LocalPlayerHandPanel.js";
@@ -69,100 +67,6 @@ export function LeftStatusRailContainer() {
   }, [players, currentTurnPlayerID, localPlayerID, lobbyAvatarSrc]);
 
   return <LeftStatusRail players={scorePlayers} />;
-}
-
-export function CenterBoardStageContainer({ onFishFromIce }: { onFishFromIce: (slot: number) => void }) {
-  const actionView = useFrozenGuildStore(selectActionBannerView);
-  const flow = useFrozenGuildStore(selectActionFlowView);
-  const iceCards = useFrozenGuildStore(selectIceGridCardsView);
-  const spy = useFrozenGuildStore(selectSpyResolutionView);
-  const gameOverOverlay = useFrozenGuildStore(selectGameOverOverlayView);
-  const spyDraftSlots = useFrozenGuildStore((state) => state.spyDraftSlots);
-  const spyDraftGiftSlot = useFrozenGuildStore((state) => state.spyDraftGiftSlot);
-  const toggleSpyDraftSlot = useFrozenGuildStore((state) => state.toggleSpyDraftSlot);
-  const setSpyDraftGiftSlot = useFrozenGuildStore((state) => state.setSpyDraftGiftSlot);
-  const swapSourceKey = useFrozenGuildStore((state) => state.swapDraftSourceKey);
-  const swapTargetKey = useFrozenGuildStore((state) => state.swapDraftTargetKey);
-  const setSwapSourceKey = useFrozenGuildStore((state) => state.setSwapDraftSourceKey);
-  const setSwapTargetKey = useFrozenGuildStore((state) => state.setSwapDraftTargetKey);
-  const [pendingFishSlot, setPendingFishSlot] = useState<number | null>(null);
-
-  const canFish = useFrozenGuildStore((state) => {
-    if (!state.G || !state.ctx || !state.localPlayerID) return false;
-    if (state.gameover !== undefined) return false;
-    const isMyTurn = state.ctx.currentPlayer === state.localPlayerID;
-    if (!isMyTurn || state.G.turn.actionCompleted) return false;
-    const effectiveValue = state.G.dice.value === 6 ? state.G.turn.padrinoAction : state.G.dice.value;
-    return state.G.dice.rolled && effectiveValue !== null && effectiveValue >= 1 && effectiveValue <= 3;
-  });
-
-  useEffect(() => {
-    if (!canFish) {
-      setPendingFishSlot(null);
-      return;
-    }
-
-    if (pendingFishSlot === null) {
-      return;
-    }
-
-    const pendingCard = iceCards[pendingFishSlot];
-    if (!pendingCard || pendingCard.empty) {
-      setPendingFishSlot(null);
-    }
-  }, [canFish, pendingFishSlot, iceCards]);
-
-  return (
-    <CenterBoardStage
-      title={actionView.title}
-      detail={actionView.detail}
-      severity={actionView.severity}
-      mode={flow.mode}
-      cards={iceCards}
-      clickableSlots={
-        canFish
-          ? iceCards.map((card, index) => (card.empty ? -1 : index)).filter((slot) => slot >= 0 && slot !== pendingFishSlot)
-          : flow.mode === "swap"
-            ? []
-          : flow.mode === "spy" && spy
-            ? (spy.active ? spy.revealedSlots : spy.availableSlots)
-            : []
-      }
-      selectedSlots={
-        flow.mode === "swap"
-          ? [swapSourceKey, swapTargetKey]
-              .filter((value) => value.startsWith("ice:"))
-              .map((value) => Number(value.split(":")[1]))
-              .filter((value) => Number.isInteger(value) && value >= 0)
-          : flow.mode === "spy" && spy
-          ? (spy.active ? (spyDraftGiftSlot !== null ? [spyDraftGiftSlot] : []) : spyDraftSlots)
-          : []
-      }
-      onSlotClick={(slot) => {
-        if (canFish) {
-          if (pendingFishSlot !== null) {
-            return;
-          }
-          setPendingFishSlot(slot);
-          onFishFromIce(slot);
-          return;
-        }
-        if (flow.mode === "swap") {
-          return;
-        }
-        if (flow.mode === "spy" && spy) {
-          if (!spy.active && spy.availableSlots.includes(slot)) {
-            toggleSpyDraftSlot(slot);
-            return;
-          }
-          if (spy.active && spy.revealedSlots.includes(slot)) {
-            setSpyDraftGiftSlot(slot);
-          }
-        }
-      }}
-      gameOverOverlay={gameOverOverlay}
-    />
-  );
 }
 
 export function useMobileActionFlow() {
@@ -446,6 +350,7 @@ export function RightLedgerRailContainer() {
   const swapSourceKey = useFrozenGuildStore((state) => state.swapDraftSourceKey);
   const swapTargetKey = useFrozenGuildStore((state) => state.swapDraftTargetKey);
   const setSwapSourceKey = useFrozenGuildStore((state) => state.setSwapDraftSourceKey);
+  const setSwapTargetKey = useFrozenGuildStore((state) => state.setSwapDraftTargetKey);
 
   const clickableCardsByPlayerID: Record<string, number[]> = {};
   const selectedCardsByPlayerID: Record<string, number[]> = {};

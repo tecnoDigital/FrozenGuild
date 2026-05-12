@@ -14,6 +14,8 @@ import type { LobbyAvatarID, LobbyColorID } from "../../features/lobby/lobbyStor
 import { resolveLobbyAvatarSrc, resolveLobbyColorValue } from "../../features/lobby/lobbyStore.js";
 
 type LobbyScreenProps = {
+  mode?: "create" | "join";
+  onModeChange?: (mode: "create" | "join") => void;
   playerName: string;
   avatarID: LobbyAvatarID;
   colorID: LobbyColorID;
@@ -34,6 +36,7 @@ type LobbyScreenProps = {
   onColorChange?: (colorID: LobbyColorID) => void;
   onNumPlayersChange?: (value: number) => void;
   onToggleBotPlayerID?: (playerID: string) => void;
+  onSetBotPlayerIDs?: (ids: string[]) => void;
   onSelectJoinMatchID?: (matchID: string) => void;
   onRefreshMatches?: () => void;
   onCreate?: () => void;
@@ -41,7 +44,18 @@ type LobbyScreenProps = {
 };
 
 export function LobbyScreen(props: LobbyScreenProps) {
-  const [mode, setMode] = useState<"create" | "join">("create");
+  const [uncontrolledMode, setUncontrolledMode] = useState<"create" | "join">("create");
+  const mode = props.mode ?? uncontrolledMode;
+  const setMode = useCallback(
+    (next: "create" | "join") => {
+      if (props.onModeChange) {
+        props.onModeChange(next);
+      } else {
+        setUncontrolledMode(next);
+      }
+    },
+    [props.onModeChange]
+  );
   const [previewTitle, setPreviewTitle] = useState("New Expedition Table");
   const [previewId, setPreviewId] = useState("FG-NEW");
 
@@ -52,8 +66,15 @@ export function LobbyScreen(props: LobbyScreenProps) {
     (next: number) => {
       const clamped = Math.max(0, Math.min(next, maxBots));
       const candidates = Array.from({ length: maxBots }, (_, i) => String(i + 1));
+      const target = candidates.slice(0, clamped);
+
+      if (props.onSetBotPlayerIDs) {
+        props.onSetBotPlayerIDs(target);
+        return;
+      }
+
       const currentSet = new Set(props.selectedBotPlayerIDs);
-      const targetSet = new Set(candidates.slice(0, clamped));
+      const targetSet = new Set(target);
 
       for (const id of targetSet) {
         if (!currentSet.has(id)) props.onToggleBotPlayerID?.(id);
@@ -62,7 +83,7 @@ export function LobbyScreen(props: LobbyScreenProps) {
         if (!targetSet.has(id)) props.onToggleBotPlayerID?.(id);
       }
     },
-    [maxBots, props.selectedBotPlayerIDs, props.onToggleBotPlayerID]
+    [maxBots, props.selectedBotPlayerIDs, props.onToggleBotPlayerID, props.onSetBotPlayerIDs]
   );
 
   const handleRandomize = useCallback(() => {
@@ -89,19 +110,19 @@ export function LobbyScreen(props: LobbyScreenProps) {
         props.onSelectJoinMatchID?.("");
       }
     },
-    [props.onSelectJoinMatchID]
+    [setMode, props.onSelectJoinMatchID]
   );
 
   const handleViewRooms = useCallback(() => {
     setMode("join");
-  }, []);
+  }, [setMode]);
 
   const handleBackToExpedition = useCallback(() => {
     setMode("create");
     setPreviewTitle("New Expedition Table");
     setPreviewId("FG-NEW");
     props.onSelectJoinMatchID?.("");
-  }, [props.onSelectJoinMatchID]);
+  }, [setMode, props.onSelectJoinMatchID]);
 
   const waitingSeats = Math.max(0, props.numPlayers - 1 - botCount);
 

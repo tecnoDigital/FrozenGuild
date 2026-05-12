@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ReactNode } from "react";
 import { DicePanel } from "../../web/src/ui/actions/DicePanel";
-import { Card } from "../../web/src/ui/board/Card";
+import { FrozenIceGrid } from "../../web/src/features/board/ui/FrozenIceGrid";
 import { LocalPlayerHandPanel } from "../../web/src/ui/players/LocalPlayerHandPanel";
 import { PlayerLedgerRow } from "../../web/src/ui/players/PlayerLedgerRow";
 
@@ -32,17 +32,24 @@ describe("fg phase 7 visual feedback contract", () => {
   });
 
   it("marks hidden and revealed card states with explicit accessibility labels", () => {
-    const hiddenTree = Card({ id: "c-hidden", label: "K♠", image: "/assets/cards/backs/frozen-dreamcatcher-back.png", hidden: true, motionLayout: false });
-    const revealedTree = Card({ id: "c-open", label: "A♣", image: "/assets/cards/fronts/clubs/a.png", hidden: false, motionLayout: false });
+    const cards = Array.from({ length: 9 }, (_, i) => ({
+      id: `c${i}`,
+      label: `Card ${i}`,
+      image: "/assets/cards/types/penguin-1.png",
+      hidden: false,
+      empty: false
+    }));
+    cards[0] = { id: "c-hidden", label: "K♠", image: "/assets/cards/backs/frozen-dreamcatcher-back.png", hidden: true, empty: false };
+    cards[1] = { id: "c-open", label: "A♣", image: "/assets/cards/fronts/clubs/a.png", hidden: false, empty: false };
 
-    const hiddenNodes = collectElements(hiddenTree);
-    const revealedNodes = collectElements(revealedTree);
+    const tree = FrozenIceGrid({ cards });
+    const nodes = collectElements(tree);
+    const imgs = nodes.filter((n) => (n as { type?: unknown }).type === "img") as {
+      props?: Record<string, unknown>;
+    }[];
 
-    const imgHidden = hiddenNodes.find((node) => (node as { props?: Record<string, unknown> }).props?.["alt"] === "Carta oculta");
-    const imgRevealed = revealedNodes.find((node) => (node as { props?: Record<string, unknown> }).props?.["alt"] === "A♣");
-
-    expect(imgHidden).toBeTruthy();
-    expect(imgRevealed).toBeTruthy();
+    expect(imgs[0]?.props?.alt).toBe("Carta oculta");
+    expect(imgs[1]?.props?.alt).toBe("A♣");
   });
 
   it("marks active-turn player rows for immediate turn recognition", () => {

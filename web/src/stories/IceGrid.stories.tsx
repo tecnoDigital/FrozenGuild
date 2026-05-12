@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { IceGrid } from "../ui/board/IceGrid.js";
+import { FrozenIceGrid } from "../features/board/ui/FrozenIceGrid.js";
 import { getCardBackAsset, getCardFallbackAsset } from "../view-model/assetMap.js";
 
 const sampleCards = [
@@ -14,16 +14,16 @@ const sampleCards = [
   { id: "hidden-8", label: "Slot 8", image: getCardBackAsset(), hidden: true, empty: false }
 ];
 
-const meta: Meta<typeof IceGrid> = {
-  title: "Board/IceGrid",
-  component: IceGrid,
+const meta: Meta<typeof FrozenIceGrid> = {
+  title: "Board/FrozenIceGrid",
+  component: FrozenIceGrid,
   args: {
     cards: sampleCards
   }
 };
 
 export default meta;
-type Story = StoryObj<typeof IceGrid>;
+type Story = StoryObj<typeof FrozenIceGrid>;
 
 export const Default: Story = {};
 

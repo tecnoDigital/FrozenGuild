@@ -181,3 +181,15 @@
     padding: 8px;
   }
 }
+
+section.center {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  padding: 0;
+}
+
+section.center::before {
+  content: none;
+}

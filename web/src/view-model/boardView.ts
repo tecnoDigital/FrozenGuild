@@ -3,7 +3,7 @@ import type { FrozenGuildUiStore } from "../store/frozenGuildStore.js";
 import { selectIceGrid } from "../store/selectors.js";
 import { getCardAssetByType, getCardBackAsset, getCardFallbackAsset } from "./assetMap.js";
 
-export type IceGridCardView = {
+export type BoardCardView = {
   id: string;
   label: string;
   image: string;
@@ -11,7 +11,7 @@ export type IceGridCardView = {
   empty: boolean;
 };
 
-export function makeIceGridView(state: FrozenGuildUiStore): IceGridCardView[] {
+export function makeBoardView(state: FrozenGuildUiStore): BoardCardView[] {
   const slots = selectIceGrid(state);
 
   return Array.from({ length: 9 }).map((_, index) => {
@@ -51,24 +51,24 @@ export function makeIceGridView(state: FrozenGuildUiStore): IceGridCardView[] {
   });
 }
 
-const EMPTY_ICE_VIEW: IceGridCardView[] = [];
+const EMPTY_BOARD_VIEW: BoardCardView[] = [];
 type IceGridSlots = NonNullable<FrozenGuildUiStore["G"]>["iceGrid"];
 
 let lastIceGridRef: IceGridSlots | null | undefined;
-let lastIceView: IceGridCardView[] = EMPTY_ICE_VIEW;
+let lastBoardView: BoardCardView[] = EMPTY_BOARD_VIEW;
 
-export function selectIceGridCardsView(state: FrozenGuildUiStore): IceGridCardView[] {
+export function selectBoardCardsView(state: FrozenGuildUiStore): BoardCardView[] {
   if (!state.G) {
     lastIceGridRef = null;
-    lastIceView = EMPTY_ICE_VIEW;
-    return lastIceView;
+    lastBoardView = EMPTY_BOARD_VIEW;
+    return lastBoardView;
   }
 
   if (state.G.iceGrid === lastIceGridRef) {
-    return lastIceView;
+    return lastBoardView;
   }
 
   lastIceGridRef = state.G.iceGrid;
-  lastIceView = makeIceGridView(state);
-  return lastIceView;
+  lastBoardView = makeBoardView(state);
+  return lastBoardView;
 }

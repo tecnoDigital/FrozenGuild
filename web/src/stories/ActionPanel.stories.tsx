@@ -24,8 +24,10 @@ const meta: Meta<typeof ActionPanel> = {
       helperText: "Listo para confirmar intercambio.",
       sourceKey: "ice:0",
       targetKey: "player:0:0",
-      options: [
-        { key: "ice:0", label: "Hielo 1", location: { area: "ice_grid", slot: 0 } },
+      sourceOptions: [
+        { key: "ice:0", label: "Hielo 1", location: { area: "ice_grid", slot: 0 } }
+      ],
+      targetOptions: [
         { key: "player:0:0", label: "Jugador 0 · penguin-001", location: { area: "player_zone", playerID: "0", index: 0 } }
       ],
       onSourceKeyChange: fn(),

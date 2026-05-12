@@ -3,13 +3,13 @@ import type { FinalResults } from "../../../../shared/game/types.js";
 import { GameShell } from "../layout/GameShell.js";
 import {
   CenterActionDockContainer,
-  CenterBoardStageContainer,
   LeftStatusRailContainer,
   LocalHandContainer,
   RivalsLedgerContainer,
   useMobileActionFlow,
   RightLedgerRailContainer
 } from "./GameScreenContainers.js";
+import { BoardContainer } from "../../features/board/ui/BoardContainer.js";
 import { useRenderProfiling } from "./useRenderProfiling.js";
 import { MobileGameShell } from "../mobile/MobileGameShell.js";
 import { FinalResultsOverlay } from "./FinalResultsOverlay.js";
@@ -47,8 +47,8 @@ export function GameScreen({ finalResults, gameOver, onReturnToLobby, onRollDice
   }, []);
 
   const centerBoard = (
-    <Profiler id="CenterBoardStage" onRender={onRender}>
-      <CenterBoardStageContainer onFishFromIce={onFishFromIce} />
+    <Profiler id="BoardContainer" onRender={onRender}>
+      <BoardContainer onFishFromIce={onFishFromIce} />
     </Profiler>
   );
 

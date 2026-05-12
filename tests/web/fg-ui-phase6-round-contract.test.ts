@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ReactNode } from "react";
-import { BoardSlotsContainer } from "../../web/src/features/game/ui/BoardSlotsContainer";
+import { BoardContainer } from "../../web/src/features/board/ui/BoardContainer";
 import { ActionBarContainer } from "../../web/src/features/game/ui/ActionBarContainer";
 import { DicePanelContainer } from "../../web/src/features/game/ui/DicePanelContainer";
 import { GameShell } from "../../web/src/features/game/ui/GameShell";
@@ -514,7 +514,7 @@ describe("fg phase 6 round connection contract", () => {
     const nodes = collectElements(shellTree);
     const nodeTypes = new Set(nodes.map((node) => (node as { type?: unknown }).type));
 
-    expect(nodeTypes.has(BoardSlotsContainer)).toBe(true);
+    expect(nodeTypes.has(BoardContainer)).toBe(true);
   });
 
   it("derives board slots from snapshot iceGrid card IDs only with safe fallback", () => {

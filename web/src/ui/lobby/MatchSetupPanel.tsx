@@ -20,9 +20,6 @@ export function MatchSetupPanel({
   onBotCountChange,
 }: MatchSetupPanelProps) {
   const isCreate = mode === "create";
-  const waitingSeats = Math.max(0, numPlayers - 1 - botCount);
-  const botText = `${botCount} ${botCount === 1 ? "bot" : "bots"}`;
-  const waitingText = `${waitingSeats} ${waitingSeats === 1 ? "waiting seat" : "waiting seats"}`;
 
   return (
     <section className={styles.section}>
@@ -95,9 +92,6 @@ export function MatchSetupPanel({
           </div>
         </div>
 
-        <div className={styles.configSummary} style={{ display: isCreate ? "block" : "none" }}>
-          <strong>You</strong> + {botText} + {waitingText}
-        </div>
       </div>
     </section>
   );

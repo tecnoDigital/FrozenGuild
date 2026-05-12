@@ -7,6 +7,14 @@ import type { FinalResults, FrozenGuildState, SwapLocation } from "./types.js";
 const INVALID_MOVE = "INVALID_MOVE" as const;
 export const DISCONNECT_GRACE_MS = 30_000;
 
+function isBotPlayerState(G: FrozenGuildState, playerID: string): boolean {
+  if (G.botIDs?.includes(playerID)) {
+    return true;
+  }
+  const player = G.players[playerID];
+  return player ? player.name.trim().toUpperCase().startsWith("BOT ") : false;
+}
+
 type MoveCtx = {
   G: FrozenGuildState;
   ctx: Ctx;
@@ -1215,6 +1223,32 @@ export function choosePadrinoAction(
 }
 
 export function endTurn({ G, ctx, playerID, events }: MoveCtx): typeof INVALID_MOVE | void {
+  const orca = G.orcaResolution;
+  if (orca && isBotPlayerState(G, orca.playerID)) {
+    const candidates = [...orca.validTargetCardIDs];
+    if (candidates.length > 0) {
+      const target = candidates[Math.floor(Math.random() * candidates.length)]!;
+      resolveOrcaDestroy({ G, ctx, playerID: orca.playerID, events }, target);
+    }
+  }
+
+  const seal = G.sealBombResolution;
+  if (seal && isBotPlayerState(G, seal.playerID)) {
+    const candidates = [...seal.validTargetCardIDs];
+    const selected: string[] = [];
+    while (selected.length < seal.requiredDiscardCount && candidates.length > 0) {
+      const chosen = candidates[Math.floor(Math.random() * candidates.length)]!;
+      selected.push(chosen);
+      const selectedIndex = candidates.indexOf(chosen);
+      if (selectedIndex >= 0) {
+        candidates.splice(selectedIndex, 1);
+      }
+    }
+    if (selected.length > 0) {
+      resolveSealBombExplosion({ G, ctx, playerID: seal.playerID }, selected);
+    }
+  }
+
   if (hasPendingMandatoryResolution(G)) {
     return INVALID_MOVE;
   }

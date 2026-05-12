@@ -107,20 +107,23 @@ describe("fg phase 5 lobby customization contract", () => {
 
   it("displays selected lobby profile inside game shell status rail", () => {
     const tree = LeftStatusRail({
-      playerName: "Iria",
-      playerAvatarSrc: "/assets/characters/avatars/penguin-1.png",
-      playerColorValue: "#63ece3",
-      turnLabel: "Turno 1",
-      deckCount: 25,
-      discardCount: 2,
-      tableStatus: "activa"
+      players: [
+        {
+          id: "0",
+          name: "Iria",
+          avatarSrc: "/assets/characters/avatars/penguin-1.png",
+          colorValue: "#63ece3",
+          score: 0,
+          isActiveTurn: true
+        }
+      ]
     });
 
     const nodes = collectElements(tree);
-    const avatarNode = nodes.find((node) => node.props?.["data-testid"] === "left-status-avatar");
-    const colorNode = nodes.find((node) => node.props?.["data-testid"] === "left-status-color-chip");
+    const avatarNode = nodes.find((node) => node.props?.["data-testid"] === "score-row-0")?.props?.children?.props?.children?.[0];
+    const colorNode = nodes.find((node) => node.props?.["title"] === "Color #63ece3");
 
     expect(avatarNode?.props?.src).toBe("/assets/characters/avatars/penguin-1.png");
-    expect(colorNode?.props?.title).toContain("#63ece3");
+    expect(colorNode?.props?.style).toMatchObject({ backgroundColor: "#63ece3" });
   });
 });

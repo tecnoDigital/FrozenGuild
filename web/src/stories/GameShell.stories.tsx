@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { GameShell } from "../ui/layout/GameShell.js";
-import { CenterBoardStage } from "../ui/layout/CenterBoardStage.js";
+import { BoardSurface } from "../features/board/ui/BoardSurface.js";
+import { FrozenIceGrid } from "../features/board/ui/FrozenIceGrid.js";
 import { getCardBackAsset, getCardFallbackAsset } from "../view-model/assetMap.js";
 
 const boardCards = [
@@ -42,15 +43,9 @@ export const FullBoard: Story = {
       </div>
     ),
     center: (
-      <CenterBoardStage
-        title="Tu turno"
-        detail="Lanza el dado para continuar."
-        severity="your-turn"
-        mode="roll"
-        cards={boardCards}
-        clickableSlots={[]}
-        selectedSlots={[]}
-      />
+      <BoardSurface aria-label="Frozen Guild board grid">
+        <FrozenIceGrid cards={boardCards} clickableSlots={[]} selectedSlots={[]} />
+      </BoardSurface>
     ),
     actions: <div style={{ height: 60, background: "rgba(125,220,255,0.12)", borderRadius: 8 }} />,
     hand: <div style={{ height: 100, background: "rgba(125,220,255,0.12)", borderRadius: 8 }} />,

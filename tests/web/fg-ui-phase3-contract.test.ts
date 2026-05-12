@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { ActionBar } from "../../web/src/features/game/ui/ActionBar";
 import { ActionBarContainer } from "../../web/src/features/game/ui/ActionBarContainer";
 import { ActionButton } from "../../web/src/features/game/ui/ActionButton";
-import { BoardSlotsContainer } from "../../web/src/features/game/ui/BoardSlotsContainer";
+import { BoardContainer } from "../../web/src/features/board/ui/BoardContainer";
 import { CurrentTurnPanel } from "../../web/src/features/game/ui/CurrentTurnPanel";
 import { CurrentTurnPanelContainer } from "../../web/src/features/game/ui/CurrentTurnPanelContainer";
 import { DeckPanel } from "../../web/src/features/game/ui/DeckPanel";
@@ -22,7 +22,6 @@ import { ScorePanelContainer } from "../../web/src/features/game/ui/ScorePanelCo
 import type {
   ActionBarProps,
   ActionButtonProps,
-  BoardCardSlotProps,
   CardVisualProps,
   CurrentTurnPanelProps,
   DeckPanelProps,
@@ -69,7 +68,7 @@ describe("fg phase 3 UI contract", () => {
       alt: "Penguin card"
     };
 
-    const boardSlot: BoardCardSlotProps = { slotId: "r0c0", card: cardVisual };
+    const boardSlot = { slotId: "r0c0", card: cardVisual };
     const summary: PlayerSummaryProps = {
       id: "p1",
       name: "Player",
@@ -146,7 +145,7 @@ describe("fg phase 3 UI contract", () => {
     const testIds = getTestIds(nodes);
 
     expect(nodeTypes.has(RoundBadgeContainer)).toBe(true);
-    expect(nodeTypes.has(BoardSlotsContainer)).toBe(true);
+    expect(nodeTypes.has(BoardContainer)).toBe(true);
     expect(nodeTypes.has(CurrentTurnPanelContainer)).toBe(true);
     expect(nodeTypes.has(ScorePanelContainer)).toBe(true);
     expect(nodeTypes.has(DeckPanelContainer)).toBe(true);

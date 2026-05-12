@@ -1,5 +1,5 @@
 import { ActionBarContainer } from "./ActionBarContainer";
-import { BoardSlotsContainer } from "./BoardSlotsContainer";
+import { BoardContainer } from "../../board/ui/BoardContainer";
 import { CurrentTurnPanelContainer } from "./CurrentTurnPanelContainer";
 import { DeckPanelContainer } from "./DeckPanelContainer";
 import { DicePanelContainer } from "./DicePanelContainer";
@@ -40,7 +40,7 @@ export function GameShell({
         </aside>
 
         <section className={styles.grid} data-testid="phase4-board">
-          <BoardSlotsContainer />
+          <BoardContainer onFishFromIce={() => undefined} />
         </section>
 
         <aside className={styles.rightRail} data-testid="phase4-opponents-panel">

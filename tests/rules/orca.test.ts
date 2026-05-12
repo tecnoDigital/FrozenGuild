@@ -83,7 +83,7 @@ describe("orca resolution", () => {
     expect(G.discardPile.includes(orcaCardId)).toBe(true);
   });
 
-  it("requires the receiving player to resolve pending orca", () => {
+  it("allows gifting dangerous cards via spy", () => {
     const G = createInitialState(2, () => 0.2);
     const ctx = makeCtx("0");
     const orcaCardId = findOrcaCardId(G.deck);
@@ -91,20 +91,11 @@ describe("orca resolution", () => {
 
     rollDice({ G, ctx, playerID: "0", random: { D6: () => 4 } });
     spyOnIce({ G, ctx, playerID: "0" }, [0]);
-    spyGiveCard({ G, ctx, playerID: "0" }, 0, "1");
+    const giftResult = spyGiveCard({ G, ctx, playerID: "0" }, 0, "1");
 
-    expect(G.orcaResolution?.playerID).toBe("1");
-    const target = G.orcaResolution?.validTargetCardIDs[0];
-    expect(target).toBeTruthy();
-    if (!target) {
-      return;
-    }
-
-    const invalidResolver = resolveOrcaDestroy({ G, ctx, playerID: "0" }, target);
-    const validResolver = resolveOrcaDestroy({ G, ctx, playerID: "1" }, target);
-
-    expect(invalidResolver).toBe("INVALID_MOVE");
-    expect(validResolver).toBeUndefined();
-    expect(G.orcaResolution).toBeNull();
+    expect(giftResult).toBeUndefined();
+    expect(G.players["1"]?.zone.includes(orcaCardId)).toBe(true);
+    expect(G.spy).toBeNull();
+    expect(G.turn.actionCompleted).toBe(true);
   });
 });

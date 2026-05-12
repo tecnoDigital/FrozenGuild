@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "./LobbyGlass.module.css";
 import type { LobbyAvatarID, LobbyColorID } from "../../features/lobby/lobbyStore.js";
 import { lobbyAvatarOptions, lobbyColorOptions, resolveLobbyAvatarSrc } from "../../features/lobby/lobbyStore.js";
 
 const AVATAR_PAGE_SIZE = 6;
+const NAME_DEBOUNCE_MS = 120;
 
 type PlayerProfilePanelProps = {
   playerName: string;
@@ -23,19 +24,42 @@ export function PlayerProfilePanel({
   onColorChange,
 }: PlayerProfilePanelProps) {
   const [avatarPage, setAvatarPage] = useState(0);
+  const [localName, setLocalName] = useState(playerName);
+  const nameTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const selectedAvatar = lobbyAvatarOptions.find((avatar) => avatar.id === avatarID) ?? lobbyAvatarOptions[0];
   const selectedColor = lobbyColorOptions.find((color) => color.id === colorID) ?? lobbyColorOptions[0];
   const totalAvatarPages = Math.max(1, Math.ceil(lobbyAvatarOptions.length / AVATAR_PAGE_SIZE));
   const start = avatarPage * AVATAR_PAGE_SIZE;
   const visibleAvatars = lobbyAvatarOptions.slice(start, start + AVATAR_PAGE_SIZE);
 
-  return (
-    <section className={styles.section}>
-      <div className={styles.sectionTitle}>
-        <h2>Player Profile</h2>
-        <span>Identity deck</span>
-      </div>
+  useEffect(() => {
+    setLocalName(playerName);
+    if (nameTimerRef.current) {
+      clearTimeout(nameTimerRef.current);
+      nameTimerRef.current = null;
+    }
+  }, [playerName]);
 
+  useEffect(() => {
+    return () => {
+      if (nameTimerRef.current) {
+        clearTimeout(nameTimerRef.current);
+      }
+    };
+  }, []);
+
+  const handleNameChange = (value: string) => {
+    setLocalName(value);
+    if (nameTimerRef.current) {
+      clearTimeout(nameTimerRef.current);
+    }
+    nameTimerRef.current = setTimeout(() => {
+      onPlayerNameChange?.(value);
+    }, NAME_DEBOUNCE_MS);
+  };
+
+  return (
+    <section className={`${styles.section} ${styles.profileSection}`} aria-label="Player Profile">
       <div className={styles.profileCompact}>
         <div
           className={styles.avatarCard}
@@ -59,8 +83,8 @@ export function PlayerProfilePanel({
             <input
               id="playerName"
               className={styles.textInput}
-              value={playerName}
-              onChange={(e) => onPlayerNameChange?.(e.target.value)}
+              value={localName}
+              onChange={(e) => handleNameChange(e.target.value)}
               autoComplete="off"
               maxLength={24}
             />
@@ -116,9 +140,6 @@ export function PlayerProfilePanel({
                 );
               })}
             </div>
-            <p className={styles.colorBarLabel}>
-              Selected: <strong>{selectedColor?.label ?? "Ice"}</strong>
-            </p>
           </div>
         </div>
       </div>

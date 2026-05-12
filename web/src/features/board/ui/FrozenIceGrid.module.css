@@ -1,0 +1,171 @@
+:root {
+  --board-bg: #0b3557;
+  --board-border: rgba(213, 244, 255, 0.22);
+  --card-bg: #071c34;
+  --card-border: rgba(231, 249, 255, 0.82);
+  --card-shadow: rgba(0, 0, 0, 0.34);
+  --card-asset-ratio: 512 / 622.08;
+}
+
+.boardSurface {
+  position: relative;
+  width: min(92vw, 760px);
+  margin-inline: auto;
+  aspect-ratio: 1.43 / 1;
+  display: grid;
+  place-items: center;
+  padding: clamp(20px, 3.6vw, 48px);
+  border-radius: 28px;
+  background: transparent;
+  border: 0;
+  perspective: 860px;
+  perspective-origin: 50% 22%;
+}
+
+.iceGrid {
+  width: min(72%, 460px);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(14px, 2.4vw, 30px);
+  transform-style: preserve-3d;
+  transform-origin: center center;
+  transform:
+    rotateX(42deg)
+    translateY(22px)
+    scale(1.22);
+}
+
+.frostCard {
+  position: relative;
+  border: 0;
+  padding: 0;
+  aspect-ratio: var(--card-asset-ratio);
+  border-radius: 14px;
+  background: transparent;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  transition: transform 180ms ease, filter 180ms ease;
+  filter: drop-shadow(0 10px 9px var(--card-shadow));
+}
+
+.frostCard:hover:not(:disabled) {
+  transform: translateZ(18px) scale(1.025);
+  filter: drop-shadow(0 16px 14px var(--card-shadow));
+}
+
+.frostCard:focus-visible {
+  outline: 3px solid rgba(209, 245, 255, 0.95);
+  outline-offset: 5px;
+}
+
+.frostCard:disabled {
+  cursor: default;
+  filter: none;
+  transform: none;
+}
+
+.cardInner {
+  position: absolute;
+  inset: 0;
+  display: block;
+  border-radius: inherit;
+  background: var(--card-bg);
+  border: 2px solid var(--card-border);
+  transform: translateZ(6px);
+  backface-visibility: hidden;
+  overflow: hidden;
+}
+
+.cardImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: inherit;
+  image-rendering: pixelated;
+}
+
+.gameOverOverlay {
+  position: absolute;
+  inset: clamp(20px, 2.4vw, 42px);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  background: transparent;
+  pointer-events: none;
+  text-align: center;
+  padding: 16px;
+}
+
+.gameOverOverlayCard {
+  background: rgba(12, 22, 40, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  padding: 14px 16px;
+  max-width: 320px;
+}
+
+.gameOverOverlayTitle {
+  display: block;
+  font-size: 1rem;
+  color: #d5f4ff;
+}
+
+.gameOverOverlayDetail {
+  display: block;
+  margin-top: 6px;
+  opacity: 0.92;
+  color: rgba(213, 244, 255, 0.8);
+}
+
+@media (max-height: 1080px) and (min-width: 721px) {
+  .boardSurface {
+    width: min(92vw, 646px);
+    padding: clamp(17px, 3.06vw, 41px);
+    perspective: 730px;
+  }
+
+  .iceGrid {
+    width: min(72%, 391px);
+    gap: clamp(12px, 2.04vw, 26px);
+    transform:
+      rotateX(42deg)
+      translateY(19px)
+      scale(1.03);
+  }
+}
+
+@media (max-height: 800px) and (min-width: 721px) {
+  .boardSurface {
+    width: min(92vw, 549px);
+    padding: clamp(14px, 2.6vw, 35px);
+    perspective: 620px;
+  }
+
+  .iceGrid {
+    width: min(72%, 332px);
+    gap: clamp(10px, 1.73vw, 22px);
+    transform:
+      rotateX(42deg)
+      translateY(16px)
+      scale(0.88);
+  }
+}
+
+@media (max-width: 720px) {   
+  .boardSurface {
+    aspect-ratio: 1 / 1.15;
+    padding: 20px;
+    perspective: 760px;
+  }
+
+  .iceGrid {
+    width: 76%;
+    gap: 14px;
+    transform:
+      rotateX(38deg)
+      translateY(14px)
+      scale(1.18);
+  }
+}
