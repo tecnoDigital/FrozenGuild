@@ -28,6 +28,7 @@ export function PlayerProfilePanel({
   const nameTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const selectedAvatar = lobbyAvatarOptions.find((avatar) => avatar.id === avatarID) ?? lobbyAvatarOptions[0];
   const selectedColor = lobbyColorOptions.find((color) => color.id === colorID) ?? lobbyColorOptions[0];
+  const previewName = localName.trim() || "Nickname";
   const totalAvatarPages = Math.max(1, Math.ceil(lobbyAvatarOptions.length / AVATAR_PAGE_SIZE));
   const start = avatarPage * AVATAR_PAGE_SIZE;
   const visibleAvatars = lobbyAvatarOptions.slice(start, start + AVATAR_PAGE_SIZE);
@@ -63,7 +64,7 @@ export function PlayerProfilePanel({
       <div className={styles.profileCompact}>
         <div
           className={styles.avatarCard}
-          aria-label={`Selected avatar preview: ${selectedAvatar?.label ?? "Penguin"}`}
+          aria-label={`Selected avatar preview for ${previewName}`}
           style={{ ["--lobby-color" as string]: selectedColor?.value ?? "#63ece3" }}
         >
           <span className={styles.avatarGlow} aria-hidden="true" />
@@ -73,7 +74,7 @@ export function PlayerProfilePanel({
             alt=""
             draggable={false}
           />
-          <span className={styles.avatarName}>{selectedAvatar?.label ?? "Penguin"}</span>
+          <span className={styles.avatarName}>{previewName}</span>
         </div>
         <div className={styles.fieldStackCompact}>
           <div>

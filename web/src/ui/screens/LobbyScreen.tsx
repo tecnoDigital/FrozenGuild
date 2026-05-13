@@ -264,7 +264,6 @@ export function LobbyScreen(props: LobbyScreenProps) {
               <span className={styles.crestEmoji}>🐧</span>
             </div>
             <div>
-              <div className={styles.eyebrow}>Frozen Guild</div>
               <h1 className={styles.title}>Lobby</h1>
               <p className={styles.subtitle}>Prepare your penguin, choose a room, enter El Hielo.</p>
             </div>

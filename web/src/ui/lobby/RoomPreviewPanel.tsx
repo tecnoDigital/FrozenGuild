@@ -11,6 +11,7 @@ type RoomPreviewPanelProps = {
   seats: SeatData[];
   selectedMatch: {
     matchID: string;
+    availableSeats: string[];
     occupiedSeats: string[];
     occupiedPlayers: Array<{ seat: string; name: string; isBot: boolean }>;
     totalPlayers: number;
@@ -38,46 +39,49 @@ export function RoomPreviewPanel({
       selectedMatch.occupiedPlayers[0]?.name ??
       "Unknown")
     : "";
+  const selectedPlayersText = selectedMatch
+    ? `${selectedMatch.occupiedSeats.length}/${selectedMatch.totalPlayers}`
+    : "0/0";
 
   return (
     <section className={styles.roomPreview}>
       <div className={styles.previewHeader}>
         <div>
-          <h2 className={isCreate ? styles.modeFade : undefined}>{previewTitle}</h2>
-          <p className={styles.roomId}>
-            {isCreate ? `Room preview · ${previewId}` : `Selected room · ${selectedMatch?.matchID ?? ""}`}
-          </p>
+          <h2 className={styles.modeFade}>{previewTitle}</h2>
+          <div
+            key={isCreate ? "create-room-summary" : `join-room-summary-${selectedMatch?.matchID ?? "empty"}`}
+            className={`${styles.roomHeaderStatus} ${styles.modeFade}`}
+            aria-label={isCreate ? "Create room summary" : "Selected room summary"}
+          >
+            {isCreate ? (
+              <>
+                <span className={styles.roomHeaderId}>{`ID: ${previewId}`}</span>
+                <span>{`1 human`}</span>
+                <span>{botText}</span>
+                <span>{waitingText}</span>
+                <strong>{`1/${numPlayers}`}</strong>
+              </>
+            ) : selectedMatch ? (
+              <>
+                <span className={styles.roomHeaderId}>{`ID: ${selectedMatch.matchID}`}</span>
+                <span>{`Host: ${hostName}`}</span>
+                <span>{`${selectedMatch.availableSeats.length} open`}</span>
+                <strong>{selectedPlayersText}</strong>
+              </>
+            ) : (
+              <>
+                <span className={styles.roomHeaderId}>ID: —</span>
+                <span>Select a room</span>
+                <strong>{selectedPlayersText}</strong>
+              </>
+            )}
+          </div>
         </div>
         {isCreate ? (
           <button type="button" className={styles.ghostBtn} onClick={onRandomize}>
             Randomize
           </button>
         ) : null}
-      </div>
-
-      <div className={styles.roomStatusPanel} style={{ display: isCreate ? "flex" : "none" }}>
-        <div>
-          <span className={styles.roomStatusLabel}>Room status</span>
-          <strong>Creating</strong> · {`1 human · ${botText} · ${waitingText}`}
-        </div>
-        <div className={styles.roomStatusMetric}>{`1/${numPlayers}`}</div>
-      </div>
-
-      <div
-        className={`${styles.joinReadonlyPanel} ${!isCreate ? styles.joinReadonlyPanelActive : ""}`}
-      >
-        <span className={styles.roomStatusLabel}>Selected room</span>
-        <strong>
-          {selectedMatch
-            ? `${previewTitle} · ${selectedMatch.matchID}`
-            : "No room selected"}
-        </strong>
-        <br />
-        <span>
-          {selectedMatch
-            ? `${selectedMatch.occupiedSeats.length}/${selectedMatch.totalPlayers} players · Host: ${hostName} · Configuration locked by room owner.`
-            : "Pick a room on the right to see its configuration."}
-        </span>
       </div>
 
       <SeatPreview seats={seats} />
