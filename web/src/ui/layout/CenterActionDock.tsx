@@ -2,6 +2,7 @@ import { DicePanel } from "../actions/DicePanel.js";
 import { ActionPanel } from "../actions/ActionPanel.js";
 import type { ActionFlowView } from "../../store/selectors.js";
 import type { SwapLocation } from "../../../../shared/game/types.js";
+import styles from "./CenterActionDock.module.css";
 
 type CenterActionDockProps = {
   rolled: boolean;
@@ -18,10 +19,6 @@ type CenterActionDockProps = {
     helperText: string;
     sourceKey: string;
     targetKey: string;
-    sourceOptions: Array<{ key: string; label: string; location: SwapLocation }>;
-    targetOptions: Array<{ key: string; label: string; location: SwapLocation }>;
-    onSourceKeyChange: (key: string) => void;
-    onTargetKeyChange: (key: string) => void;
     onConfirm: () => void;
     onClearSelection: () => void;
   };
@@ -55,6 +52,14 @@ type CenterActionDockProps = {
   } | null;
 };
 
+function diceToneClass(value: number | null, fallbackMode: ActionFlowView["mode"]): string {
+  if (value === 4 || fallbackMode === "spy") return styles.toneSpy ?? "";
+  if (value === 5 || fallbackMode === "swap") return styles.toneSwap ?? "";
+  if (value === 6 || fallbackMode === "padrino") return styles.tonePadrino ?? "";
+  if (value === 1 || value === 2 || value === 3 || fallbackMode === "fish") return styles.toneFish ?? "";
+  return styles.toneIdle ?? "";
+}
+
 export function CenterActionDock({
   rolled,
   value,
@@ -68,17 +73,102 @@ export function CenterActionDock({
   seal,
   spy
 }: CenterActionDockProps) {
+  const showEndTurnOverlay = flow.mode === "done" || flow.canEndTurn;
+  const showSwapActions = flow.mode === "swap" && (!!swap.sourceKey || !!swap.targetKey);
+  const showSpyConfirm = flow.mode === "spy" && spy != null && !spy.active && spy.selectedSlots.length > 0;
+  const showSpyResolution = flow.mode === "spy" && spy != null && spy.active;
+  const canGiveSpyCard = showSpyResolution && spy.selectedGiftSlot !== null && spy.targetPlayerIDs.length > 0;
+  const showOverlay = showEndTurnOverlay || showSwapActions || showSpyConfirm || showSpyResolution;
+  const overlayToneClass = diceToneClass(value, flow.mode);
+  const overlayButtonClassName = `${styles.overlayButton} ${overlayToneClass}`;
+
   return (
     <div>
-      <DicePanel rolled={rolled} value={value} disabled={disabled} onRoll={onRoll} />
+      <div className={styles.diceWrapper}>
+        <DicePanel rolled={rolled} value={value} disabled={disabled} onRoll={onRoll} />
+        {showOverlay && (
+          <div className={styles.diceOverlay}>
+            {showSwapActions && (
+              <div className={styles.overlayButtonGroup} role="group" aria-label="Resolver intercambio">
+                <button
+                  type="button"
+                  className={overlayButtonClassName}
+                  onClick={swap.onConfirm}
+                  disabled={!swap.canConfirm}
+                >
+                  Confirmar intercambio
+                </button>
+                <button
+                  type="button"
+                  className={overlayButtonClassName}
+                  onClick={swap.onClearSelection}
+                >
+                  Limpiar seleccion
+                </button>
+              </div>
+            )}
+            {showSpyConfirm && (
+              <button
+                type="button"
+                className={overlayButtonClassName}
+                onClick={spy.onConfirmSpy}
+              >
+                Confirmar espionaje
+              </button>
+            )}
+            {showSpyResolution && (
+              <div className={styles.overlayResolutionStack}>
+                {spy.targetPlayerIDs.length > 1 ? (
+                  <label className={styles.overlayTargetLabel}>
+                    Regalar a
+                    <select
+                      className={styles.overlayTargetSelect}
+                      value={spy.targetPlayerID}
+                      onChange={(event) => spy.onTargetPlayerChange(event.target.value)}
+                    >
+                      {spy.targetPlayerIDs.map((playerID) => (
+                        <option key={`spy-overlay-target-${playerID}`} value={playerID}>Jugador {playerID}</option>
+                      ))}
+                    </select>
+                  </label>
+                ) : null}
+                <div className={styles.overlayButtonGroup} role="group" aria-label="Resolver espionaje">
+                  <button
+                    type="button"
+                    className={overlayButtonClassName}
+                    onClick={spy.onGiveCard}
+                    disabled={!canGiveSpyCard}
+                  >
+                    Regalar carta
+                  </button>
+                  <button
+                    type="button"
+                    className={overlayButtonClassName}
+                    onClick={spy.onCompleteSpy}
+                  >
+                    Cerrar espionaje
+                  </button>
+                </div>
+              </div>
+            )}
+            {showEndTurnOverlay && (
+              <button
+                type="button"
+                className={overlayButtonClassName}
+                onClick={onEndTurn}
+                aria-label="Terminar turno"
+              >
+                END TURN
+              </button>
+            )}
+          </div>
+        )}
+      </div>
       <ActionPanel
         flow={flow}
         onChoosePadrinoAction={onChoosePadrinoAction}
-        onEndTurn={onEndTurn}
-        swap={swap}
         orca={orca}
         seal={seal}
-        spy={spy}
       />
     </div>
   );

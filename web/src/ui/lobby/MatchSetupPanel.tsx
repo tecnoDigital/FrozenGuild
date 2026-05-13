@@ -23,11 +23,6 @@ export function MatchSetupPanel({
 
   return (
     <section className={styles.section}>
-      <div className={styles.sectionTitle}>
-        <h2>Match Setup</h2>
-        <span>Create or join</span>
-      </div>
-
       <div className={styles.fieldStack}>
         <div className={styles.toggleBar} role="tablist" aria-label="Lobby mode">
           <button
@@ -37,7 +32,7 @@ export function MatchSetupPanel({
             role="tab"
             aria-selected={isCreate}
           >
-            Create Match
+            Create
           </button>
           <button
             type="button"
@@ -46,7 +41,7 @@ export function MatchSetupPanel({
             role="tab"
             aria-selected={!isCreate}
           >
-            Join Match
+            Join
           </button>
         </div>
 

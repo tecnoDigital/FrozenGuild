@@ -154,7 +154,7 @@
 
 @media (max-height: 800px) and (min-width: 900px) {
   .gameShell {
-    --fg-shell-side-column: clamp(280px, 26vw, 360px);
+    --fg-shell-side-column: clamp(320px, 26vw, 400px);
     --fg-shell-center-column: minmax(0, 1fr);
     --fg-shell-gutter: 8px;
 

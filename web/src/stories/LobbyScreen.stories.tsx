@@ -55,7 +55,7 @@ export const Default: Story = {};
 export const JoinMode: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const joinBtn = await canvas.findByRole("tab", { name: /Join Match/i });
+    const joinBtn = await canvas.findByRole("tab", { name: /Join/i });
     await userEvent.click(joinBtn);
   }
 };
@@ -66,7 +66,7 @@ export const JoinModeWithSelection: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const joinBtn = await canvas.findByRole("tab", { name: /Join Match/i });
+    const joinBtn = await canvas.findByRole("tab", { name: /Join/i });
     await userEvent.click(joinBtn);
   }
 };

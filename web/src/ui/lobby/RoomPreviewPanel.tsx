@@ -16,7 +16,10 @@ type RoomPreviewPanelProps = {
     occupiedPlayers: Array<{ seat: string; name: string; isBot: boolean }>;
     totalPlayers: number;
   } | null;
-  onRandomize?: (() => void) | undefined;
+  onCreate?: (() => void) | undefined;
+  canCreate?: boolean;
+  createCtaText?: string;
+  busy?: boolean;
 };
 
 export function RoomPreviewPanel({
@@ -28,7 +31,10 @@ export function RoomPreviewPanel({
   waitingSeats,
   seats,
   selectedMatch,
-  onRandomize,
+  onCreate,
+  canCreate = true,
+  createCtaText = "Create Room",
+  busy = false,
 }: RoomPreviewPanelProps) {
   const isCreate = mode === "create";
   const botText = `${botCount} ${botCount === 1 ? "bot" : "bots"}`;
@@ -78,9 +84,16 @@ export function RoomPreviewPanel({
           </div>
         </div>
         {isCreate ? (
-          <button type="button" className={styles.ghostBtn} onClick={onRandomize}>
-            Randomize
-          </button>
+          <div className={styles.previewHeaderActions}>
+            <button
+              type="button"
+              className={styles.primaryBtn}
+              onClick={onCreate}
+              disabled={!canCreate || busy}
+            >
+              {createCtaText}
+            </button>
+          </div>
         ) : null}
       </div>
 

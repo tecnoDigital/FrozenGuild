@@ -28,10 +28,6 @@ const meta: Meta<typeof CenterActionDock> = {
       helperText: "",
       sourceKey: "",
       targetKey: "",
-      sourceOptions: [],
-      targetOptions: [],
-      onSourceKeyChange: fn(),
-      onTargetKeyChange: fn(),
       onConfirm: fn(),
       onClearSelection: fn()
     },

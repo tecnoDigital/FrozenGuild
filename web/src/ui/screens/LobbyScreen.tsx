@@ -56,8 +56,8 @@ export function LobbyScreen(props: LobbyScreenProps) {
     },
     [props.onModeChange]
   );
-  const [previewTitle, setPreviewTitle] = useState("New Expedition Table");
-  const [previewId, setPreviewId] = useState("FG-NEW");
+  const previewTitle = "New Expedition Table";
+  const previewId = "FG-NEW";
 
   const maxBots = Math.max(0, props.numPlayers - 1);
   const botCount = Math.min(props.selectedBotPlayerIDs.length, maxBots);
@@ -86,27 +86,10 @@ export function LobbyScreen(props: LobbyScreenProps) {
     [maxBots, props.selectedBotPlayerIDs, props.onToggleBotPlayerID, props.onSetBotPlayerIDs]
   );
 
-  const handleRandomize = useCallback(() => {
-    const names = [
-      "Frozen Dock",
-      "Orca Table",
-      "Penguin Vault",
-      "Krill Alley",
-      "Arctic Base",
-      "Ice Cave",
-      "Blizzard Peak",
-    ];
-    const id = Math.floor(1000 + Math.random() * 8999);
-    setPreviewTitle(names[Math.floor(Math.random() * names.length)] ?? "New Expedition Table");
-    setPreviewId(`FG-${id}`);
-  }, []);
-
   const handleModeChange = useCallback(
     (next: "create" | "join") => {
       setMode(next);
       if (next === "create") {
-        setPreviewTitle("New Expedition Table");
-        setPreviewId("FG-NEW");
         props.onSelectJoinMatchID?.("");
       }
     },
@@ -119,8 +102,6 @@ export function LobbyScreen(props: LobbyScreenProps) {
 
   const handleBackToExpedition = useCallback(() => {
     setMode("create");
-    setPreviewTitle("New Expedition Table");
-    setPreviewId("FG-NEW");
     props.onSelectJoinMatchID?.("");
   }, [setMode, props.onSelectJoinMatchID]);
 
@@ -240,7 +221,7 @@ export function LobbyScreen(props: LobbyScreenProps) {
   const canCreate = hasName;
   const canJoin = hasName && !!props.selectedJoinMatchID;
 
-  const createCtaText = hasName ? "Create Match" : "Enter Nickname First";
+  const createCtaText = hasName ? "Create Room" : "Enter Nickname First";
   const joinCtaText = !hasName
     ? "Enter Nickname First"
     : !props.selectedJoinMatchID
@@ -250,10 +231,6 @@ export function LobbyScreen(props: LobbyScreenProps) {
   const handleCreate = () => {
     props.onCreate?.();
   };
-
-  const footerHint = isCreate
-    ? "Create a clean MVP room. Configure players and bots before opening the table."
-    : "Pick a room on the right. The selected room appears here as read-only configuration.";
 
   return (
     <LobbyShell>
@@ -302,22 +279,11 @@ export function LobbyScreen(props: LobbyScreenProps) {
           waitingSeats={waitingSeats}
           seats={seats}
           selectedMatch={selectedMatch}
-          onRandomize={handleRandomize}
+          onCreate={handleCreate}
+          canCreate={canCreate}
+          createCtaText={createCtaText}
+          busy={props.busy ?? false}
         />
-
-        <footer className={styles.actionsFooter}>
-          <p className={styles.hint}>{footerHint}</p>
-          {isCreate && (
-            <button
-              type="button"
-              className={styles.primaryBtn}
-              onClick={handleCreate}
-              disabled={!canCreate || props.busy}
-            >
-              {createCtaText}
-            </button>
-          )}
-        </footer>
       </LobbyLeftColumn>
 
       <LobbyRightColumn>

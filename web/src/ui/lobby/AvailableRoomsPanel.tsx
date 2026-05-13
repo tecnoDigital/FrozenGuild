@@ -85,7 +85,7 @@ export function AvailableRoomsPanel({
                   <span className={styles.statusTag}>WAITING</span>
                 </h3>
                 <div className={styles.roomMeta}>
-                  <span>Match ID: {row.matchID}</span>
+                  <span>ID: {row.matchID}</span>
                   <span>Host: {deriveHostName(row)}</span>
                   <span>Rules: MVP</span>
                 </div>
@@ -112,9 +112,9 @@ export function AvailableRoomsPanel({
 
       <div className={`${styles.emptyRooms} ${rows.length === 0 ? styles.emptyRoomsActive : ""}`}>
         <h3>No rooms available</h3>
-        <p>Create a new match instead, or refresh when another player opens a table.</p>
+        <p>Create a new room instead, or refresh when another player opens a table.</p>
         <button type="button" className={styles.secondaryBtn} onClick={onCreateFromEmpty} disabled={busy}>
-          Create Match
+          Create Room
         </button>
       </div>
 

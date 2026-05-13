@@ -126,10 +126,6 @@ export function CenterActionDockContainer({
     () => swapOptions.filter((item) => item.location.area === "player_zone" && item.location.playerID === localPlayerID),
     [localPlayerID, swapOptions]
   );
-  const swapTargetOptions = useMemo(
-    () => swapOptions.filter((item) => item.location.area === "player_zone" && item.location.playerID !== localPlayerID),
-    [localPlayerID, swapOptions]
-  );
   const orca = useFrozenGuildStore(selectOrcaResolutionView);
   const seal = useFrozenGuildStore(selectSealBombResolutionView);
   const spy = useFrozenGuildStore(selectSpyResolutionView);
@@ -242,10 +238,6 @@ export function CenterActionDockContainer({
         helperText: canChoosePadrino ? "" : swapHelperText,
         sourceKey: swapSourceKey,
         targetKey: swapTargetKey,
-        sourceOptions: swapSourceOptions,
-        targetOptions: swapTargetOptions,
-        onSourceKeyChange: setSwapSourceKey,
-        onTargetKeyChange: setSwapTargetKey,
         onConfirm: () => {
           if (swapCanConfirm && swapSource && swapTarget) {
             onSwapCards(swapSource, swapTarget);
