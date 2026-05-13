@@ -1124,6 +1124,14 @@
   margin-bottom: 15px;
 }
 
+.roomsFooter {
+  padding: 18px 0 0;
+  border-top: 1px solid var(--stroke);
+  display: flex;
+  justify-content: flex-end;
+  background: transparent;
+}
+
 .modeFade {
   animation: modeFade .22s var(--ease) both;
 }

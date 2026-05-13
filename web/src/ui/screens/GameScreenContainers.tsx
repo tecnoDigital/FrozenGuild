@@ -143,7 +143,9 @@ export function CenterActionDockContainer({
   const clearSwapDraft = useFrozenGuildStore((state) => state.clearSwapDraft);
   const orcaTarget = useFrozenGuildStore((state) => state.orcaDraftCardID);
   const setOrcaTarget = useFrozenGuildStore((state) => state.setOrcaDraftCardID);
-  const [sealTargets, setSealTargets] = useState<string[]>([]);
+  const sealTargets = useFrozenGuildStore((state) => state.sealDraftCardIDs);
+  const toggleSealDraftCardID = useFrozenGuildStore((state) => state.toggleSealDraftCardID);
+  const clearSealDraft = useFrozenGuildStore((state) => state.clearSealDraft);
   const spySlots = useFrozenGuildStore((state) => state.spyDraftSlots);
   const spyGiftSlot = useFrozenGuildStore((state) => state.spyDraftGiftSlot);
   const toggleSpyDraftSlot = useFrozenGuildStore((state) => state.toggleSpyDraftSlot);
@@ -161,12 +163,12 @@ export function CenterActionDockContainer({
       setOrcaTarget(null);
     }
     if (flow.mode !== "seal") {
-      setSealTargets([]);
+      clearSealDraft();
     }
     if (flow.mode !== "spy") {
       clearSpyDraft();
     }
-  }, [clearSpyDraft, clearSwapDraft, flow.mode, setOrcaTarget]);
+  }, [clearSealDraft, clearSpyDraft, clearSwapDraft, flow.mode, setOrcaTarget]);
 
   useEffect(() => {
     if (!spy || spy.targetPlayerIDs.length === 0) {
@@ -221,12 +223,7 @@ export function CenterActionDockContainer({
     : "Selecciona una carta de tu mano como origen y otra de un rival como destino.";
 
   const onToggleSealTarget = (cardID: string) => {
-    setSealTargets((current) => {
-      if (current.includes(cardID)) {
-        return current.filter((value) => value !== cardID);
-      }
-      return [...current, cardID];
-    });
+    toggleSealDraftCardID(cardID, seal?.requiredDiscardCount ?? 1);
   };
 
   return (
@@ -303,7 +300,7 @@ export function CenterActionDockContainer({
 
           if (isValidSelection) {
             onResolveSealBomb(sealTargets);
-            setSealTargets([]);
+            clearSealDraft();
           }
         }
       } : null}
@@ -405,8 +402,11 @@ export function LocalHandContainer() {
   const localPlayerID = useFrozenGuildStore((state) => state.localPlayerID);
   const flow = useFrozenGuildStore(selectActionFlowView);
   const orca = useFrozenGuildStore(selectOrcaResolutionView);
+  const seal = useFrozenGuildStore(selectSealBombResolutionView);
   const orcaTarget = useFrozenGuildStore((state) => state.orcaDraftCardID);
   const setOrcaTarget = useFrozenGuildStore((state) => state.setOrcaDraftCardID);
+  const sealTargets = useFrozenGuildStore((state) => state.sealDraftCardIDs);
+  const toggleSealDraftCardID = useFrozenGuildStore((state) => state.toggleSealDraftCardID);
   const swapSourceKey = useFrozenGuildStore((state) => state.swapDraftSourceKey);
   const swapTargetKey = useFrozenGuildStore((state) => state.swapDraftTargetKey);
   const setSwapSourceKey = useFrozenGuildStore((state) => state.setSwapDraftSourceKey);
@@ -425,7 +425,12 @@ export function LocalHandContainer() {
         ? local.cardIDs
             .map((cardID, index) => (orca.validTargetCardIDs.includes(cardID) ? index : -1))
             .filter((index) => index >= 0)
+        : flow.mode === "seal" && seal
+          ? local.cardIDs
+              .map((cardID, index) => (seal.validTargetCardIDs.includes(cardID) ? index : -1))
+              .filter((index) => index >= 0)
         : [];
+
   const selectedCardIndexes: number[] = [];
 
   [swapSourceKey, swapTargetKey].forEach((value) => {
@@ -445,6 +450,15 @@ export function LocalHandContainer() {
     }
   }
 
+  if (flow.mode === "seal") {
+    sealTargets.forEach((cardID) => {
+      const selectedIndex = local.cardIDs.findIndex((localCardID) => localCardID === cardID);
+      if (selectedIndex >= 0) {
+        selectedCardIndexes.push(selectedIndex);
+      }
+    });
+  }
+
   const onLocalCardClick = (index: number) => {
     if (flow.mode === "swap") {
       const nextKey = `player:${local.id}:${index}`;
@@ -458,6 +472,15 @@ export function LocalHandContainer() {
         return;
       }
       setOrcaTarget(orcaTarget === cardID ? null : cardID);
+      return;
+    }
+
+    if (flow.mode === "seal" && seal) {
+      const cardID = local.cardIDs[index];
+      if (!cardID || !seal.validTargetCardIDs.includes(cardID)) {
+        return;
+      }
+      toggleSealDraftCardID(cardID, seal.requiredDiscardCount);
     }
   };
 

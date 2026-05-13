@@ -4,7 +4,9 @@ import { getCardAssetById } from "../../view-model/assetMap.js";
 
 type CompactHandProps = {
   cardIDs: string[];
+  /** @deprecated use selectableIndexes instead */
   clickableIndexes?: number[];
+  selectableIndexes?: number[];
   selectedIndexes?: number[];
   onCardClick?: (index: number) => void;
   size?: "compact" | "local" | "hud";
@@ -16,8 +18,9 @@ function getFanRotation(index: number, total: number): number {
   return -maxAngle + (index / (total - 1)) * (maxAngle * 2);
 }
 
-export function CompactHand({ cardIDs, clickableIndexes = [], selectedIndexes = [], onCardClick, size = "compact" }: CompactHandProps) {
-  const clickable = new Set(clickableIndexes);
+export function CompactHand({ cardIDs, clickableIndexes = [], selectableIndexes, selectedIndexes = [], onCardClick, size = "compact" }: CompactHandProps) {
+  const rawSelectable = selectableIndexes ?? clickableIndexes;
+  const selectable = new Set(rawSelectable);
   const selected = new Set(selectedIndexes);
   const isHud = size === "hud";
 
@@ -31,7 +34,7 @@ export function CompactHand({ cardIDs, clickableIndexes = [], selectedIndexes = 
       aria-label="Cartas visibles del jugador"
     >
       {cardIDs.map((cardID, index) => {
-        const canClick = !!onCardClick && clickable.has(index);
+        const isSelectable = !!onCardClick && selectable.has(index);
         const isSelected = selected.has(index);
         const rotation = isHud ? getFanRotation(index, cardIDs.length) : 0;
 
@@ -40,11 +43,11 @@ export function CompactHand({ cardIDs, clickableIndexes = [], selectedIndexes = 
             <button
               key={cardID}
               type="button"
-              className={`${styles.hudCardButton} ${canClick ? styles.hudCardClickable : ""} ${isSelected ? styles.hudCardSelected : ""}`}
-              onClick={canClick ? () => onCardClick(index) : undefined}
-              disabled={!canClick}
+              className={`${styles.hudCardButton} ${isSelectable ? styles.hudCardSelectable : ""} ${isSelected ? styles.hudCardSelected : ""}`}
+              onClick={isSelectable ? () => onCardClick(index) : undefined}
+              disabled={!isSelectable}
               aria-pressed={isSelected}
-              aria-label={`${cardID} ${canClick ? "seleccionable" : "bloqueada"}`}
+              aria-label={`${cardID} ${isSelectable ? "seleccionable" : "bloqueada"}`}
               style={{
                 zIndex: cardIDs.length - index,
                 transform: `rotate(${rotation}deg)`,
@@ -69,11 +72,11 @@ export function CompactHand({ cardIDs, clickableIndexes = [], selectedIndexes = 
           <button
             key={cardID}
             type="button"
-            className={`${styles.compactCardButton} ${size === "local" ? styles.compactCardButtonLocal : ""} ${canClick ? styles.compactCardClickable : ""} ${isSelected ? styles.compactCardSelected : ""}`}
-            onClick={canClick ? () => onCardClick(index) : undefined}
-            disabled={!canClick}
+            className={`${styles.compactCardButton} ${size === "local" ? styles.compactCardButtonLocal : ""} ${isSelectable ? styles.compactCardSelectable : ""} ${isSelected ? styles.compactCardSelected : ""}`}
+            onClick={isSelectable ? () => onCardClick(index) : undefined}
+            disabled={!isSelectable}
             aria-pressed={isSelected}
-            aria-label={`${cardID} ${canClick ? "seleccionable" : "bloqueada"}`}
+            aria-label={`${cardID} ${isSelectable ? "seleccionable" : "bloqueada"}`}
             style={{ zIndex: cardIDs.length - index }}
           >
             <motion.div

@@ -485,11 +485,11 @@ export function App() {
       return;
     }
 
-    if (!gameState.ctx || !gameState.G?.players) {
+    if (!gameState.G?.players) {
       return;
     }
 
-    const isMyTurn = gameState.ctx.currentPlayer === session.playerID;
+    const isMyTurn = gameState.currentPlayer === session.playerID;
     if (!isMyTurn) {
       return;
     }
@@ -1295,7 +1295,7 @@ onFishFromIce={(slot) => {
                 return (
                   <button
                     key={`${slot}-${cardId ?? "empty"}`}
-                    className={`ice-slot ${cardId ? "" : "ice-slot--empty"} ${(canInteract || isSelectedForSpy || isSelectedSpyGiftSlot) ? "ice-slot--clickable" : ""} ${(isSelectedForSpy || isSelectedSpyGiftSlot) ? "card-choice--selected" : ""}`}
+                    className={`ice-slot ${cardId ? "" : "ice-slot--empty"} ${canInteract ? "ice-slot--selectable" : ""} ${(isSelectedForSpy || isSelectedSpyGiftSlot) ? "card-choice--selected" : ""}`}
                     disabled={!canInteract}
                     onClick={() => {
                       if (canFish) {
@@ -1314,8 +1314,10 @@ onFishFromIce={(slot) => {
                       }
                     }}
                   >
-                    <span className="slot-index">Slot {slot + 1}</span>
-                    <strong>{formatCard(cardId)}</strong>
+                    <div className="slot-body">
+                      <span className="slot-index">Slot {slot + 1}</span>
+                      <strong>{formatCard(cardId)}</strong>
+                    </div>
                   </button>
                 );
               })}
@@ -1368,7 +1370,7 @@ onFishFromIce={(slot) => {
                       return (
                         <button
                           key={cardId}
-                          className={`mini-card ${canSelectSwapCard || isSelectedForSwap ? "ice-slot--clickable" : ""} ${isSelectedForSwap ? "card-choice--selected" : ""}`}
+                          className={`mini-card ${canSelectSwapCard ? "mini-card--selectable" : ""} ${isSelectedForSwap ? "card-choice--selected" : ""}`}
                           disabled={!canSelectSwapCard}
                           onClick={() => {
                             if (canSelectSwapCard) {
@@ -1376,8 +1378,10 @@ onFishFromIce={(slot) => {
                             }
                           }}
                         >
-                          <strong>{formatCard(cardId)}</strong>
-                          <span className="slot-id">{cardId}</span>
+                          <div className="mini-card-body">
+                            <strong>{formatCard(cardId)}</strong>
+                            <span className="slot-id">{cardId}</span>
+                          </div>
                         </button>
                       );
                     })}

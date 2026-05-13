@@ -13,9 +13,9 @@ const DICE_ACTIONS: Record<number, DiceActionConfig> = {
   1: { label: "PESCA", description: "Toma una carta del hielo", tone: "fish" },
   2: { label: "PESCA", description: "Toma una carta del hielo", tone: "fish" },
   3: { label: "PESCA", description: "Toma una carta del hielo", tone: "fish" },
-  4: { label: "ESPÍA", description: "Revela cartas del hielo", tone: "spy" },
-  5: { label: "INTERCAMBIO", description: "Intercambia cartas con un rival", tone: "swap" },
-  6: { label: "PADRINO", description: "Elige una acción especial", tone: "padrino" },
+  4: { label: "SPY", description: "Descubre cartas del hielo", tone: "spy" },
+  5: { label: "SWAP", description: "Intercambia cartas con un rival", tone: "swap" },
+  6: { label: "PADRINO", description: "El padrino te hara un favor", tone: "padrino" },
 };
 
 function normalizeDiceResult(value: unknown, fallback = 1) {
@@ -47,6 +47,7 @@ export function DiceDecisionConsole({ value, rolled, disabled = false, onRoll }:
   const [nonce, setNonce] = useState(0);
   const timersRef = useRef<number[]>([]);
   const prevRolledRef = useRef(rolled);
+  const rollingStartedRef = useRef(false);
 
   const clearTimers = useCallback(() => {
     timersRef.current.forEach((id) => window.clearTimeout(id));
@@ -62,11 +63,16 @@ export function DiceDecisionConsole({ value, rolled, disabled = false, onRoll }:
 
     if (justRolled && value !== null) {
       clearTimers();
-      setAnimState("impact");
-      const id = window.setTimeout(() => setAnimState("revealed"), 330);
-      timersRef.current.push(id);
+      const impactDelay = rollingStartedRef.current ? 1280 : 0;
+      const impactId = window.setTimeout(() => setAnimState("impact"), impactDelay);
+      const revealId = window.setTimeout(() => {
+        rollingStartedRef.current = false;
+        setAnimState("revealed");
+      }, impactDelay + 360);
+      timersRef.current.push(impactId, revealId);
     } else if (rolledBack) {
       clearTimers();
+      rollingStartedRef.current = false;
       setAnimState("idle");
     }
   }, [rolled, value, clearTimers]);
@@ -74,6 +80,7 @@ export function DiceDecisionConsole({ value, rolled, disabled = false, onRoll }:
   const handleRoll = () => {
     if (disabled || !onRoll || animState === "rolling" || animState === "impact") return;
     clearTimers();
+    rollingStartedRef.current = true;
     onRoll();
     setNonce((n) => n + 1);
     setAnimState("rolling");

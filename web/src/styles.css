@@ -420,12 +420,6 @@ h4 {
   text-align: left;
 }
 
-.ice-slot--clickable {
-  cursor: pointer;
-  border-color: rgba(120, 214, 255, 0.8);
-  background: rgba(16, 42, 78, 0.96);
-}
-
 .ice-slot--empty {
   background: rgba(8, 20, 38, 0.4);
 }
@@ -500,19 +494,9 @@ h4 {
   border: 1px solid rgba(162, 194, 255, 0.12);
 }
 
-.mini-card--clickable {
-  cursor: pointer;
-  border-color: rgba(120, 214, 255, 0.72);
-  background: rgba(16, 42, 78, 0.95);
-}
-
 .mini-card--selected {
   border-color: rgba(255, 201, 120, 0.9);
   background: rgba(62, 47, 21, 0.9);
-}
-
-.mini-card--dimmed {
-  opacity: 0.5;
 }
 
 .turn-log--hint {
@@ -606,6 +590,118 @@ h4 {
   border-radius: 20px;
   border: 1px dashed rgba(143, 198, 255, 0.3);
   color: #a9bcd8;
+}
+
+@keyframes sweep {
+  from {
+    transform: translateX(-130%) skewX(-16deg);
+  }
+
+  to {
+    transform: translateX(130%) skewX(-16deg);
+  }
+}
+
+/* selectable ice slot */
+.ice-slot--selectable {
+  position: relative;
+  cursor: pointer;
+  border-color: rgba(126, 239, 255, 0.78);
+  box-shadow:
+    0 0 0 2px rgba(124, 238, 255, 0.22),
+    0 0 32px rgba(124, 238, 255, 0.28),
+    0 16px 30px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease;
+}
+
+.ice-slot--selectable::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.25),
+    transparent
+  );
+  animation: sweep 1.25s linear infinite;
+}
+
+.ice-slot--selectable:hover {
+  transform: translateY(-4px) scale(1.02);
+}
+
+.ice-slot--selectable:active {
+  transform: translateY(-2px) scale(0.98);
+}
+
+.ice-slot.card-choice--selected::after {
+  animation: none;
+  background: transparent;
+}
+
+/* selectable mini-card */
+.mini-card--selectable {
+  position: relative;
+  cursor: pointer;
+  border-color: rgba(126, 239, 255, 0.78);
+  box-shadow:
+    0 0 0 2px rgba(124, 238, 255, 0.22),
+    0 0 32px rgba(124, 238, 255, 0.28),
+    0 16px 30px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease;
+}
+
+.mini-card--selectable::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.25),
+    transparent
+  );
+  animation: sweep 1.25s linear infinite;
+}
+
+.mini-card--selectable:hover {
+  transform: translateY(-4px) scale(1.02);
+}
+
+.mini-card--selectable:active {
+  transform: translateY(-2px) scale(0.98);
+}
+
+.mini-card.card-choice--selected::after {
+  animation: none;
+  background: transparent;
+}
+
+/* content wrappers to stay above sweep */
+.slot-body,
+.mini-card-body {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 4px;
+}
+
+.slot-body {
+  align-content: start;
+  gap: 8px;
 }
 
 @media (max-width: 980px) {

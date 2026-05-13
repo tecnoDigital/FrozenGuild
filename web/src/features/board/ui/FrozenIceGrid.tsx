@@ -4,6 +4,8 @@ import { FrostCard } from "./FrostCard.js";
 
 export type FrozenIceGridProps = {
   cards: BoardCardView[];
+  selectableSlots?: number[];
+  /** @deprecated use selectableSlots instead */
   clickableSlots?: number[];
   selectedSlots?: number[];
   onSlotClick?: (slot: number) => void;
@@ -11,17 +13,18 @@ export type FrozenIceGridProps = {
 
 export function FrozenIceGrid({
   cards,
+  selectableSlots,
   clickableSlots = [],
   selectedSlots = [],
   onSlotClick
 }: FrozenIceGridProps) {
-  const clickableSet = new Set(clickableSlots);
+  const selectableSet = new Set(selectableSlots ?? clickableSlots);
   const selectedSet = new Set(selectedSlots);
 
   return (
     <div className={styles.iceGrid}>
       {cards.map((card, index) => {
-        const isClickable = clickableSet.has(index);
+        const isSelectable = selectableSet.has(index) && !card.empty;
         const isSelected = selectedSet.has(index);
         const isEmpty = card.empty;
 
@@ -36,10 +39,10 @@ export function FrozenIceGrid({
                   ? `Hidden card at slot ${index + 1}`
                   : `${card.label} at slot ${index + 1}`
             }
-            onClick={isClickable ? () => { onSlotClick?.(index); } : undefined}
-            disabled={!isClickable || isEmpty}
+            onClick={isSelectable ? () => { onSlotClick?.(index); } : undefined}
+            disabled={!isSelectable}
             selected={isSelected}
-            clickable={isClickable}
+            selectable={isSelectable}
           >
             {!isEmpty && (
               <img

@@ -180,6 +180,8 @@
   background: linear-gradient(160deg, rgba(234, 250, 255, 0.08), rgba(8, 26, 44, 0.9));
   overflow: hidden;
   box-shadow: 0 6px 16px rgba(2, 8, 18, 0.46), 0 0 10px rgba(125, 220, 255, 0.12);
+  position: relative;
+  z-index: 1;
 }
 
 .compactCardImg {
@@ -201,28 +203,68 @@
   align-items: center;
   justify-content: center;
   transition: transform var(--fg-transition-fast);
+  position: relative;
 }
 
 .compactCardButton:first-child {
   margin-left: 0;
 }
 
-.compactCardButton:hover:not(:disabled) {
-  transform: translateY(-1px);
-}
-
 .compactCardButton:disabled {
   cursor: default;
+  opacity: 1;
+}
+
+.compactCardButton.compactCardSelectable:hover {
+  transform: translateY(-4px) scale(1.02);
+}
+
+.compactCardButton.compactCardSelectable:active {
+  transform: translateY(-2px) scale(0.98);
 }
 
 .compactCardSelected {
-  outline: 2px solid var(--fg-color-cyan-glow);
+  outline: 2px solid rgba(255, 214, 107, 0.95);
   outline-offset: 1px;
-  box-shadow: 0 0 16px rgba(22, 217, 255, 0.34);
+  box-shadow: 0 0 16px rgba(255, 201, 120, 0.34);
 }
 
-.compactCardClickable {
+.compactCardSelectable {
+  position: relative;
   cursor: pointer;
+  outline: 2px solid rgba(124, 238, 255, 0.22);
+  outline-offset: 1px;
+  border-color: rgba(126, 239, 255, 0.78);
+  box-shadow:
+    0 0 0 2px rgba(124, 238, 255, 0.22),
+    0 0 32px rgba(124, 238, 255, 0.28),
+    0 16px 30px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease;
+}
+
+.compactCardSelectable::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.25),
+    transparent
+  );
+  animation: sweep 1.25s linear infinite;
+}
+
+.compactCardButton.compactCardSelected::after {
+  animation: none;
+  background: transparent;
 }
 
 .localHandFrame {
@@ -232,8 +274,8 @@
   min-height: clamp(210px, 24vh, 300px);
   width: 100%;
   background:
-    linear-gradient(180deg, rgba(14, 32, 52, 0.25), rgba(5, 17, 31, 0.66)),
-    url("/assets/ui/frames/player-hand-frame.png");
+    url("/assets/ui/frames/player-hand-frame.png"),
+    linear-gradient(180deg, #0e2034, #05111f);
   background-size: 100% 100%;
   background-repeat: no-repeat;
   box-shadow: 0 16px 26px rgba(2, 8, 18, 0.42), inset 0 0 16px rgba(125, 220, 255, 0.14);
@@ -271,7 +313,7 @@
   overflow-x: auto;
   overflow-y: visible;
   padding: 10px clamp(8px, 1.4vw, 18px) 8px;
-  justify-content: flex-end;
+  justify-content: center;
 }
 
 .compactCardLocal {
@@ -458,6 +500,8 @@
   background: linear-gradient(160deg, rgba(234, 250, 255, 0.08), rgba(8, 26, 44, 0.9));
   overflow: hidden;
   box-shadow: 0 6px 16px rgba(2, 8, 18, 0.46), 0 0 10px rgba(125, 220, 255, 0.12);
+  position: relative;
+  z-index: 1;
 }
 
 .hudCardImg {
@@ -480,28 +524,77 @@
   justify-content: center;
   transition: transform var(--fg-transition-fast);
   transform-origin: bottom center;
+  position: relative;
 }
 
 .hudCardButton:first-child {
   margin-left: 0;
 }
 
-.hudCardButton:hover:not(:disabled) {
-  transform: translateY(-2px);
-}
-
 .hudCardButton:disabled {
   cursor: default;
+  opacity: 1;
+}
+
+.hudCardButton.hudCardSelectable:hover {
+  transform: translateY(-4px) scale(1.02);
+}
+
+.hudCardButton.hudCardSelectable:active {
+  transform: translateY(-2px) scale(0.98);
 }
 
 .hudCardSelected {
-  outline: 2px solid var(--fg-color-cyan-glow);
+  outline: 2px solid rgba(255, 214, 107, 0.95);
   outline-offset: 1px;
-  box-shadow: 0 0 16px rgba(22, 217, 255, 0.34);
+  box-shadow: 0 0 16px rgba(255, 201, 120, 0.34);
 }
 
-.hudCardClickable {
+.hudCardSelectable {
+  position: relative;
   cursor: pointer;
+  outline: 2px solid rgba(124, 238, 255, 0.22);
+  outline-offset: 1px;
+  border-color: rgba(126, 239, 255, 0.78);
+  box-shadow:
+    0 0 0 2px rgba(124, 238, 255, 0.22),
+    0 0 32px rgba(124, 238, 255, 0.28),
+    0 16px 30px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease;
+}
+
+.hudCardSelectable::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.25),
+    transparent
+  );
+  animation: sweep 1.25s linear infinite;
+}
+
+.hudCardButton.hudCardSelected::after {
+  animation: none;
+  background: transparent;
+}
+
+@keyframes sweep {
+  from {
+    transform: translateX(-130%) skewX(-16deg);
+  }
+  to {
+    transform: translateX(130%) skewX(-16deg);
+  }
 }
 
 @media (max-height: 800px) and (min-width: 900px) {

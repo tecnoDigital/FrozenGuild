@@ -42,15 +42,28 @@
   aspect-ratio: var(--card-asset-ratio);
   border-radius: 14px;
   background: transparent;
-  cursor: pointer;
+  cursor: default;
   transform-style: preserve-3d;
   transition: transform 180ms ease, filter 180ms ease;
   filter: drop-shadow(0 10px 9px var(--card-shadow));
 }
 
-.frostCard:hover:not(:disabled) {
+.frostCard[data-selectable="true"] {
+  cursor: pointer;
+  filter:
+    drop-shadow(0 0 10px rgba(124, 238, 255, 0.52))
+    drop-shadow(0 14px 12px var(--card-shadow));
+}
+
+.frostCard[data-selectable="true"]:hover {
   transform: translateZ(18px) scale(1.025);
-  filter: drop-shadow(0 16px 14px var(--card-shadow));
+  filter:
+    drop-shadow(0 0 16px rgba(124, 238, 255, 0.64))
+    drop-shadow(0 16px 14px var(--card-shadow));
+}
+
+.frostCard[data-selectable="true"]:active {
+  transform: translateZ(10px) scale(0.985);
 }
 
 .frostCard:focus-visible {
@@ -76,12 +89,60 @@
   overflow: hidden;
 }
 
+.frostCard[data-selectable="true"] .cardInner {
+  border-color: rgba(126, 239, 255, 0.88);
+  box-shadow:
+    0 0 0 2px rgba(124, 238, 255, 0.24),
+    0 0 28px rgba(124, 238, 255, 0.34),
+    inset 0 0 18px rgba(124, 238, 255, 0.16);
+}
+
+.frostCard[data-selectable="true"] .cardInner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.25),
+    transparent
+  );
+  animation: selectableSweep 1.25s linear infinite;
+}
+
+.frostCard[data-selected="true"] .cardInner {
+  border-color: rgba(255, 214, 107, 0.96);
+  box-shadow:
+    0 0 0 2px rgba(255, 214, 107, 0.32),
+    0 0 24px rgba(255, 201, 120, 0.34),
+    inset 0 0 14px rgba(255, 214, 107, 0.12);
+}
+
+.frostCard[data-selected="true"] .cardInner::after {
+  animation: none;
+  background: transparent;
+}
+
 .cardImage {
+  position: relative;
+  z-index: 1;
   width: 100%;
   height: 100%;
   object-fit: contain;
   border-radius: inherit;
   image-rendering: pixelated;
+}
+
+@keyframes selectableSweep {
+  from {
+    transform: translateX(-130%) skewX(-16deg);
+  }
+
+  to {
+    transform: translateX(130%) skewX(-16deg);
+  }
 }
 
 .gameOverOverlay {

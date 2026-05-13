@@ -237,16 +237,18 @@ export function LobbyScreen(props: LobbyScreenProps) {
   const joinableMatches = props.availableMatches.filter((m) => m.availableSeats.length > 0);
 
   const hasName = props.playerName.trim().length > 0;
-  const canContinue = hasName && (isCreate || !!props.selectedJoinMatchID);
+  const canCreate = hasName;
+  const canJoin = hasName && !!props.selectedJoinMatchID;
 
-  let ctaText = "Create Match";
-  if (!hasName) ctaText = "Enter Nickname First";
-  else if (!isCreate && !props.selectedJoinMatchID) ctaText = "Select a Room First";
-  else if (!isCreate) ctaText = "Join Selected Room";
+  const createCtaText = hasName ? "Create Match" : "Enter Nickname First";
+  const joinCtaText = !hasName
+    ? "Enter Nickname First"
+    : !props.selectedJoinMatchID
+      ? "Select a Room First"
+      : "Join Selected Room";
 
-  const handleCta = () => {
-    if (isCreate) props.onCreate?.();
-    else props.onJoin?.();
+  const handleCreate = () => {
+    props.onCreate?.();
   };
 
   const footerHint = isCreate
@@ -306,14 +308,16 @@ export function LobbyScreen(props: LobbyScreenProps) {
 
         <footer className={styles.actionsFooter}>
           <p className={styles.hint}>{footerHint}</p>
-          <button
-            type="button"
-            className={styles.primaryBtn}
-            onClick={handleCta}
-            disabled={!canContinue || props.busy}
-          >
-            {ctaText}
-          </button>
+          {isCreate && (
+            <button
+              type="button"
+              className={styles.primaryBtn}
+              onClick={handleCreate}
+              disabled={!canCreate || props.busy}
+            >
+              {createCtaText}
+            </button>
+          )}
         </footer>
       </LobbyLeftColumn>
 
@@ -327,6 +331,9 @@ export function LobbyScreen(props: LobbyScreenProps) {
           onSelectMatchID={props.onSelectJoinMatchID}
           onBackToExpedition={handleBackToExpedition}
           onCreateFromEmpty={handleBackToExpedition}
+          onJoin={props.onJoin}
+          canJoin={canJoin}
+          joinCtaText={joinCtaText}
         />
       </LobbyRightColumn>
     </LobbyShell>

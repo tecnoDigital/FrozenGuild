@@ -12,10 +12,12 @@ export function FishGlyph({ className }: { className?: string | undefined }) {
 export function SpyGlyph({ className }: { className?: string | undefined }) {
   return (
     <svg className={className} viewBox="0 0 120 90" aria-hidden="true">
-      <path d="M10 45C30 20 90 20 110 45C90 70 30 70 10 45Z" />
-      <circle cx="60" cy="45" r="14" />
-      <circle cx="60" cy="45" r="6" />
-      <path d="M35 25L45 35M85 25L75 35" />
+      <path d="M10 45C29 19 91 19 110 45C91 71 29 71 10 45Z" />
+      <circle cx="60" cy="45" r="17" />
+      <circle cx="60" cy="45" r="7" />
+      <path d="M18 23L31 35M102 23L89 35" />
+      <path d="M38 76L49 62M82 76L71 62" />
+      <path d="M60 13V23M60 67V77" />
     </svg>
   );
 }
@@ -23,10 +25,13 @@ export function SpyGlyph({ className }: { className?: string | undefined }) {
 export function SwapGlyph({ className }: { className?: string | undefined }) {
   return (
     <svg className={className} viewBox="0 0 120 90" aria-hidden="true">
-      <path d="M25 35L45 35L40 30M45 35L40 40" />
-      <path d="M95 55L75 55L80 50M75 55L80 60" />
-      <path d="M25 35C45 20 75 20 95 35" />
-      <path d="M95 55C75 70 45 70 25 55" />
+      <rect x="17" y="22" width="30" height="42" rx="5" />
+      <rect x="73" y="26" width="30" height="42" rx="5" />
+      <path d="M27 17C45 7 75 8 93 25" />
+      <path d="M93 25L80 24L88 14" />
+      <path d="M93 73C75 83 45 82 27 65" />
+      <path d="M27 65L40 66L32 76" />
+      <path d="M25 36H39M81 50H95" />
     </svg>
   );
 }
@@ -34,11 +39,13 @@ export function SwapGlyph({ className }: { className?: string | undefined }) {
 export function PadrinoGlyph({ className }: { className?: string | undefined }) {
   return (
     <svg className={className} viewBox="0 0 120 90" aria-hidden="true">
-      <path d="M20 50L100 50L85 30L35 30Z" />
-      <path d="M50 30L60 15L70 30" />
-      <circle cx="60" cy="55" r="5" />
-      <path d="M60 60L60 72" />
-      <path d="M45 72L75 72" />
+      <path d="M19 54L101 54L88 30L75 45L60 18L45 45L32 30Z" />
+      <path d="M28 54L35 73H85L92 54" />
+      <circle cx="32" cy="30" r="4" />
+      <circle cx="60" cy="18" r="5" />
+      <circle cx="88" cy="30" r="4" />
+      <path d="M39 66H81" />
+      <path d="M60 33V55" />
     </svg>
   );
 }

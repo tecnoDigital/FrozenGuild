@@ -7,7 +7,7 @@ export type FrostCardProps = {
   onClick?: (() => void) | undefined;
   disabled?: boolean;
   selected?: boolean;
-  clickable?: boolean;
+  selectable?: boolean;
   children?: ReactNode;
 };
 
@@ -17,9 +17,11 @@ export function FrostCard({
   onClick,
   disabled = false,
   selected = false,
-  clickable = false,
+  selectable = false,
   children
 }: FrostCardProps) {
+  const isSelectable = selectable && !disabled;
+
   return (
     <button
       className={styles.frostCard}
@@ -27,7 +29,7 @@ export function FrostCard({
       aria-label={ariaLabel}
       data-slot-index={index}
       data-selected={selected ? "true" : undefined}
-      data-clickable={clickable ? "true" : undefined}
+      data-selectable={isSelectable ? "true" : undefined}
       disabled={disabled}
       onClick={onClick}
     >

@@ -54,12 +54,9 @@ export function BoardContainer({ onFishFromIce }: BoardContainerProps) {
     }
   }, [canFish, pendingFishSlot, iceCards]);
 
-  const clickableSlots = (() => {
+  const selectableSlots = (() => {
     if (canFish) {
       return iceCards.map((card, index) => (card.empty ? -1 : index)).filter((slot) => slot >= 0 && slot !== pendingFishSlot);
-    }
-    if (flow.mode === "swap") {
-      return iceCards.map((card, index) => (card.empty ? -1 : index)).filter((slot) => slot >= 0);
     }
     if (flow.mode === "spy" && spy) {
       return spy.active ? spy.revealedSlots : spy.availableSlots;
@@ -118,7 +115,7 @@ export function BoardContainer({ onFishFromIce }: BoardContainerProps) {
     <BoardSurface aria-label={actionView.title || "Frozen Guild board grid"}>
       <FrozenIceGrid
         cards={iceCards}
-        clickableSlots={clickableSlots}
+        selectableSlots={selectableSlots}
         selectedSlots={selectedSlots}
         onSlotClick={handleSlotClick}
       />

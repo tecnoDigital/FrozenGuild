@@ -25,7 +25,7 @@ export const Hidden: Story = {
 
 export const Selectable: Story = {
   args: {
-    clickable: true
+    selectable: true
   }
 };
 

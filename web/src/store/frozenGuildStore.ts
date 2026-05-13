@@ -14,6 +14,7 @@ export type FrozenGuildUiStore = FrozenGuildSnapshot & {
   swapDraftSourceKey: string;
   swapDraftTargetKey: string;
   orcaDraftCardID: string | null;
+  sealDraftCardIDs: string[];
   setSnapshot: (snapshot: FrozenGuildSnapshot) => void;
   toggleSpyDraftSlot: (slot: number) => void;
   setSpyDraftGiftSlot: (slot: number | null) => void;
@@ -22,6 +23,8 @@ export type FrozenGuildUiStore = FrozenGuildSnapshot & {
   setSwapDraftTargetKey: (key: string) => void;
   clearSwapDraft: () => void;
   setOrcaDraftCardID: (cardID: string | null) => void;
+  toggleSealDraftCardID: (cardID: string, maxCount: number) => void;
+  clearSealDraft: () => void;
 };
 
 export const useFrozenGuildStore = create<FrozenGuildUiStore>((set) => ({
@@ -34,6 +37,7 @@ export const useFrozenGuildStore = create<FrozenGuildUiStore>((set) => ({
   swapDraftSourceKey: "",
   swapDraftTargetKey: "",
   orcaDraftCardID: null,
+  sealDraftCardIDs: [],
   setSnapshot: (snapshot) => set(snapshot),
   toggleSpyDraftSlot: (slot) =>
     set((state) => {
@@ -50,5 +54,16 @@ export const useFrozenGuildStore = create<FrozenGuildUiStore>((set) => ({
   setSwapDraftSourceKey: (key) => set({ swapDraftSourceKey: key }),
   setSwapDraftTargetKey: (key) => set({ swapDraftTargetKey: key }),
   clearSwapDraft: () => set({ swapDraftSourceKey: "", swapDraftTargetKey: "" }),
-  setOrcaDraftCardID: (cardID) => set({ orcaDraftCardID: cardID })
+  setOrcaDraftCardID: (cardID) => set({ orcaDraftCardID: cardID }),
+  toggleSealDraftCardID: (cardID, maxCount) =>
+    set((state) => {
+      if (state.sealDraftCardIDs.includes(cardID)) {
+        return { sealDraftCardIDs: state.sealDraftCardIDs.filter((value) => value !== cardID) };
+      }
+      if (state.sealDraftCardIDs.length >= maxCount) {
+        return { sealDraftCardIDs: [...state.sealDraftCardIDs.slice(1), cardID] };
+      }
+      return { sealDraftCardIDs: [...state.sealDraftCardIDs, cardID] };
+    }),
+  clearSealDraft: () => set({ sealDraftCardIDs: [] })
 }));

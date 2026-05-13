@@ -29,7 +29,7 @@ export function LocalPlayerHandPanel({
       </header>
       <CompactHand
         cardIDs={cardIDs}
-        clickableIndexes={clickableCardIndexes}
+        selectableIndexes={clickableCardIndexes}
         selectedIndexes={selectedCardIndexes}
         {...(onCardClick ? { onCardClick } : {})}
         size="local"

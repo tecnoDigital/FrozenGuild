@@ -38,3 +38,13 @@
     0 0 0 2px rgba(172, 248, 255, 0.9),
     0 0 24px rgba(94, 222, 255, 0.55);
 }
+
+.selectable {
+  position: relative;
+  cursor: pointer;
+  border-color: rgba(126, 239, 255, 0.78);
+  box-shadow:
+    0 0 0 2px rgba(124, 238, 255, 0.22),
+    0 0 32px rgba(124, 238, 255, 0.28),
+    0 16px 30px rgba(0, 0, 0, 0.4);
+}

@@ -16,6 +16,9 @@ type AvailableRoomsPanelProps = {
   onSelectMatchID?: ((matchID: string) => void) | undefined;
   onBackToExpedition?: (() => void) | undefined;
   onCreateFromEmpty?: (() => void) | undefined;
+  onJoin?: (() => void) | undefined;
+  canJoin?: boolean;
+  joinCtaText?: string;
 };
 
 function deriveHostName(match: AvailableRoomRow): string {
@@ -32,6 +35,9 @@ export function AvailableRoomsPanel({
   onSelectMatchID,
   onBackToExpedition,
   onCreateFromEmpty,
+  onJoin,
+  canJoin,
+  joinCtaText,
 }: AvailableRoomsPanelProps) {
   const selectedMatch = rows.find((r) => r.matchID === selectedMatchID) ?? null;
 
@@ -42,7 +48,7 @@ export function AvailableRoomsPanel({
           <div className={styles.eyebrow}>Open Tables</div>
           <h2>Available Rooms</h2>
           <p>
-            Pick a waiting table. The left side locks to that room so the join action is explicit.
+            Pick a waiting table, review the selection, then join from this column.
           </p>
         </div>
         <button type="button" className={styles.secondaryBtn} onClick={onBackToExpedition}>
@@ -52,8 +58,8 @@ export function AvailableRoomsPanel({
 
       <div className={styles.selectedNote}>
         {selectedMatch
-          ? `${deriveRoomName(selectedMatch.matchID)} selected. Host: ${deriveHostName(selectedMatch)}. Players: ${selectedMatch.occupiedSeats.length}/${selectedMatch.totalPlayers}. Ready to join from the left column.`
-          : "No room selected yet. Choose a room to update the left preview."}
+          ? `${deriveRoomName(selectedMatch.matchID)} selected. Host: ${deriveHostName(selectedMatch)}. Players: ${selectedMatch.occupiedSeats.length}/${selectedMatch.totalPlayers}.`
+          : "No room selected yet. Choose a room below."}
       </div>
 
       <div className={styles.roomList} style={{ display: rows.length > 0 ? "grid" : "none" }}>
@@ -109,6 +115,17 @@ export function AvailableRoomsPanel({
         <p>Create a new match instead, or refresh when another player opens a table.</p>
         <button type="button" className={styles.secondaryBtn} onClick={onCreateFromEmpty} disabled={busy}>
           Create Match
+        </button>
+      </div>
+
+      <div className={styles.roomsFooter}>
+        <button
+          type="button"
+          className={styles.primaryBtn}
+          onClick={onJoin}
+          disabled={!canJoin || busy}
+        >
+          {joinCtaText ?? "Join Selected Room"}
         </button>
       </div>
     </div>
