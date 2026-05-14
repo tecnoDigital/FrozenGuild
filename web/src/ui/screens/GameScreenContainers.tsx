@@ -3,16 +3,17 @@ import type { SwapLocation } from "../../../../shared/game/types.js";
 import { resolvePlayerColorValue } from "../../../../shared/game/playerColors.js";
 import { useFrozenGuildStore } from "../../store/frozenGuildStore.js";
 import {
+  selectIsMyTurn,
   selectActionFlowView,
   selectCanChoosePadrino,
   selectGameOverOverlayView,
   selectOrcaResolutionView,
   selectSealBombResolutionView,
   selectSpyResolutionView,
-  selectActionBannerView,
   selectPlayersLedger,
   selectUnstablePlayers
 } from "../../store/selectors.js";
+import { FrozenTurnBanner } from "../layout/FrozenTurnBanner.js";
 import { CenterActionDock } from "../layout/CenterActionDock.js";
 import { LeftStatusRail } from "../layout/LeftStatusRail.js";
 import { RightLedgerRail } from "../layout/RightLedgerRail.js";
@@ -71,6 +72,13 @@ export function LeftStatusRailContainer() {
 
 export function useMobileActionFlow() {
   return useFrozenGuildStore(selectActionFlowView);
+}
+
+export function TurnBannerContainer() {
+  const round = useFrozenGuildStore((state) => state.ctx?.turn ?? 1);
+  const isMyTurn = useFrozenGuildStore(selectIsMyTurn);
+
+  return <FrozenTurnBanner round={round} isMyTurn={isMyTurn} />;
 }
 
 type CenterActionDockContainerProps = {

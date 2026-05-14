@@ -22,10 +22,7 @@ const meta: Meta<typeof CenterActionDock> = {
       showPadrinoOptions: true
     },
     swap: {
-      source: null,
-      target: null,
       canConfirm: false,
-      helperText: "",
       sourceKey: "",
       targetKey: "",
       onConfirm: fn(),

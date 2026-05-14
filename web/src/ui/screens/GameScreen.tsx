@@ -6,6 +6,7 @@ import {
   LeftStatusRailContainer,
   LocalHandContainer,
   RivalsLedgerContainer,
+  TurnBannerContainer,
   useMobileActionFlow,
   RightLedgerRailContainer
 } from "./GameScreenContainers.js";
@@ -48,7 +49,14 @@ export function GameScreen({ finalResults, gameOver, onReturnToLobby, onRollDice
 
   const centerBoard = (
     <Profiler id="BoardContainer" onRender={onRender}>
-      <BoardContainer onFishFromIce={onFishFromIce} />
+      <BoardContainer
+        onFishFromIce={onFishFromIce}
+        overlayBanner={
+          <Profiler id="TurnBanner" onRender={onRender}>
+            <TurnBannerContainer />
+          </Profiler>
+        }
+      />
     </Profiler>
   );
 

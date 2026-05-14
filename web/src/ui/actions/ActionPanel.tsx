@@ -1,8 +1,5 @@
 import { motion } from "framer-motion";
 import type { ActionFlowView } from "../../store/selectors.js";
-import { PadrinoChoicePanel } from "./PadrinoChoicePanel.js";
-import { OrcaResolutionPanel } from "./OrcaResolutionPanel.js";
-import { SealExplosionPanel } from "./SealExplosionPanel.js";
 import styles from "./Actions.module.css";
 type ActionPanelProps = {
   flow: ActionFlowView;
@@ -22,7 +19,7 @@ type ActionPanelProps = {
   } | null;
 };
 
-export function ActionPanel({ flow, onChoosePadrinoAction, orca, seal }: ActionPanelProps) {
+export function ActionPanel({ flow }: ActionPanelProps) {
   const modeIcon =
     flow.mode === "fish"
       ? "/assets/ui/icons/fish.png"
@@ -65,27 +62,6 @@ export function ActionPanel({ flow, onChoosePadrinoAction, orca, seal }: ActionP
         </motion.span>
         <span>{flow.helperText}</span>
       </p>
-
-      {flow.mode === "padrino" ? <PadrinoChoicePanel onChoose={onChoosePadrinoAction} /> : null}
-
-      {flow.mode === "orca" && orca ? (
-        <OrcaResolutionPanel
-          validTargetCardIDs={orca.validTargetCardIDs}
-          selectedCardID={orca.selectedCardID}
-          onSelectCardID={orca.onSelectCardID}
-          onResolve={orca.onResolve}
-        />
-      ) : null}
-
-      {flow.mode === "seal" && seal ? (
-        <SealExplosionPanel
-          validTargetCardIDs={seal.validTargetCardIDs}
-          selectedCardIDs={seal.selectedCardIDs}
-          requiredDiscardCount={seal.requiredDiscardCount}
-          onToggleCardID={seal.onToggleCardID}
-          onResolve={seal.onResolve}
-        />
-      ) : null}
 
     </div>
   );

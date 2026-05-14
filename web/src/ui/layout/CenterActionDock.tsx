@@ -1,7 +1,6 @@
 import { DicePanel } from "../actions/DicePanel.js";
 import { ActionPanel } from "../actions/ActionPanel.js";
 import type { ActionFlowView } from "../../store/selectors.js";
-import type { SwapLocation } from "../../../../shared/game/types.js";
 import styles from "./CenterActionDock.module.css";
 
 type CenterActionDockProps = {
@@ -13,10 +12,7 @@ type CenterActionDockProps = {
   onChoosePadrinoAction: (action: 1 | 4 | 5) => void;
   onEndTurn: () => void;
   swap: {
-    source: SwapLocation | null;
-    target: SwapLocation | null;
     canConfirm: boolean;
-    helperText: string;
     sourceKey: string;
     targetKey: string;
     onConfirm: () => void;
@@ -83,7 +79,13 @@ export function CenterActionDock({
   const overlayButtonClassName = `${styles.overlayButton} ${overlayToneClass}`;
 
   return (
-    <div>
+    <div className={styles.dockRoot}>
+      <ActionPanel
+        flow={flow}
+        onChoosePadrinoAction={onChoosePadrinoAction}
+        orca={orca}
+        seal={seal}
+      />
       <div className={styles.diceWrapper}>
         <DicePanel rolled={rolled} value={value} disabled={disabled} onRoll={onRoll} />
         {showOverlay && (
@@ -164,12 +166,6 @@ export function CenterActionDock({
           </div>
         )}
       </div>
-      <ActionPanel
-        flow={flow}
-        onChoosePadrinoAction={onChoosePadrinoAction}
-        orca={orca}
-        seal={seal}
-      />
     </div>
   );
 }

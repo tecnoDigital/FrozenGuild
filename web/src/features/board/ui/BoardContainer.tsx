@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
 import { useFrozenGuildStore } from "../../../store/frozenGuildStore.js";
 import {
   selectActionBannerView,
@@ -13,9 +14,10 @@ import styles from "./FrozenIceGrid.module.css";
 
 export type BoardContainerProps = {
   onFishFromIce: (slot: number) => void;
+  overlayBanner?: ReactNode;
 };
 
-export function BoardContainer({ onFishFromIce }: BoardContainerProps) {
+export function BoardContainer({ onFishFromIce, overlayBanner }: BoardContainerProps) {
   const actionView = useFrozenGuildStore(selectActionBannerView);
   const flow = useFrozenGuildStore(selectActionFlowView);
   const iceCards = useFrozenGuildStore(selectBoardCardsView);
@@ -113,6 +115,7 @@ export function BoardContainer({ onFishFromIce }: BoardContainerProps) {
 
   return (
     <BoardSurface aria-label={actionView.title || "Frozen Guild board grid"}>
+      {overlayBanner ? <div className={styles.turnBannerOverlay}>{overlayBanner}</div> : null}
       <FrozenIceGrid
         cards={iceCards}
         selectableSlots={selectableSlots}

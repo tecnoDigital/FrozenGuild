@@ -159,6 +159,15 @@
   padding: 16px;
 }
 
+.turnBannerOverlay {
+  position: absolute;
+  top: clamp(2px, 1vw, 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  pointer-events: none;
+}
+
 .gameOverOverlayCard {
   background: rgba(12, 22, 40, 0.95);
   border: 1px solid rgba(255, 255, 255, 0.18);

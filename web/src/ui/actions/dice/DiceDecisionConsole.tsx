@@ -96,6 +96,7 @@ export function DiceDecisionConsole({ value, rolled, disabled = false, onRoll }:
   const isImpact = animState === "impact";
   const isRevealed = animState === "revealed";
   const isActionActive = isImpact || isRevealed;
+  const isInteractive = !disabled && !!onRoll && animState === "idle";
 
   const normalizedValue = normalizeDiceResult(value, 1);
   const action = isActionActive ? DICE_ACTIONS[normalizedValue] : null;
@@ -111,6 +112,7 @@ export function DiceDecisionConsole({ value, rolled, disabled = false, onRoll }:
     <div
       className={[
         styles.decisionConsole,
+        isInteractive ? styles.interactive : "",
         styles[animState] || "",
         getToneClass(tone),
       ].filter(Boolean).join(" ")}
