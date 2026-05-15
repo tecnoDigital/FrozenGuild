@@ -9,7 +9,8 @@
   width: 100%;
   max-width: 400px;
   aspect-ratio: 400 / 260;
-  min-height: 220px;
+  min-height: var(--dice-console-min-height, 220px);
+  max-height: var(--dice-console-max-height, none);
   position: relative;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.18);

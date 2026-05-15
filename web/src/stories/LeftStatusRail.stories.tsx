@@ -5,40 +5,9 @@ const meta: Meta<typeof LeftStatusRail> = {
   title: "Layout/LeftStatusRail",
   component: LeftStatusRail,
   args: {
-    players: [
-      {
-        id: "player-0",
-        name: "Don Krill",
-        avatarSrc: "/assets/characters/avatars/penguin-1.png",
-        colorValue: "#ffd700",
-        score: 23,
-        isActiveTurn: true
-      },
-      {
-        id: "player-1",
-        name: "Lady Morsa",
-        avatarSrc: "/assets/characters/avatars/walrus.png",
-        colorValue: "#9b59b6",
-        score: 18,
-        isActiveTurn: false
-      },
-      {
-        id: "player-2",
-        name: "Capitán Petrel",
-        avatarSrc: "/assets/characters/avatars/petrel.png",
-        colorValue: "#2ecc71",
-        score: 12,
-        isActiveTurn: false
-      },
-      {
-        id: "player-3",
-        name: "Sr. Bomba",
-        avatarSrc: "/assets/characters/avatars/sealBomb.png",
-        colorValue: "#ff3b30",
-        score: -6,
-        isActiveTurn: false
-      }
-    ]
+    deckCount: 34,
+    discardCount: 6,
+    cardBackSrc: "/assets/cards/backs/frozen-dreamcatcher-back.png"
   }
 };
 
@@ -47,38 +16,23 @@ type Story = StoryObj<typeof LeftStatusRail>;
 
 export const Default: Story = {};
 
-export const SinglePlayer: Story = {
+export const FreshTable: Story = {
   args: {
-    players: [
-      {
-        id: "player-0",
-        name: "Oz",
-        avatarSrc: "/assets/characters/avatars/penguin-1.png",
-        colorValue: "#63ece3",
-        score: 15,
-        isActiveTurn: true
-      }
-    ]
+    deckCount: 40,
+    discardCount: 0
   }
 };
 
-export const Empty: Story = {
+export const LateGame: Story = {
   args: {
-    players: []
+    deckCount: 7,
+    discardCount: 29
   }
 };
 
-export const MissingData: Story = {
+export const EmptyDeck: Story = {
   args: {
-    players: [
-      {
-        id: "",
-        name: "",
-        avatarSrc: "",
-        colorValue: "",
-        score: 0,
-        isActiveTurn: false
-      }
-    ]
+    deckCount: 0,
+    discardCount: 36
   }
 };

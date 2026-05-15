@@ -9,7 +9,8 @@
 
 .boardSurface {
   position: relative;
-  width: min(92vw, 760px);
+  width: min(100%, 92vw, 760px);
+  max-height: 100%;
   margin-inline: auto;
   aspect-ratio: 1.43 / 1;
   display: grid;
@@ -163,6 +164,9 @@
   position: absolute;
   top: clamp(2px, 1vw, 12px);
   left: 50%;
+  width: min(100%, 480px);
+  display: flex;
+  justify-content: center;
   transform: translateX(-50%);
   z-index: 4;
   pointer-events: none;
@@ -191,7 +195,7 @@
 
 @media (max-height: 1080px) and (min-width: 721px) {
   .boardSurface {
-    width: min(92vw, 646px);
+    width: min(100%, 92vw, 646px);
     padding: clamp(17px, 3.06vw, 41px);
     perspective: 730px;
   }
@@ -208,7 +212,7 @@
 
 @media (max-height: 800px) and (min-width: 721px) {
   .boardSurface {
-    width: min(92vw, 549px);
+    width: min(100%, 92vw, 549px);
     padding: clamp(14px, 2.6vw, 35px);
     perspective: 620px;
   }

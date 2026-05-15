@@ -10,6 +10,8 @@ import {
   selectOrcaResolutionView,
   selectSealBombResolutionView,
   selectSpyResolutionView,
+  selectDeckCount,
+  selectDiscardCount,
   selectPlayersLedger,
   selectUnstablePlayers
 } from "../../store/selectors.js";
@@ -49,25 +51,10 @@ function resolveLedgerAvatarSrc(player: LedgerAvatarPlayer, isLocal: boolean, lo
 }
 
 export function LeftStatusRailContainer() {
-  const players = useFrozenGuildStore(selectPlayersLedger);
-  const currentTurnPlayerID = useFrozenGuildStore((state) => state.ctx?.currentPlayer ?? null);
-  const localPlayerID = useFrozenGuildStore((state) => state.localPlayerID);
-  const lobbyAvatar = useLobbyProfileStore(selectLobbyAvatar);
-  const lobbyAvatarSrc = resolveLobbyAvatarSrc(lobbyAvatar);
+  const deckCount = useFrozenGuildStore(selectDeckCount);
+  const discardCount = useFrozenGuildStore(selectDiscardCount);
 
-  const scorePlayers = useMemo(() => {
-    const sorted = [...players].sort((a, b) => b.score - a.score);
-    return sorted.map((player) => ({
-      id: player.id,
-      name: player.name,
-      avatarSrc: resolveLedgerAvatarSrc(player, player.id === localPlayerID, lobbyAvatarSrc),
-      colorValue: resolvePlayerColorValue(player.colorId),
-      score: player.score,
-      isActiveTurn: currentTurnPlayerID === player.id
-    }));
-  }, [players, currentTurnPlayerID, localPlayerID, lobbyAvatarSrc]);
-
-  return <LeftStatusRail players={scorePlayers} />;
+  return <LeftStatusRail deckCount={deckCount} discardCount={discardCount} cardBackSrc={assets.cards.back} />;
 }
 
 export function useMobileActionFlow() {
