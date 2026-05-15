@@ -274,6 +274,7 @@
 }
 
 .localHandFrame {
+  position: relative;
   border: 1px solid rgba(125, 220, 255, 0.44);
   border-radius: var(--fg-radius-lg);
   padding: clamp(14px, 1.1vw, 18px) clamp(22px, 2vw, 34px);
@@ -290,6 +291,57 @@
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   align-content: stretch;
+}
+
+.localHandActionBanner {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, -56%);
+  z-index: 3;
+  max-width: min(92%, 720px);
+  padding: clamp(4px, 0.6dvh, 7px) clamp(10px, 1vw, 14px);
+  border-radius: 999px;
+  border: 1px solid rgba(151, 238, 255, 0.64);
+  background: linear-gradient(140deg, rgba(10, 33, 52, 0.94), rgba(7, 19, 33, 0.94));
+  color: #dff8ff;
+  font-size: clamp(0.62rem, 0.68vw, 0.74rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-align: left;
+  text-wrap: balance;
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(6px, 0.8vw, 10px);
+  box-shadow:
+    0 8px 20px rgba(3, 11, 24, 0.48),
+    0 0 0 1px rgba(113, 223, 255, 0.2) inset,
+    0 0 14px rgba(93, 220, 255, 0.2);
+  pointer-events: none;
+}
+
+.localHandActionBannerText {
+  opacity: 0.95;
+}
+
+.localHandActionBannerButton {
+  pointer-events: auto;
+  border: 1px solid rgba(173, 242, 255, 0.62);
+  background: linear-gradient(145deg, rgba(44, 106, 130, 0.92), rgba(21, 62, 84, 0.96));
+  color: #ecfbff;
+  font-size: clamp(0.72rem, 0.8vw, 0.86rem);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  border-radius: 999px;
+  padding: 7px 16px;
+  min-height: 34px;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.localHandActionBannerButton:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .localHandHeader {
@@ -327,14 +379,14 @@
 }
 
 .compactCardLocal {
-  width: clamp(120px, 9vw, 190px);
-  height: clamp(170px, 24dvh, 270px);
+  width: clamp(170px, 12vw, 260px);
+  height: clamp(240px, 32dvh, 380px);
 }
 
 .compactCardButtonLocal {
-  margin-left: clamp(-48px, -3vw, -34px);
-  min-width: clamp(100px, 7.2vw, 158px);
-  min-height: clamp(172px, 24.3dvh, 274px);
+  margin-left: clamp(-64px, -4.5vw, -44px);
+  min-width: clamp(150px, 10.5vw, 220px);
+  min-height: clamp(244px, 32.3dvh, 384px);
 }
 
 .compactCardButtonLocal:first-child {
@@ -609,7 +661,7 @@
 .handLocalFan {
   position: relative;
   /* Increased height to prevent clipping on large cards and low viewports */
-  height: clamp(240px, 30dvh, 380px);
+  height: clamp(340px, 40dvh, 520px);
   align-items: flex-end;
   justify-content: center;
   overflow: visible;
@@ -618,11 +670,11 @@
 
 .fanCardLocal {
   position: absolute;
-  bottom: 0;
+  bottom: clamp(10px, 1.5dvh, 22px);
   left: 50%;
-  --card-width: clamp(120px, 9vw, 190px);
+  --card-width: clamp(170px, 12vw, 260px);
   width: var(--card-width);
-  height: clamp(170px, 24dvh, 270px);
+  height: clamp(240px, 32dvh, 380px);
   transform: translate3d(var(--card-x, 0), var(--card-y, 0), 0);
   z-index: var(--card-z, 1);
   margin-left: calc(var(--card-width) / -2);
@@ -755,7 +807,7 @@
 .stackLayers {
   position: absolute;
   inset: 0;
-  z-index: 0;
+  z-index: 1;
   pointer-events: none;
 }
 
@@ -765,9 +817,9 @@
   border-radius: 8px;
   border: 1px solid rgba(213, 250, 255, 0.46);
   background: linear-gradient(180deg, rgba(235, 252, 255, 0.9), rgba(105, 186, 215, 0.86));
-  box-shadow: 0 14px 26px rgba(0, 0, 0, 0.22);
-  transform: translate3d(8px, -10px, 0) rotate(3deg);
-  opacity: 0.5;
+  box-shadow: 0 18px 30px rgba(0, 0, 0, 0.28), 0 0 14px rgba(125, 220, 255, 0.16);
+  transform: translate3d(12px, -14px, 0) rotate(4deg);
+  opacity: 0.56;
 }
 
 .stackLayerMid {
@@ -776,28 +828,29 @@
   border-radius: 8px;
   border: 1px solid rgba(213, 250, 255, 0.55);
   background: linear-gradient(180deg, rgba(235, 252, 255, 0.94), rgba(120, 196, 225, 0.9));
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.18);
-  transform: translate3d(4px, -5px, 0) rotate(1.5deg);
-  opacity: 0.75;
+  box-shadow: 0 13px 22px rgba(0, 0, 0, 0.22), 0 0 10px rgba(125, 220, 255, 0.12);
+  transform: translate3d(7px, -8px, 0) rotate(2.1deg);
+  opacity: 0.8;
 }
 
 .stackCount {
   position: absolute;
-  top: -14px;
-  right: -10px;
-  z-index: 8;
-  min-width: 32px;
-  height: 26px;
+  top: -18px;
+  right: -14px;
+  z-index: 9;
+  min-width: 36px;
+  height: 30px;
   display: grid;
   place-items: center;
   border-radius: 999px;
   color: #062034;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 1000;
   letter-spacing: -0.04em;
   background: radial-gradient(circle at 35% 22%, #ffffff, #bdf7ff 34%, #5ed8f5 100%);
   border: 1px solid rgba(239, 253, 255, 0.84);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.28), 0 0 16px rgba(97, 226, 255, 0.28);
+  box-shadow: 0 8px 14px rgba(0, 0, 0, 0.32), 0 0 18px rgba(97, 226, 255, 0.32);
+  pointer-events: none;
 }
 
 .hudStackCount {
@@ -877,29 +930,30 @@
   }
 
   .compactCardLocal {
-    width: clamp(90px, 6.8vw, 135px);
-    height: clamp(130px, 17dvh, 185px);
+    width: clamp(130px, 9vw, 195px);
+    height: clamp(185px, 24dvh, 275px);
   }
 
   .compactCardButtonLocal {
-    min-width: clamp(78px, 5.6vw, 108px);
-    min-height: clamp(132px, 17.3dvh, 189px);
-    margin-left: clamp(-40px, -2.2vw, -28px);
+    min-width: clamp(115px, 7.8vw, 165px);
+    min-height: clamp(188px, 24.3dvh, 279px);
+    margin-left: clamp(-50px, -3.2vw, -34px);
   }
 
   .handLocalFan {
-    height: clamp(200px, 24dvh, 270px);
+    height: clamp(260px, 32dvh, 360px);
   }
 
   .fanCardLocal {
-    --card-width: clamp(90px, 6.8vw, 135px);
+    bottom: clamp(6px, 1dvh, 14px);
+    --card-width: clamp(130px, 9vw, 195px);
     width: var(--card-width);
-    height: clamp(130px, 17dvh, 185px);
+    height: clamp(185px, 24dvh, 275px);
     margin-left: calc(var(--card-width) / -2);
   }
 
   .fanCardButtonLocal {
-    min-height: clamp(130px, 17dvh, 185px);
+    min-height: clamp(185px, 24dvh, 275px);
   }
 
   .hudRow {
@@ -984,14 +1038,14 @@
   }
 
   .compactCardLocal {
-    width: clamp(100px, 22vw, 145px);
-    height: clamp(145px, 33vw, 210px);
+    width: clamp(130px, 26vw, 190px);
+    height: clamp(185px, 38vw, 270px);
   }
 
   .compactCardButtonLocal {
-    margin-left: clamp(-30px, -5.5vw, -18px);
-    min-width: clamp(88px, 20vw, 126px);
-    min-height: clamp(148px, 33.3dvh, 216px);
+    margin-left: clamp(-40px, -7vw, -24px);
+    min-width: clamp(118px, 24vw, 172px);
+    min-height: clamp(188px, 38.3dvh, 274px);
   }
 
   .handLocalFan {
@@ -1001,7 +1055,7 @@
     overflow-x: auto;
     overflow-y: visible;
     /* Allow enough height for large cards in horizontal scroll */
-    height: clamp(185px, 34vw, 240px);
+    height: clamp(210px, 40vw, 290px);
     align-items: flex-end;
     padding-bottom: clamp(4px, 0.8dvh, 8px);
   }
@@ -1011,10 +1065,10 @@
     left: auto;
     bottom: auto;
     transform: none;
-    --card-width: clamp(100px, 22vw, 145px);
+    --card-width: clamp(130px, 26vw, 190px);
     width: var(--card-width);
-    height: clamp(145px, 33vw, 210px);
-    margin-left: clamp(-30px, -5.5vw, -18px);
+    height: clamp(185px, 38vw, 270px);
+    margin-left: clamp(-40px, -7vw, -24px);
   }
 
   .fanCardLocal:first-child {
@@ -1026,23 +1080,23 @@
   }
 
   .fanCardButtonLocal {
-    min-height: clamp(132px, 30vw, 190px);
+    min-height: clamp(185px, 38vw, 270px);
   }
 
   .stackCount {
-    top: -10px;
-    right: -8px;
-    min-width: 26px;
-    height: 22px;
-    font-size: 10px;
+    top: -12px;
+    right: -10px;
+    min-width: 30px;
+    height: 24px;
+    font-size: 11px;
   }
 
   .stackLayerBack {
-    transform: translate3d(4px, -6px, 0) rotate(2deg);
+    transform: translate3d(6px, -8px, 0) rotate(2.5deg);
   }
 
   .stackLayerMid {
-    transform: translate3d(2px, -3px, 0) rotate(1deg);
+    transform: translate3d(4px, -5px, 0) rotate(1.4deg);
   }
 
   .hudRow {

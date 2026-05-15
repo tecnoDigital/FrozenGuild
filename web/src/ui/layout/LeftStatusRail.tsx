@@ -8,25 +8,40 @@ type CardPileStatProps = {
   label: string;
   count: number;
   cardBackSrc: string;
+  isActive: boolean;
 };
 
 type LeftStatusRailProps = {
-  deckCount: number;
-  discardCount: number;
-  cardBackSrc: string;
+  deckCount?: number;
+  discardCount?: number;
+  cardBackSrc?: string;
+  players?: Array<{
+    id: string;
+    name: string;
+    avatarSrc?: string;
+    colorValue?: string;
+    score?: number;
+    isActiveTurn?: boolean;
+  }>;
 };
 
 function formatCount(count: number) {
   return Number.isFinite(count) ? Math.max(0, count) : 0;
 }
 
-function CardPileStat({ kind, label, count, cardBackSrc }: CardPileStatProps) {
+function CardPileStat({ kind, label, count, cardBackSrc, isActive }: CardPileStatProps) {
   const safeCount = formatCount(count);
   const isEmpty = safeCount === 0;
   const pileClassName = `${styles.pile} ${kind === "discard" ? styles.discardPile : styles.deckPile}`;
 
   return (
-    <section className={styles.pileCard} data-kind={kind} aria-label={`${label}: ${safeCount} cartas`}>
+    <section
+      className={styles.pileStation}
+      data-kind={kind}
+      data-active={isActive ? "true" : "false"}
+      data-empty={isEmpty ? "true" : "false"}
+      aria-label={`${label}: ${safeCount} cartas`}
+    >
       <div className={styles.pileHeader}>
         <span className={styles.pileLabel}>{label}</span>
         <span className={styles.pileCount}>{safeCount}</span>
@@ -53,7 +68,33 @@ function CardPileStat({ kind, label, count, cardBackSrc }: CardPileStatProps) {
   );
 }
 
-export function LeftStatusRail({ deckCount, discardCount, cardBackSrc }: LeftStatusRailProps) {
+export function LeftStatusRail({
+  deckCount = 0,
+  discardCount = 0,
+  cardBackSrc = assets.cards.back,
+  players = []
+}: LeftStatusRailProps) {
+  if (players.length > 0) {
+    return (
+      <div className={styles.rail}>
+        {players.map((player) => (
+          <article key={player.id} data-testid={`score-row-${player.id}`}>
+            <div>
+              <img src={player.avatarSrc} alt="" />
+              <span>{player.name}</span>
+              <span
+                title={`Color ${player.colorValue}`}
+                style={player.colorValue ? { backgroundColor: player.colorValue } : undefined}
+              />
+            </div>
+          </article>
+        ))}
+      </div>
+    );
+  }
+
+  const activePile: CardPileKind | null = null;
+
   return (
     <div className={styles.rail}>
       <div className={styles.logoWrap}>
@@ -61,11 +102,24 @@ export function LeftStatusRail({ deckCount, discardCount, cardBackSrc }: LeftSta
       </div>
 
       <div className={styles.tableSurface} aria-label="Pilas de cartas de la mesa">
-        <CardPileStat kind="deck" label="MAZO" count={deckCount} cardBackSrc={cardBackSrc} />
+        <div className={styles.iceWake} aria-hidden="true" />
+        <CardPileStat
+          kind="deck"
+          label="MAZO"
+          count={deckCount}
+          cardBackSrc={cardBackSrc}
+          isActive={activePile === "deck"}
+        />
         <div className={styles.flowArrow} aria-hidden="true">
           <span />
         </div>
-        <CardPileStat kind="discard" label="DESCARTE" count={discardCount} cardBackSrc={cardBackSrc} />
+        <CardPileStat
+          kind="discard"
+          label="DESCARTE"
+          count={discardCount}
+          cardBackSrc={cardBackSrc}
+          isActive={activePile === "discard"}
+        />
       </div>
     </div>
   );

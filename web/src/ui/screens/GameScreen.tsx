@@ -92,7 +92,10 @@ export function GameScreen({ finalResults, gameOver, onReturnToLobby, onRollDice
           actions={actionsDock}
           hand={
             <Profiler id="LocalHand" onRender={onRender}>
-              <LocalHandContainer />
+              <LocalHandContainer
+                onResolveOrca={onResolveOrca}
+                onResolveSealBomb={onResolveSealBomb}
+              />
             </Profiler>
           }
           rivals={
@@ -120,7 +123,10 @@ export function GameScreen({ finalResults, gameOver, onReturnToLobby, onRollDice
         actions={actionsDock}
         hand={
           <Profiler id="LocalHand" onRender={onRender}>
-            <LocalHandContainer />
+            <LocalHandContainer
+              onResolveOrca={onResolveOrca}
+              onResolveSealBomb={onResolveSealBomb}
+            />
           </Profiler>
         }
         right={

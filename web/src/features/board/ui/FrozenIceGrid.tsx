@@ -42,6 +42,7 @@ export function FrozenIceGrid({
             onClick={isSelectable ? () => { onSlotClick?.(index); } : undefined}
             disabled={!isSelectable}
             selected={isSelected}
+            clickable={isSelectable}
             selectable={isSelectable}
           >
             {!isEmpty && (

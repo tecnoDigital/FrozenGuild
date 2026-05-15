@@ -9,11 +9,16 @@ export type DicePanelProps = {
 
 export function DicePanel({ value, rolled, disabled = false, onRoll }: DicePanelProps) {
   return (
-    <DiceDecisionConsole
-      value={value}
-      rolled={rolled}
-      disabled={disabled}
-      onRoll={onRoll}
-    />
+    <div
+      data-action-available={disabled ? "false" : "true"}
+      aria-disabled={disabled}
+    >
+      <DiceDecisionConsole
+        value={value}
+        rolled={rolled}
+        disabled={disabled}
+        onRoll={onRoll}
+      />
+    </div>
   );
 }

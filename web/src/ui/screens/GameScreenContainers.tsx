@@ -384,7 +384,12 @@ export function RightLedgerRailContainer() {
   );
 }
 
-export function LocalHandContainer() {
+type LocalHandContainerProps = {
+  onResolveOrca: (targetCardID: string) => void;
+  onResolveSealBomb: (targetCardIDs: string[]) => void;
+};
+
+export function LocalHandContainer({ onResolveOrca, onResolveSealBomb }: LocalHandContainerProps) {
   const players = useFrozenGuildStore(selectPlayersLedger);
   const localPlayerID = useFrozenGuildStore((state) => state.localPlayerID);
   const flow = useFrozenGuildStore(selectActionFlowView);
@@ -471,11 +476,62 @@ export function LocalHandContainer() {
     }
   };
 
+  const actionBannerText =
+    flow.mode === "orca"
+      ? "Pacto de Orca · Una carta debe caer"
+      : flow.mode === "seal"
+        ? `Protocolo de escarcha · Sella ${seal?.requiredDiscardCount ?? 1} carta(s) para estabilizar`
+        : null;
+
+  const canConfirmOrca =
+    flow.mode === "orca"
+    && !!orca
+    && !!orcaTarget
+    && orca.validTargetCardIDs.includes(orcaTarget);
+
+  const canConfirmSeal =
+    flow.mode === "seal"
+    && !!seal
+    && sealTargets.length === seal.requiredDiscardCount
+    && new Set(sealTargets).size === sealTargets.length
+    && sealTargets.every((cardID) => seal.validTargetCardIDs.includes(cardID));
+
+  const actionBannerButtonLabel =
+    flow.mode === "orca"
+      ? "Cumplir pacto"
+      : flow.mode === "seal"
+        ? "Estabilizar"
+        : null;
+
+  const actionBannerButtonDisabled =
+    flow.mode === "orca"
+      ? !canConfirmOrca
+      : flow.mode === "seal"
+        ? !canConfirmSeal
+        : true;
+
+  const onActionBannerButtonClick = () => {
+    if (flow.mode === "orca" && canConfirmOrca && orcaTarget) {
+      onResolveOrca(orcaTarget);
+      setOrcaTarget(null);
+      return;
+    }
+
+    if (flow.mode === "seal" && canConfirmSeal) {
+      onResolveSealBomb(sealTargets);
+      useFrozenGuildStore.getState().clearSealDraft();
+    }
+  };
+
   return (
     <LocalPlayerHandPanel
       playerName={local.name}
       score={local.score}
       cardIDs={local.cardIDs}
+      actionBannerText={actionBannerText}
+      actionBannerButtonLabel={actionBannerButtonLabel}
+      actionBannerButtonDisabled={actionBannerButtonDisabled}
+      onActionBannerButtonClick={onActionBannerButtonClick}
       clickableCardIndexes={clickableCardIndexes}
       selectedCardIndexes={selectedCardIndexes}
       onCardClick={onLocalCardClick}

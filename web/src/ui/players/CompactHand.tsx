@@ -83,8 +83,8 @@ export function CompactHand({
 
   const localTransforms = useMemo(() => {
     if (!isLocal) return [];
-    // Estimated card width in px for local size (midpoint of clamp range)
-    return computeFanTransforms(visualSlots.length, 150);
+    // Estimated card width in px for local size (midpoint of new clamp range)
+    return computeFanTransforms(visualSlots.length, 210);
   }, [isLocal, visualSlots.length]);
 
   const containerClass = isHud
@@ -138,9 +138,9 @@ export function CompactHand({
                   <div className={styles.stackLayers} aria-hidden="true">
                     <div className={styles.stackLayerBack} />
                     <div className={styles.stackLayerMid} />
-                    <span className={styles.stackCount}>×{slot.count}</span>
                   </div>
                 ) : null}
+                {isStack ? <span className={styles.stackCount}>×{slot.count}</span> : null}
                 <button
                   type="button"
                   className={`${styles.fanCardButtonLocal} ${isSelectable ? styles.fanCardButtonLocalSelectable : ""} ${isSelected ? styles.fanCardButtonLocalSelected : ""}`}
@@ -160,7 +160,7 @@ export function CompactHand({
                     title={cardID}
                     initial={false}
                     animate={{
-                      scale: isSelected ? 1.05 : 1,
+                      scale: isSelected ? 1.1 : 1,
                       y: isSelected ? -4 : 0,
                     }}
                     transition={{ duration: 0.15, ease: "easeOut" }}
@@ -201,7 +201,7 @@ export function CompactHand({
                 title={cardID}
                 initial={false}
                 animate={{
-                  scale: isSelected ? 1.05 : 1,
+                  scale: isSelected ? 1.1 : 1,
                   y: isSelected ? -2 : 0,
                 }}
                 transition={{ duration: 0.15, ease: "easeOut" }}
@@ -243,7 +243,7 @@ export function CompactHand({
               title={cardID}
               initial={false}
               animate={{
-                scale: isSelected ? 1.05 : 1,
+                scale: isSelected ? 1.1 : 1,
                 y: isSelected ? -1 : 0,
               }}
               transition={{ duration: 0.15, ease: "easeOut" }}
