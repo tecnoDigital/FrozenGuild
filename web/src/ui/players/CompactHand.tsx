@@ -1,4 +1,4 @@
-import { useMemo, useRef, useEffect } from "react";
+import { useMemo, useRef, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import styles from "./Players.module.css";
 import { getCardAssetById } from "../../view-model/assetMap.js";
@@ -56,6 +56,8 @@ export function CompactHand({
   onCardClick,
   size = "compact",
 }: CompactHandProps) {
+  const localHandRef = useRef<HTMLDivElement | null>(null);
+  const [measuredCardWidth, setMeasuredCardWidth] = useState<number | null>(null);
   const rawSelectable = selectableIndexes ?? clickableIndexes;
   const selectable = useMemo(() => new Set(rawSelectable), [rawSelectable]);
   const selected = useMemo(() => new Set(selectedIndexes), [selectedIndexes]);
@@ -83,8 +85,50 @@ export function CompactHand({
 
   const localTransforms = useMemo(() => {
     if (!isLocal) return [];
-    // Estimated card width in px for local size (midpoint of new clamp range)
-    return computeFanTransforms(visualSlots.length, 210);
+    // Use measured CSS-rendered width when available.
+    const width = measuredCardWidth ?? 210;
+    return computeFanTransforms(visualSlots.length, width);
+  }, [isLocal, visualSlots.length, measuredCardWidth]);
+
+  useEffect(() => {
+    if (!isLocal || typeof window === "undefined") return;
+
+    const root = localHandRef.current;
+    if (!root) return;
+
+    const measure = () => {
+      const card = root.querySelector<HTMLElement>(`.${styles.fanCardLocal}`);
+      if (!card) return;
+      const width = card.getBoundingClientRect().width;
+      if (width > 0) {
+        setMeasuredCardWidth((prev) => {
+          // Avoid noisy rerenders for sub-pixel jitter.
+          if (prev !== null && Math.abs(prev - width) < 0.5) return prev;
+          return width;
+        });
+      }
+    };
+
+    measure();
+
+    const observer =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(() => measure())
+        : null;
+
+    if (observer) {
+      observer.observe(root);
+    } else {
+      window.addEventListener("resize", measure);
+    }
+
+    return () => {
+      if (observer) {
+        observer.disconnect();
+      } else {
+        window.removeEventListener("resize", measure);
+      }
+    };
   }, [isLocal, visualSlots.length]);
 
   const containerClass = isHud
@@ -95,6 +139,7 @@ export function CompactHand({
 
   return (
     <div
+      ref={isLocal ? localHandRef : undefined}
       className={containerClass}
       aria-label="Cartas visibles del jugador"
     >

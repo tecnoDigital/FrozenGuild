@@ -43,13 +43,6 @@ export function LocalPlayerHandPanel({
           ) : null}
         </div>
       ) : null}
-      <header className={styles.localHandHeader}>
-        <p className={styles.localHandTitle}>TU MANO</p>
-        <p className={styles.localHandMeta}>
-          <span>{playerName}</span>
-          <span aria-label="Puntaje local">{score} pts</span>
-        </p>
-      </header>
       <CompactHand
         cardIDs={cardIDs}
         selectableIndexes={clickableCardIndexes}

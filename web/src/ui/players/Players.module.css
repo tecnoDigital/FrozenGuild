@@ -1037,6 +1037,11 @@
     padding: 12px;
   }
 
+  /* Allow child hand strip to own horizontal overflow/scroll on small screens. */
+  .handLocal {
+    overflow-x: visible;
+  }
+
   .compactCardLocal {
     width: clamp(130px, 26vw, 190px);
     height: clamp(185px, 38vw, 270px);
@@ -1054,10 +1059,11 @@
     flex-wrap: nowrap;
     overflow-x: auto;
     overflow-y: visible;
-    /* Allow enough height for large cards in horizontal scroll */
-    height: clamp(210px, 40vw, 290px);
+    /* Portrait-safe: avoid over-relying on vw (too small on narrow devices). */
+    height: clamp(220px, 30dvh, 310px);
     align-items: flex-end;
     padding-bottom: clamp(4px, 0.8dvh, 8px);
+    -webkit-overflow-scrolling: touch;
   }
 
   .fanCardLocal {
@@ -1067,8 +1073,9 @@
     transform: none;
     --card-width: clamp(130px, 26vw, 190px);
     width: var(--card-width);
-    height: clamp(185px, 38vw, 270px);
-    margin-left: clamp(-40px, -7vw, -24px);
+    height: auto;
+    aspect-ratio: 2 / 3;
+    margin-left: clamp(-48px, -8.5vw, -28px);
   }
 
   .fanCardLocal:first-child {
@@ -1080,7 +1087,7 @@
   }
 
   .fanCardButtonLocal {
-    min-height: clamp(185px, 38vw, 270px);
+    min-height: auto;
   }
 
   .stackCount {
@@ -1132,5 +1139,21 @@
     min-width: clamp(32px, 7vw, 44px);
     min-height: clamp(52px, 11vw, 70px);
     margin-left: clamp(-10px, -2vw, -8px);
+  }
+}
+
+@media (orientation: portrait) and (max-width: 900px) {
+  .handLocalFan {
+    height: clamp(240px, 34dvh, 330px);
+    padding-inline: clamp(6px, 2.5vw, 14px);
+  }
+
+  .fanCardLocal {
+    --card-width: clamp(136px, 34vw, 198px);
+    margin-left: clamp(-42px, -7.8vw, -24px);
+  }
+
+  .fanCardButtonLocal {
+    min-height: 100%;
   }
 }
