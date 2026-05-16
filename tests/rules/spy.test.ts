@@ -118,4 +118,33 @@ describe("spy move", () => {
     expect(endAfterComplete).toBeUndefined();
     expect(endTurnCalls).toBe(1);
   });
+
+  it("ends game instead of deadlocking when no ice cards exist for spy", () => {
+    const G = createInitialState(2, () => 0.3);
+    const ctx = makeCtx("0");
+    let gameOverPayload: unknown;
+    let endTurnCalls = 0;
+
+    G.iceGrid = G.iceGrid.map(() => null);
+
+    rollDice({ G, ctx, playerID: "0", random: { D6: () => 4 } });
+    const result = endTurn({
+      G,
+      ctx,
+      playerID: "0",
+      events: {
+        endGame: (arg) => {
+          gameOverPayload = arg;
+        },
+        endTurn: () => {
+          endTurnCalls += 1;
+        }
+      }
+    });
+
+    expect(result).toBeUndefined();
+    expect(endTurnCalls).toBe(0);
+    expect(gameOverPayload).toMatchObject({ reason: "NO_ICE_CARDS_AVAILABLE" });
+    expect(gameOverPayload).toHaveProperty("finalResults.players");
+  });
 });

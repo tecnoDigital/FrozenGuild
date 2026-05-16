@@ -21,9 +21,9 @@ export function ActionBanner({ title, detail, severity = "neutral", mode = "wait
 
   const modeIcon =
     mode === "fish"
-      ? "/src/assets/fish.png"
+      ? "/assets/ui/icons/fish.png"
       : mode === "orca"
-        ? "/src/assets/orca.png"
+        ? "/assets/ui/icons/orca.png"
         : null;
 
   return (
@@ -32,7 +32,7 @@ export function ActionBanner({ title, detail, severity = "neutral", mode = "wait
         {modeIcon ? <img className={styles.bannerModeIcon} src={modeIcon} alt="" aria-hidden /> : null}
         <span>{title}</span>
       </strong>
-      <p style={{ margin: "6px 0 0" }}>{detail}</p>
+      <p className={styles.bannerDetail}>{detail}</p>
     </div>
   );
 }

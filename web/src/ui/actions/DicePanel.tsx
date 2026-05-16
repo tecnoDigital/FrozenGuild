@@ -1,21 +1,24 @@
-import styles from "./Actions.module.css";
-import { Button } from "../shared/Button.js";
+import { DiceDecisionConsole } from "./dice/DiceDecisionConsole.js";
 
-type DicePanelProps = {
+export type DicePanelProps = {
   value: number | null;
   rolled: boolean;
   disabled?: boolean;
-  onRoll?: () => void;
+  onRoll?: (() => void) | undefined;
 };
 
 export function DicePanel({ value, rolled, disabled = false, onRoll }: DicePanelProps) {
   return (
-    <div className={styles.dice}>
-      <img className={styles.diceIcon} src="/src/assets/dice.png" alt="Dado" />
-      <strong>Dado: {rolled ? value : "-"}</strong>
-      <Button disabled={disabled} onClick={onRoll}>
-        Lanzar dado
-      </Button>
+    <div
+      data-action-available={disabled ? "false" : "true"}
+      aria-disabled={disabled}
+    >
+      <DiceDecisionConsole
+        value={value}
+        rolled={rolled}
+        disabled={disabled}
+        onRoll={onRoll}
+      />
     </div>
   );
 }

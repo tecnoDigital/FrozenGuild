@@ -16,6 +16,7 @@
     "dev:local": "npm run dev",
     "start:local": "bash ./scripts/start-local.sh",
     "start:ngrok": "bash ./scripts/start-ngrok.sh",
+    "start:ngrokps": "powershell -ExecutionPolicy Bypass -File ./scripts/start-ngrok.ps1",
     "stop": "bash ./scripts/stop.sh",
     "test:start": "npm run start:ngrok",
     "test:stop": "npm run stop",
@@ -44,5 +45,8 @@
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.29.0",
     "vitest": "^2.1.9"
+  },
+  "dependencies": {
+    "storybook": "^10.3.6"
   }
 }

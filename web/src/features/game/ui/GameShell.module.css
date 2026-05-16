@@ -1,0 +1,83 @@
+.shell {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: clamp(0.75rem, 1.6vh, 1.25rem);
+  min-block-size: min(100vh, calc(100vw * 9 / 16));
+  inline-size: min(100%, 120rem);
+  margin-inline: auto;
+  padding: clamp(0.8rem, 1.8vw, 1.5rem);
+}
+
+.topBar {
+  display: grid;
+  grid-template-columns: minmax(14rem, 22vw) 1fr minmax(14rem, 22vw);
+  align-items: start;
+  inline-size: 100%;
+}
+
+.logo {
+  justify-self: start;
+  inline-size: clamp(9rem, 16vw, 16rem);
+  block-size: auto;
+  filter: drop-shadow(0 0 18px rgba(22, 217, 255, 0.38));
+}
+
+.roundBadgeWrap {
+  justify-self: center;
+}
+
+.topSpacer {
+  inline-size: clamp(9rem, 16vw, 16rem);
+}
+
+.layout {
+  inline-size: 100%;
+  block-size: 100%;
+  display: grid;
+  grid-template-columns: minmax(13rem, 18vw) minmax(29rem, 1fr) minmax(14rem, 20vw);
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: clamp(0.6rem, 1.5vh, 1rem);
+  align-items: start;
+}
+
+.leftRail,
+.rightRail {
+  display: grid;
+  gap: clamp(0.55rem, 1.2vh, 0.85rem);
+  align-content: start;
+}
+
+.grid {
+  grid-row: 1;
+  justify-self: center;
+  align-self: center;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(clamp(6.25rem, 7vw, 7.25rem), clamp(8.25rem, 10vw, 10.5rem)));
+  gap: clamp(0.45rem, 0.95vw, 0.9rem);
+  padding: clamp(0.45rem, 1vw, 0.9rem);
+  border: var(--fg-border-icy);
+  border-radius: var(--fg-radius-lg);
+  background: var(--fg-bg-panel-soft);
+  box-shadow: var(--fg-shadow-inner-frost);
+}
+
+.bottomCenter {
+  grid-row: 2;
+  grid-column: 2;
+  display: grid;
+  gap: clamp(0.45rem, 0.9vh, 0.8rem);
+  justify-items: center;
+  align-self: end;
+}
+
+.bottomRight {
+  grid-row: 2;
+  grid-column: 3;
+  align-self: end;
+}
+
+@media (max-width: 85rem) {
+  .layout {
+    grid-template-columns: minmax(12rem, 19vw) minmax(27rem, 1fr) minmax(13rem, 20vw);
+  }
+}

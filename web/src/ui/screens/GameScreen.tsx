@@ -1,18 +1,24 @@
 import { Profiler, useEffect, useState } from "react";
+import type { FinalResults } from "../../../../shared/game/types.js";
 import { GameShell } from "../layout/GameShell.js";
 import {
   CenterActionDockContainer,
-  CenterBoardStageContainer,
   LeftStatusRailContainer,
   LocalHandContainer,
   RivalsLedgerContainer,
+  TurnBannerContainer,
   useMobileActionFlow,
   RightLedgerRailContainer
 } from "./GameScreenContainers.js";
+import { BoardContainer } from "../../features/board/ui/BoardContainer.js";
 import { useRenderProfiling } from "./useRenderProfiling.js";
 import { MobileGameShell } from "../mobile/MobileGameShell.js";
+import { FinalResultsOverlay } from "./FinalResultsOverlay.js";
 
 type GameScreenProps = {
+  finalResults: FinalResults | null;
+  gameOver: boolean;
+  onReturnToLobby: () => void;
   onRollDice: () => void;
   onFishFromIce: (slot: number) => void;
   onChoosePadrinoAction: (action: 1 | 4 | 5) => void;
@@ -25,7 +31,7 @@ type GameScreenProps = {
   onCompleteSpy: () => void;
 };
 
-export function GameScreen({ onRollDice, onFishFromIce, onChoosePadrinoAction, onEndTurn, onSwapCards, onResolveOrca, onResolveSealBomb, onSpyOnIce, onSpyGiveCard, onCompleteSpy }: GameScreenProps) {
+export function GameScreen({ finalResults, gameOver, onReturnToLobby, onRollDice, onFishFromIce, onChoosePadrinoAction, onEndTurn, onSwapCards, onResolveOrca, onResolveSealBomb, onSpyOnIce, onSpyGiveCard, onCompleteSpy }: GameScreenProps) {
   const onRender = useRenderProfiling();
   const flow = useMobileActionFlow();
   const [isMobile, setIsMobile] = useState(() => (typeof window !== "undefined" ? window.innerWidth < 900 : false));
@@ -42,8 +48,15 @@ export function GameScreen({ onRollDice, onFishFromIce, onChoosePadrinoAction, o
   }, []);
 
   const centerBoard = (
-    <Profiler id="CenterBoardStage" onRender={onRender}>
-      <CenterBoardStageContainer onFishFromIce={onFishFromIce} />
+    <Profiler id="BoardContainer" onRender={onRender}>
+      <BoardContainer
+        onFishFromIce={onFishFromIce}
+        overlayBanner={
+          <Profiler id="TurnBanner" onRender={onRender}>
+            <TurnBannerContainer />
+          </Profiler>
+        }
+      />
     </Profiler>
   );
 
@@ -63,45 +76,68 @@ export function GameScreen({ onRollDice, onFishFromIce, onChoosePadrinoAction, o
     </Profiler>
   );
 
+  const shouldShowResults = gameOver && finalResults?.players.length;
+
   if (isMobile) {
     return (
-      <MobileGameShell
-        flow={flow}
-        board={centerBoard}
-        summary={
-          <Profiler id="LeftStatusRail" onRender={onRender}>
-            <LeftStatusRailContainer />
-          </Profiler>
-        }
-        actions={actionsDock}
-        hand={
-          <Profiler id="LocalHand" onRender={onRender}>
-            <LocalHandContainer />
-          </Profiler>
-        }
-        rivals={
-          <Profiler id="RivalsLedger" onRender={onRender}>
-            <RivalsLedgerContainer />
-          </Profiler>
-        }
-      />
+      <>
+        <MobileGameShell
+          flow={flow}
+          board={centerBoard}
+          summary={
+            <Profiler id="LeftStatusRail" onRender={onRender}>
+              <LeftStatusRailContainer />
+            </Profiler>
+          }
+          actions={actionsDock}
+          hand={
+            <Profiler id="LocalHand" onRender={onRender}>
+              <LocalHandContainer
+                onResolveOrca={onResolveOrca}
+                onResolveSealBomb={onResolveSealBomb}
+              />
+            </Profiler>
+          }
+          rivals={
+            <Profiler id="RivalsLedger" onRender={onRender}>
+              <RivalsLedgerContainer />
+            </Profiler>
+          }
+        />
+        {shouldShowResults ? (
+          <FinalResultsOverlay finalResults={finalResults} onReturnToLobby={onReturnToLobby} />
+        ) : null}
+      </>
     );
   }
 
   return (
-    <GameShell
-      left={
-        <Profiler id="LeftStatusRail" onRender={onRender}>
-          <LeftStatusRailContainer />
-        </Profiler>
-      }
-      center={centerBoard}
-      actions={actionsDock}
-      right={
-        <Profiler id="RightLedgerRail" onRender={onRender}>
-          <RightLedgerRailContainer />
-        </Profiler>
-      }
-    />
+    <>
+      <GameShell
+        left={
+          <Profiler id="LeftStatusRail" onRender={onRender}>
+            <LeftStatusRailContainer />
+          </Profiler>
+        }
+        center={centerBoard}
+        actions={actionsDock}
+        hand={
+          <Profiler id="LocalHand" onRender={onRender}>
+            <LocalHandContainer
+              onResolveOrca={onResolveOrca}
+              onResolveSealBomb={onResolveSealBomb}
+            />
+          </Profiler>
+        }
+        right={
+          <Profiler id="RightLedgerRail" onRender={onRender}>
+            <RightLedgerRailContainer />
+          </Profiler>
+        }
+      />
+      {shouldShowResults ? (
+        <FinalResultsOverlay finalResults={finalResults} onReturnToLobby={onReturnToLobby} />
+      ) : null}
+    </>
   );
 }

@@ -14,3 +14,4 @@ server/data/*.db-wal
 backups/
 data/*.bak
 cortex.config.json
+.atl/

@@ -1,11 +1,13 @@
 import type { PropsWithChildren } from "react";
+import styles from "./Shared.module.css";
 
-type PanelProps = PropsWithChildren<{ title?: string }>;
+type PanelProps = PropsWithChildren<{ title?: string; variant?: "default" | "ghost" }>;
 
-export function Panel({ title, children }: PanelProps) {
+export function Panel({ title, children, variant = "default" }: PanelProps) {
+  const className = variant === "ghost" ? styles.panelGhost : styles.panel;
   return (
-    <section style={{ border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", padding: 16, background: "var(--surface)" }}>
-      {title ? <h3 style={{ margin: "0 0 8px" }}>{title}</h3> : null}
+    <section className={className}>
+      {title ? <h3 className={styles.panelTitle}>{title}</h3> : null}
       {children}
     </section>
   );

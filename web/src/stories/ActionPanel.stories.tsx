@@ -16,26 +16,8 @@ const meta: Meta<typeof ActionPanel> = {
       showPadrinoOptions: false
     },
     onChoosePadrinoAction: fn(),
-    onEndTurn: fn(),
-    swap: {
-      source: { area: "ice_grid", slot: 0 },
-      target: { area: "player_zone", playerID: "0", index: 0 },
-      canConfirm: true,
-      helperText: "Listo para confirmar intercambio.",
-      sourceKey: "ice:0",
-      targetKey: "player:0:0",
-      options: [
-        { key: "ice:0", label: "Hielo 1", location: { area: "ice_grid", slot: 0 } },
-        { key: "player:0:0", label: "Jugador 0 · penguin-001", location: { area: "player_zone", playerID: "0", index: 0 } }
-      ],
-      onSourceKeyChange: fn(),
-      onTargetKeyChange: fn(),
-      onConfirm: fn(),
-      onClearSelection: fn()
-    },
     orca: null,
-    seal: null,
-    spy: null
+    seal: null
   }
 };
 
@@ -68,21 +50,6 @@ export const Spy: Story = {
       canRoll: false,
       canEndTurn: false,
       showPadrinoOptions: false
-    },
-    spy: {
-      active: false,
-      selectedSlots: [0, 3],
-      availableSlots: [0, 1, 2, 3, 4, 5],
-      revealedSlots: [],
-      selectedGiftSlot: null,
-      targetPlayerID: "1",
-      targetPlayerIDs: ["1", "2"],
-      onToggleSlot: fn(),
-      onSelectGiftSlot: fn(),
-      onTargetPlayerChange: fn(),
-      onConfirmSpy: fn(),
-      onGiveCard: fn(),
-      onCompleteSpy: fn()
     }
   }
 };

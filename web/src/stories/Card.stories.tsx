@@ -1,24 +1,42 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Card } from "../ui/board/Card.js";
+import { FrostCard } from "../features/board/ui/FrostCard.js";
 
-const meta: Meta<typeof Card> = {
-  title: "Board/Card",
-  component: Card,
+const meta: Meta<typeof FrostCard> = {
+  title: "Board/FrostCard",
+  component: FrostCard,
   args: {
-    id: "penguin-001",
-    label: "Pinguino 1",
-    image: "/src/assets/cards/penguin-1.png"
+    index: 0,
+    ariaLabel: "Pinguino 1",
+    children: <img src="/assets/cards/types/penguin-1.png" alt="Pinguino 1" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
   }
 };
 
 export default meta;
-type Story = StoryObj<typeof Card>;
+type Story = StoryObj<typeof FrostCard>;
 
-export const Visible: Story = {};
+export const Idle: Story = {};
+
 export const Hidden: Story = {
   args: {
-    hidden: true,
-    image: "/src/assets/cards/Reverso.png"
+    ariaLabel: "Hidden card",
+    children: <img src="/assets/cards/backs/frozen-dreamcatcher-back.png" alt="Carta oculta" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
   }
 };
-export const Selected: Story = { args: { selected: true } };
+
+export const Selectable: Story = {
+  args: {
+    selectable: true
+  }
+};
+
+export const Selected: Story = {
+  args: {
+    selected: true
+  }
+};
+
+export const Disabled: Story = {
+  args: {
+    disabled: true
+  }
+};

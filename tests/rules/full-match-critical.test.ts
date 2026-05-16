@@ -1,6 +1,7 @@
 import type { Ctx } from "boardgame.io";
 import { describe, expect, it } from "vitest";
 import {
+  endTurn,
   fishFromIce,
   resetTurnState,
   resolveOrcaDestroy,
@@ -28,11 +29,8 @@ describe("full match critical flow", () => {
 
       const slot = G.iceGrid.findIndex((item) => item !== null);
       if (slot === -1) {
-        break;
-      }
-
-      fishFromIce(
-        {
+        // Grid vacío: el endgame se evalúa al finalizar el turno
+        endTurn({
           G,
           ctx,
           playerID: "0",
@@ -41,6 +39,15 @@ describe("full match critical flow", () => {
               gameoverPayload = payload;
             }
           }
+        });
+        break;
+      }
+
+      fishFromIce(
+        {
+          G,
+          ctx,
+          playerID: "0"
         },
         slot
       );
@@ -59,10 +66,21 @@ describe("full match critical flow", () => {
         );
         resolveSealBombExplosion({ G, ctx, playerID: G.sealBombResolution.playerID }, targets);
       }
+
+      endTurn({
+        G,
+        ctx,
+        playerID: "0",
+        events: {
+          endGame: (payload) => {
+            gameoverPayload = payload;
+          }
+        }
+      });
     }
 
     expect(guard).toBeLessThan(500);
-    expect(gameoverPayload).toMatchObject({ reason: "ICE_CANNOT_REFILL" });
-    expect(gameoverPayload).toHaveProperty("scores");
+    expect(gameoverPayload).toMatchObject({ reason: "NO_ICE_CARDS_AVAILABLE" });
+    expect(gameoverPayload).toHaveProperty("finalResults.players");
   });
 });

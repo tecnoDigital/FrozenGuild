@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Frozen Guild — Lobby Preview</title>
+  <style>
+    :root {
+      --bg-0: #06111f;
+      --bg-1: #0a1a2d;
+      --bg-2: #0e2740;
+      --ice: #dff7ff;
+      --muted: #9db8c8;
+      --cyan: #77f3ff;
+      --blue: #46c7ff;
+      --green: #7dffbf;
+      --gold: #ffd36a;
+      --danger: #ff6b7a;
+      --text: #effcff;
+      --panel: rgba(9, 25, 43, 0.72);
+      --stroke: rgba(160, 230, 255, 0.18);
+      --stroke-strong: rgba(160, 230, 255, 0.34);
+      --shadow: 0 30px 90px rgba(0, 0, 0, 0.42);
+      --ease: cubic-bezier(.2,.8,.2,1);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 15% 12%, rgba(70,199,255,.22), transparent 28%),
+        radial-gradient(circle at 90% 15%, rgba(119,243,255,.14), transparent 24%),
+        linear-gradient(140deg, var(--bg-0), var(--bg-1) 48%, #071321);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+      background-size: 56px 56px;
+      mask-image: radial-gradient(circle at center, black, transparent 74%);
+    }
+
+    button, input, select { font: inherit; }
+    h1, h2, h3, p { margin: 0; }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      padding: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .shell {
+      width: min(1440px, 100%);
+      min-height: min(860px, calc(100vh - 64px));
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 24px;
+      padding: 24px;
+      border: 1px solid var(--stroke);
+      border-radius: 38px;
+      background: linear-gradient(145deg, rgba(255,255,255,.08), rgba(255,255,255,.025)), rgba(5, 16, 29, .42);
+      box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,.09);
+      backdrop-filter: blur(22px);
+    }
+
+    .column {
+      min-width: 0;
+      border: 1px solid var(--stroke);
+      border-radius: 30px;
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.025)), var(--panel);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+      overflow: hidden;
+    }
+
+    .left-column { display: grid; grid-template-rows: auto auto 1fr auto; }
+    .right-column { display: flex; flex-direction: column; }
+
+    .header, .section, .room-preview, .right-hero, .rooms-panel { padding: 26px; }
+    .header, .section { border-bottom: 1px solid var(--stroke); }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand { display: flex; align-items: center; gap: 16px; }
+
+    .crest {
+      width: 58px;
+      height: 58px;
+      border-radius: 18px;
+      position: relative;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at 35% 25%, rgba(255,255,255,.95), rgba(201,241,255,.76) 28%, rgba(70,199,255,.2) 64%, rgba(5,16,29,.7)), linear-gradient(145deg, #082a4a, #0a1321);
+      border: 1px solid rgba(215, 250, 255, .42);
+      box-shadow: 0 18px 42px rgba(0,0,0,.32), 0 0 36px rgba(70,199,255,.18);
+    }
+    .crest::before { content: "🐧"; font-size: 31px; }
+
+    .eyebrow {
+      color: var(--cyan);
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      margin-bottom: 7px;
+    }
+
+    h1 { font-size: clamp(26px, 2.2vw, 40px); letter-spacing: -.06em; line-height: .95; }
+    .subtitle { color: var(--muted); font-size: 14px; line-height: 1.4; margin-top: 7px; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border: 1px solid rgba(119,243,255,.22);
+      background: rgba(119,243,255,.08);
+      color: var(--ice);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .pill-dot { width: 8px; height: 8px; border-radius: 99px; background: var(--green); box-shadow: 0 0 14px rgba(125,255,191,.8); }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .section-title h2 { font-size: 16px; letter-spacing: -.02em; }
+    .section-title span { color: var(--muted); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
+
+    .profile-grid { display: grid; grid-template-columns: 116px 1fr; gap: 18px; align-items: stretch; }
+
+    .avatar-card {
+      min-height: 138px;
+      border-radius: 24px;
+      border: 1px solid var(--stroke-strong);
+      background: radial-gradient(circle at 50% 30%, rgba(223,247,255,.9), rgba(70,199,255,.2) 42%, transparent 66%), linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.03));
+      display: grid;
+      place-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .avatar-card::before {
+      content: "";
+      position: absolute;
+      width: 110px;
+      height: 110px;
+      border-radius: 45% 55% 52% 48%;
+      background: linear-gradient(145deg, #101923, #03070d);
+      bottom: 6px;
+      box-shadow: inset -18px -16px 0 rgba(255,255,255,.08);
+    }
+    .avatar-card::after {
+      content: "";
+      position: absolute;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 34%, white 0 10%, #1f8fff 11% 28%, #04101d 29% 100%);
+      top: 45px;
+      right: 31px;
+      box-shadow: -42px 0 0 -4px #07101a, -42px 0 0 0 rgba(255,255,255,.95);
+    }
+
+    .field-stack { display: grid; gap: 12px; }
+    label { display: block; color: var(--muted); font-size: 12px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 7px; }
+    input, select {
+      width: 100%;
+      border: 1px solid rgba(160,230,255,.2);
+      border-radius: 14px;
+      padding: 13px 14px;
+      background: rgba(2, 12, 23, .56);
+      color: var(--text);
+      outline: none;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+    }
+    input:focus, select:focus { border-color: rgba(119,243,255,.55); box-shadow: 0 0 0 4px rgba(119,243,255,.08); }
+    select option { background: #06111f; }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      border: 1px solid rgba(160,230,255,.2);
+      border-radius: 999px;
+      padding: 8px 11px;
+      background: rgba(255,255,255,.05);
+      color: var(--ice);
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: .22s var(--ease);
+    }
+    .chip:hover, .chip.active { transform: translateY(-1px); border-color: rgba(119,243,255,.55); background: rgba(119,243,255,.14); }
+
+    .toggle-bar {
+      display: flex;
+      padding: 5px;
+      border-radius: 18px;
+      background: rgba(2,12,23,.55);
+      border: 1px solid rgba(160,230,255,.18);
+    }
+    .mode-btn {
+      flex: 1;
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 14px;
+      color: var(--muted);
+      background: transparent;
+      font-weight: 950;
+      cursor: pointer;
+      transition: .22s var(--ease);
+    }
+    .mode-btn.active { color: #06111f; background: linear-gradient(90deg, var(--cyan), var(--blue)); box-shadow: 0 10px 26px rgba(70,199,255,.24); }
+
+    .setup-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+
+    .bot-segmented {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: 1fr;
+      gap: 6px;
+      padding: 6px;
+      min-height: 47px;
+      border: 1px solid rgba(160,230,255,.2);
+      border-radius: 14px;
+      background: rgba(2, 12, 23, .56);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+    }
+    .bot-segment {
+      border: 0;
+      border-radius: 10px;
+      background: transparent;
+      color: var(--ice);
+      font-size: 13px;
+      font-weight: 950;
+      padding: 10px 8px;
+      cursor: pointer;
+      transition: .22s var(--ease);
+    }
+    .bot-segment:hover { background: rgba(119,243,255,.10); }
+    .bot-segment.active { color: #06111f; background: linear-gradient(90deg, var(--cyan), var(--blue)); box-shadow: 0 10px 20px rgba(70,199,255,.20); }
+
+    .config-summary, .room-status-panel, .join-readonly-panel, .empty-rooms {
+      border: 1px solid rgba(160,230,255,.16);
+      border-radius: 18px;
+      background: rgba(255,255,255,.045);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      padding: 13px 14px;
+    }
+    .config-summary { margin-top: 12px; }
+    .config-summary strong, .room-status-panel strong, .join-readonly-panel strong { color: var(--ice); }
+
+    .room-preview { display: grid; gap: 16px; }
+    .preview-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+    .preview-header h2 { font-size: 20px; letter-spacing: -.04em; }
+    .room-id { color: var(--muted); font-size: 12px; margin-top: 5px; }
+
+    .room-status-panel { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .room-status-label { display: block; color: var(--cyan); font-size: 10px; font-weight: 950; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 3px; }
+    .room-status-metric { color: #06111f; background: linear-gradient(90deg, var(--cyan), var(--blue)); border-radius: 999px; padding: 7px 10px; font-size: 11px; font-weight: 950; white-space: nowrap; }
+    .join-readonly-panel { display: none; }
+    .join-readonly-panel.active { display: block; animation: enter .24s var(--ease) both; }
+
+    .seats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+    .seat {
+      min-height: 126px;
+      border: 1px solid rgba(160,230,255,.17);
+      border-radius: 20px;
+      background: radial-gradient(circle at 50% 0%, rgba(119,243,255,.14), transparent 52%), rgba(255,255,255,.04);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 12px;
+      overflow: hidden;
+    }
+    .seat.local { border-color: rgba(119,243,255,.52); box-shadow: 0 0 0 4px rgba(119,243,255,.06), inset 0 1px 0 rgba(255,255,255,.12); }
+    .seat.empty { opacity: .66; border-style: dashed; }
+    .seat.bot { border-color: rgba(255,211,106,.35); background: radial-gradient(circle at 50% 0%, rgba(255,211,106,.15), transparent 52%), rgba(255,255,255,.04); }
+    .mini-avatar { width: 36px; height: 36px; border-radius: 13px; display: grid; place-items: center; background: rgba(223,247,255,.12); border: 1px solid rgba(223,247,255,.2); margin-bottom: 10px; }
+    .seat-name { font-weight: 950; font-size: 13px; letter-spacing: -.02em; }
+    .seat-status { color: var(--muted); font-size: 11px; margin-top: 4px; line-height: 1.25; }
+    .seat-badge { width: fit-content; color: #06111f; background: rgba(119,243,255,.92); border-radius: 999px; padding: 4px 7px; font-size: 10px; font-weight: 950; letter-spacing: .08em; }
+    .seat.bot .seat-badge { background: var(--gold); }
+
+    .actions-footer {
+      padding: 20px 26px 26px;
+      border-top: 1px solid var(--stroke);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
+      align-items: center;
+      background: linear-gradient(180deg, rgba(255,255,255,.025), rgba(119,243,255,.04));
+    }
+    .hint { color: var(--muted); font-size: 13px; line-height: 1.45; }
+
+    .primary-btn, .secondary-btn, .ghost-btn {
+      border-radius: 16px;
+      padding: 14px 18px;
+      font-weight: 950;
+      cursor: pointer;
+      transition: transform .22s var(--ease), box-shadow .22s var(--ease), opacity .22s var(--ease);
+      white-space: nowrap;
+    }
+    .primary-btn { border: 0; color: #06111f; background: linear-gradient(92deg, var(--cyan), var(--blue) 58%, #8ebcff); box-shadow: 0 16px 32px rgba(70,199,255,.24), inset 0 1px 0 rgba(255,255,255,.45); }
+    .primary-btn:disabled { opacity: .48; cursor: not-allowed; transform: none; }
+    .secondary-btn, .ghost-btn { color: var(--ice); background: rgba(255,255,255,.08); border: 1px solid rgba(160,230,255,.22); }
+    .ghost-btn { padding: 11px 13px; font-size: 12px; background: transparent; }
+    .primary-btn:not(:disabled):hover, .secondary-btn:hover, .ghost-btn:hover { transform: translateY(-2px); }
+
+    .right-hero, .rooms-panel { min-height: 100%; flex-direction: column; gap: 22px; display: none; }
+    .right-hero.active, .rooms-panel.active { display: flex; animation: enter .24s var(--ease) both; }
+    @keyframes enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    .right-top, .rooms-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+    .right-top h2, .rooms-head h2 { font-size: clamp(30px, 3vw, 54px); letter-spacing: -.07em; line-height: .9; }
+    .right-top p, .rooms-head p { color: var(--muted); font-size: 15px; line-height: 1.55; max-width: 44ch; margin-top: 13px; }
+
+    .ice-map {
+      position: relative;
+      min-height: 290px;
+      border: 1px solid rgba(160,230,255,.2);
+      border-radius: 30px;
+      background: radial-gradient(circle at 50% 35%, rgba(223,247,255,.13), transparent 32%), linear-gradient(150deg, rgba(255,255,255,.08), rgba(255,255,255,.025)), rgba(2,12,23,.38);
+      overflow: hidden;
+    }
+    .ice-grid { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(-6deg); width: min(300px, 75%); display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .ice-slot { aspect-ratio: 4 / 5.4; border-radius: 14px; border: 1px solid rgba(223,247,255,.24); background: linear-gradient(160deg, rgba(223,247,255,.2), rgba(70,199,255,.04)), rgba(2,12,23,.5); box-shadow: 0 18px 30px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.12); }
+    .floating-card { position: absolute; right: 26px; bottom: 22px; width: 130px; height: 178px; border-radius: 22px; border: 1px solid rgba(255,255,255,.28); background: linear-gradient(160deg, rgba(255,211,106,.95), rgba(255,107,122,.9)); transform: rotate(8deg); box-shadow: 0 24px 60px rgba(0,0,0,.36); display: flex; flex-direction: column; justify-content: space-between; padding: 14px; color: #170c12; }
+    .floating-card strong { font-size: 15px; letter-spacing: -.03em; }
+    .floating-card span { font-size: 11px; font-weight: 950; opacity: .75; text-transform: uppercase; letter-spacing: .08em; }
+
+    .features, .card-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .feature, .mini-card { border: 1px solid rgba(160,230,255,.16); border-radius: 20px; padding: 15px; background: rgba(255,255,255,.045); min-height: 132px; }
+    .feature-icon { width: 42px; height: 42px; border-radius: 15px; display: grid; place-items: center; background: rgba(119,243,255,.1); border: 1px solid rgba(119,243,255,.2); font-size: 22px; }
+    .feature h3, .mini-card strong { margin-top: 14px; font-size: 14px; letter-spacing: -.02em; display: block; }
+    .feature p, .mini-card span { margin-top: 6px; color: var(--muted); font-size: 12px; line-height: 1.35; }
+    .mini-card { min-height: 148px; display: flex; flex-direction: column; justify-content: space-between; transition: .24s var(--ease); }
+    .mini-card:hover { transform: translateY(-4px) rotate(-1deg); border-color: rgba(119,243,255,.44); box-shadow: 0 18px 40px rgba(0,0,0,.24); }
+    .mini-card .emoji { font-size: 30px; }
+
+    .rooms-head { padding-bottom: 18px; border-bottom: 1px solid var(--stroke); }
+    .selected-note { padding: 16px; border-radius: 22px; border: 1px solid rgba(255,211,106,.24); background: rgba(255,211,106,.08); color: #ffe7a3; font-size: 13px; line-height: 1.45; }
+    .room-list { display: grid; gap: 12px; overflow: auto; padding-right: 4px; }
+    .room-card { display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: center; border: 1px solid rgba(160,230,255,.16); border-radius: 24px; background: rgba(255,255,255,.045); padding: 18px; cursor: pointer; transition: .22s var(--ease); }
+    .room-card:hover, .room-card.selected { transform: translateY(-2px); border-color: rgba(119,243,255,.48); box-shadow: 0 18px 42px rgba(0,0,0,.22); }
+    .room-main h3 { font-size: 17px; letter-spacing: -.03em; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .status-tag { font-size: 10px; letter-spacing: .09em; font-weight: 950; color: #06111f; background: var(--green); border-radius: 999px; padding: 4px 7px; }
+    .room-meta { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; color: var(--muted); font-size: 12px; }
+    .room-side { display: flex; align-items: center; gap: 12px; }
+    .players-bubble { width: 54px; height: 54px; border-radius: 18px; display: grid; place-items: center; background: rgba(119,243,255,.1); border: 1px solid rgba(119,243,255,.2); font-weight: 950; }
+
+    .empty-rooms { display: none; text-align: center; padding: 28px 18px; }
+    .empty-rooms.active { display: block; animation: enter .24s var(--ease) both; }
+    .empty-rooms h3 { color: var(--ice); font-size: 18px; margin-bottom: 7px; }
+    .empty-rooms p { color: var(--muted); margin-bottom: 15px; }
+
+    .mode-fade { animation: modeFade .22s var(--ease) both; }
+    @keyframes modeFade { from { opacity: .35; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 1080px) {
+      .page { padding: 18px; align-items: flex-start; }
+      .shell { grid-template-columns: 1fr; min-height: auto; padding: 16px; border-radius: 30px; }
+      .right-column { min-height: 650px; }
+    }
+    @media (max-width: 720px) {
+      .page { padding: 10px; }
+      .shell { padding: 10px; border-radius: 24px; gap: 12px; }
+      .column { border-radius: 22px; }
+      .header, .section, .room-preview, .right-hero, .rooms-panel { padding: 18px; }
+      .header, .right-top, .rooms-head { align-items: flex-start; flex-direction: column; }
+      .profile-grid, .setup-grid, .actions-footer, .room-card { grid-template-columns: 1fr; }
+      .seats, .features, .card-row { grid-template-columns: repeat(2, 1fr); }
+      .floating-card { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="shell" aria-label="Frozen Guild Lobby Preview">
+      <aside class="column left-column">
+        <header class="header">
+          <div class="brand">
+            <div class="crest" aria-hidden="true"></div>
+            <div>
+              <div class="eyebrow">Frozen Guild MVP</div>
+              <h1>Lobby</h1>
+              <p class="subtitle">Prepare your penguin, choose a room, enter El Hielo.</p>
+            </div>
+          </div>
+          <div class="pill"><span class="pill-dot"></span>Server ready</div>
+        </header>
+
+        <section class="section">
+          <div class="section-title">
+            <h2>Player Profile</h2>
+            <span>Who am I?</span>
+          </div>
+
+          <div class="profile-grid">
+            <div class="avatar-card" aria-label="Selected avatar preview"></div>
+            <div class="field-stack">
+              <div>
+                <label for="playerName">Nickname</label>
+                <input id="playerName" value="Lord Penguin" autocomplete="off" />
+              </div>
+              <div>
+                <label>Avatar vibe</label>
+                <div class="chips">
+                  <button class="chip active" type="button">Agent</button>
+                  <button class="chip" type="button">Captain</button>
+                  <button class="chip" type="button">Spy</button>
+                  <button class="chip" type="button">Fisher</button>
+                </div>
+              </div>
+              <div>
+                <label>Color</label>
+                <div class="chips">
+                  <button class="chip active" type="button">Ice Blue</button>
+                  <button class="chip" type="button">Aurora</button>
+                  <button class="chip" type="button">Gold</button>
+                  <button class="chip" type="button">Crimson</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-title">
+            <h2>Match Setup</h2>
+            <span>Create or join</span>
+          </div>
+
+          <div class="field-stack">
+            <div class="toggle-bar" role="tablist" aria-label="Lobby mode">
+              <button class="mode-btn active" id="createMode" type="button">Create Match</button>
+              <button class="mode-btn" id="joinMode" type="button">Join Match</button>
+            </div>
+
+            <div class="setup-grid" id="createSettings">
+              <div id="playerCountField">
+                <label for="players">Players</label>
+                <select id="players">
+                  <option value="1">1 player test</option>
+                  <option value="2">2 players</option>
+                  <option value="3">3 players</option>
+                  <option value="4" selected>4 players</option>
+                </select>
+              </div>
+              <div id="botUsageField">
+                <label for="botSegmented">Bots</label>
+                <div class="bot-segmented" id="botSegmented" aria-label="Bots selector"></div>
+              </div>
+            </div>
+
+            <div class="config-summary" id="configSummary">You + 0 bots + 3 waiting seats</div>
+          </div>
+        </section>
+
+        <section class="room-preview">
+          <div class="preview-header">
+            <div>
+              <h2 id="previewTitle">New Expedition Table</h2>
+              <p class="room-id" id="previewId">Room preview · FG-NEW</p>
+            </div>
+            <button class="ghost-btn" type="button" id="randomizeBtn">Randomize</button>
+          </div>
+
+          <div class="room-status-panel" id="roomStatusPanel">
+            <div>
+              <span class="room-status-label">Room status</span>
+              <strong id="roomStatusTitle">Creating</strong> · <span id="roomStatusText">1 human · 0 bots · 3 waiting seats</span>
+            </div>
+            <div class="room-status-metric" id="roomStatusMetric">1/4</div>
+          </div>
+
+          <div class="join-readonly-panel" id="joinReadonlyPanel">
+            <span class="room-status-label">Selected room</span>
+            <strong id="joinReadonlyTitle">No room selected</strong><br />
+            <span id="joinReadonlyDetails">Pick a room on the right to see its configuration.</span>
+          </div>
+
+          <div class="seats" id="seatPreview"></div>
+        </section>
+
+        <footer class="actions-footer">
+          <p class="hint" id="footerHint">Create a clean MVP room. Configure players and bots before opening the table.</p>
+          <button class="primary-btn" id="mainCta" type="button">Create Match</button>
+        </footer>
+      </aside>
+
+      <section class="column right-column">
+        <div class="right-hero active" id="expeditionPanel">
+          <div class="right-top">
+            <div>
+              <div class="eyebrow">Default right panel</div>
+              <h2>Expedition</h2>
+              <p>Explore El Hielo, collect cards, and use the dice to control the table. This side explains the game until the player decides to join an existing room.</p>
+            </div>
+            <button class="secondary-btn" id="showRoomsBtn" type="button">View Rooms</button>
+          </div>
+
+          <div class="ice-map" aria-label="El Hielo 3x3 preview">
+            <div class="ice-grid">
+              <div class="ice-slot"></div><div class="ice-slot"></div><div class="ice-slot"></div>
+              <div class="ice-slot"></div><div class="ice-slot"></div><div class="ice-slot"></div>
+              <div class="ice-slot"></div><div class="ice-slot"></div><div class="ice-slot"></div>
+            </div>
+            <div class="floating-card">
+              <span>Immediate effect</span>
+              <strong>Orca destroys one of your own cards before the turn continues.</strong>
+            </div>
+          </div>
+
+          <div class="features">
+            <article class="feature"><div class="feature-icon">🎲</div><h3>Dice driven</h3><p>One roll defines the action. No reroll noise.</p></article>
+            <article class="feature"><div class="feature-icon">🧊</div><h3>El Hielo</h3><p>A 3x3 hidden grid keeps memory and risk at the center.</p></article>
+            <article class="feature"><div class="feature-icon">⚔️</div><h3>Direct conflict</h3><p>Spy, swap, gift trouble, and survive the table.</p></article>
+          </div>
+
+          <div class="card-row">
+            <article class="mini-card"><div class="emoji">🐧</div><div><strong>Penguin</strong><span>Stable scoring. Simple, readable, friendly.</span></div></article>
+            <article class="mini-card"><div class="emoji">🐋</div><div><strong>Orca</strong><span>Mandatory resolution. Choose what gets destroyed.</span></div></article>
+            <article class="mini-card"><div class="emoji">🦭</div><div><strong>Seal Bomb</strong><span>Danger card. Clear blocking stage when it explodes.</span></div></article>
+          </div>
+        </div>
+
+        <div class="rooms-panel" id="roomsPanel">
+          <div class="rooms-head">
+            <div>
+              <div class="eyebrow">Join mode</div>
+              <h2>Available Rooms</h2>
+              <p>Select one room here. The left column updates as read-only configuration and the main action becomes Join Selected Room.</p>
+            </div>
+            <button class="secondary-btn" id="backToInfoBtn" type="button">Back to Expedition</button>
+          </div>
+
+          <div class="selected-note" id="selectedNote">No room selected yet. Choose a room to update the left preview.</div>
+
+          <div class="room-list" id="roomList">
+            <article class="room-card" data-room="North Pier" data-id="FG-1024" data-players="2/4" data-host="Lizz" data-seats="2">
+              <div class="room-main"><h3>North Pier <span class="status-tag">WAITING</span></h3><div class="room-meta"><span>Match ID: FG-1024</span><span>Host: Lizz</span><span>Rules: MVP</span></div></div>
+              <div class="room-side"><div class="players-bubble">2/4</div><button class="ghost-btn" type="button">Select</button></div>
+            </article>
+            <article class="room-card" data-room="Iceberg Casino" data-id="FG-2048" data-players="1/4" data-host="Gaby" data-seats="1">
+              <div class="room-main"><h3>Iceberg Casino <span class="status-tag">WAITING</span></h3><div class="room-meta"><span>Match ID: FG-2048</span><span>Host: Gaby</span><span>Rules: MVP</span></div></div>
+              <div class="room-side"><div class="players-bubble">1/4</div><button class="ghost-btn" type="button">Select</button></div>
+            </article>
+            <article class="room-card" data-room="Midnight Hielo" data-id="FG-4096" data-players="3/4" data-host="Oz" data-seats="3">
+              <div class="room-main"><h3>Midnight Hielo <span class="status-tag">WAITING</span></h3><div class="room-meta"><span>Match ID: FG-4096</span><span>Host: Oz</span><span>Rules: MVP</span></div></div>
+              <div class="room-side"><div class="players-bubble">3/4</div><button class="ghost-btn" type="button">Select</button></div>
+            </article>
+          </div>
+
+          <div class="empty-rooms" id="emptyRoomsState">
+            <h3>No rooms available</h3>
+            <p>Create a new match instead, or refresh when another player opens a table.</p>
+            <button class="secondary-btn" id="emptyCreateBtn" type="button">Create Match</button>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const createMode = document.getElementById('createMode');
+    const joinMode = document.getElementById('joinMode');
+    const expeditionPanel = document.getElementById('expeditionPanel');
+    const roomsPanel = document.getElementById('roomsPanel');
+    const showRoomsBtn = document.getElementById('showRoomsBtn');
+    const backToInfoBtn = document.getElementById('backToInfoBtn');
+    const mainCta = document.getElementById('mainCta');
+    const footerHint = document.getElementById('footerHint');
+    const previewTitle = document.getElementById('previewTitle');
+    const previewId = document.getElementById('previewId');
+    const selectedNote = document.getElementById('selectedNote');
+    const seatPreview = document.getElementById('seatPreview');
+    const playersSelect = document.getElementById('players');
+    const botSegmented = document.getElementById('botSegmented');
+    const configSummary = document.getElementById('configSummary');
+    const playerNameInput = document.getElementById('playerName');
+    const roomStatusTitle = document.getElementById('roomStatusTitle');
+    const roomStatusText = document.getElementById('roomStatusText');
+    const roomStatusMetric = document.getElementById('roomStatusMetric');
+    const joinReadonlyPanel = document.getElementById('joinReadonlyPanel');
+    const joinReadonlyTitle = document.getElementById('joinReadonlyTitle');
+    const joinReadonlyDetails = document.getElementById('joinReadonlyDetails');
+    const roomCards = [...document.querySelectorAll('.room-card')];
+    const roomList = document.getElementById('roomList');
+    const emptyRoomsState = document.getElementById('emptyRoomsState');
+
+    let selectedBots = 0;
+    let selectedRoom = null;
+
+    function plural(value, one, many) { return value === 1 ? one : many; }
+
+    function updateCtaState() {
+      const isJoin = joinMode.classList.contains('active');
+      const hasName = playerNameInput.value.trim().length > 0;
+      const canContinue = hasName && (!isJoin || selectedRoom);
+      mainCta.disabled = !canContinue;
+      if (!hasName) mainCta.textContent = 'Enter Nickname First';
+      else if (isJoin && !selectedRoom) mainCta.textContent = 'Select a Room First';
+      else mainCta.textContent = isJoin ? 'Join Selected Room' : 'Create Match';
+    }
+
+    function renderBotSelector() {
+      const selectedPlayers = Number(playersSelect.value);
+      const maxBots = Math.max(0, selectedPlayers - 1);
+      if (selectedBots > maxBots) selectedBots = maxBots;
+      botSegmented.innerHTML = '';
+      for (let i = 0; i <= maxBots; i++) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'bot-segment' + (i === selectedBots ? ' active' : '');
+        button.textContent = String(i);
+        button.setAttribute('aria-pressed', String(i === selectedBots));
+        button.addEventListener('click', () => {
+          selectedBots = i;
+          renderBotSelector();
+          renderSeatsFromCurrentConfig();
+        });
+        botSegmented.appendChild(button);
+      }
+    }
+
+    function renderSeatsFromCurrentConfig() {
+      if (joinMode.classList.contains('active')) return;
+      const totalPlayers = Number(playersSelect.value);
+      const botCount = selectedBots;
+      const waitingSeats = Math.max(0, totalPlayers - 1 - botCount);
+      const names = [playerNameInput.value.trim() || 'Unnamed Penguin', 'Player 2', 'Player 3', 'Player 4'];
+      const emojis = ['🐧', '🧊', '🐋', '🦭'];
+      const botNames = ['Bot Alpha', 'Bot Beta', 'Bot Gamma'];
+      const botStartIndex = totalPlayers - botCount;
+      seatPreview.innerHTML = '';
+
+      for (let i = 0; i < totalPlayers; i++) {
+        const isLocal = i === 0;
+        const isBot = i >= botStartIndex;
+        const isWaiting = !isLocal && !isBot;
+        const seat = document.createElement('div');
+        seat.className = 'seat ' + (isLocal ? 'local ' : '') + (isBot ? 'bot ' : '') + (isWaiting ? 'empty' : '');
+        seat.innerHTML = `
+          <div>
+            <div class="mini-avatar">${isBot ? '🤖' : isWaiting ? '＋' : emojis[i]}</div>
+            <div class="seat-name">${isBot ? botNames[i - botStartIndex] : isWaiting ? 'Waiting seat' : names[i]}</div>
+            <div class="seat-status">${isLocal ? 'Local player' : isBot ? 'AI controlled seat' : 'Available human slot'}</div>
+          </div>
+          <div class="seat-badge">${isLocal ? 'YOU' : isBot ? 'BOT' : 'WAITING'}</div>
+        `;
+        seatPreview.appendChild(seat);
+      }
+
+      const botText = `${botCount} ${plural(botCount, 'bot', 'bots')}`;
+      const waitingText = `${waitingSeats} ${plural(waitingSeats, 'waiting seat', 'waiting seats')}`;
+      configSummary.innerHTML = `<strong>You</strong> + ${botText} + ${waitingText}`;
+      roomStatusTitle.textContent = 'Creating';
+      roomStatusText.textContent = `1 human · ${botText} · ${waitingText}`;
+      roomStatusMetric.textContent = `1/${totalPlayers}`;
+      updateCtaState();
+    }
+
+    function renderJoinSeats(taken, total) {
+      const names = ['Lord Penguin', 'Lizz', 'Gaby', 'Oz'];
+      const emojis = ['🐧', '🦊', '👻', '🐋'];
+      seatPreview.innerHTML = '';
+      for (let i = 0; i < total; i++) {
+        const occupied = i < taken;
+        const seat = document.createElement('div');
+        seat.className = 'seat ' + (i === 0 && occupied ? 'local ' : '') + (!occupied ? 'empty' : '');
+        seat.innerHTML = `
+          <div>
+            <div class="mini-avatar">${occupied ? emojis[i] : '＋'}</div>
+            <div class="seat-name">${occupied ? names[i] : 'Waiting seat'}</div>
+            <div class="seat-status">${occupied ? (i === 0 ? 'You will join here' : 'Connected player') : 'Available human slot'}</div>
+          </div>
+          <div class="seat-badge">${occupied ? (i === 0 ? 'YOU' : 'HUMAN') : 'WAITING'}</div>
+        `;
+        seatPreview.appendChild(seat);
+      }
+    }
+
+    function setMode(mode) {
+      const isJoin = mode === 'join';
+      const createSettings = document.getElementById('createSettings');
+      createMode.classList.toggle('active', !isJoin);
+      joinMode.classList.toggle('active', isJoin);
+      expeditionPanel.classList.toggle('active', !isJoin);
+      roomsPanel.classList.toggle('active', isJoin);
+      createSettings.style.display = isJoin ? 'none' : 'grid';
+      configSummary.style.display = isJoin ? 'none' : 'block';
+      joinReadonlyPanel.classList.toggle('active', isJoin);
+      previewTitle.classList.add('mode-fade');
+      setTimeout(() => previewTitle.classList.remove('mode-fade'), 240);
+
+      if (isJoin) {
+        footerHint.textContent = 'Pick a room on the right. The selected room appears here as read-only configuration.';
+      } else {
+        selectedRoom = null;
+        roomCards.forEach(item => item.classList.remove('selected'));
+        previewTitle.textContent = 'New Expedition Table';
+        previewId.textContent = 'Room preview · FG-NEW';
+        selectedNote.textContent = 'No room selected yet. Choose a room to update the left preview.';
+        joinReadonlyTitle.textContent = 'No room selected';
+        joinReadonlyDetails.textContent = 'Pick a room on the right to see its configuration.';
+        footerHint.textContent = 'Create a clean MVP room. Configure players and bots before opening the table.';
+        renderSeatsFromCurrentConfig();
+      }
+      updateCtaState();
+    }
+
+    function selectRoom(card) {
+      roomCards.forEach(item => item.classList.remove('selected'));
+      card.classList.add('selected');
+      const room = card.dataset.room;
+      const id = card.dataset.id;
+      const players = card.dataset.players;
+      const host = card.dataset.host;
+      const seats = Number(card.dataset.seats || 1);
+      const total = Number(players.split('/')[1] || 4);
+      selectedRoom = { room, id, players, host, seats, total };
+      previewTitle.textContent = room;
+      previewId.textContent = `Selected room · ${id} · ${players}`;
+      selectedNote.textContent = `${room} selected. Host: ${host}. Players: ${players}. Ready to join from the left column.`;
+      joinReadonlyTitle.textContent = `${room} · ${id}`;
+      joinReadonlyDetails.textContent = `${players} players · Host: ${host} · Configuration locked by room owner.`;
+      roomStatusTitle.textContent = 'Joining';
+      roomStatusText.textContent = `${players} players · Host ${host} · read-only setup`;
+      roomStatusMetric.textContent = players;
+      renderJoinSeats(seats, total);
+      updateCtaState();
+    }
+
+    function updateEmptyRoomsState() {
+      const hasRooms = roomCards.length > 0;
+      roomList.style.display = hasRooms ? 'grid' : 'none';
+      emptyRoomsState.classList.toggle('active', !hasRooms);
+    }
+
+    createMode.addEventListener('click', () => setMode('create'));
+    joinMode.addEventListener('click', () => setMode('join'));
+    showRoomsBtn.addEventListener('click', () => setMode('join'));
+    backToInfoBtn.addEventListener('click', () => setMode('create'));
+    document.getElementById('emptyCreateBtn').addEventListener('click', () => setMode('create'));
+    playersSelect.addEventListener('change', () => { renderBotSelector(); renderSeatsFromCurrentConfig(); });
+    playerNameInput.addEventListener('input', renderSeatsFromCurrentConfig);
+    roomCards.forEach(card => card.addEventListener('click', () => selectRoom(card)));
+    document.querySelectorAll('.chips').forEach(group => {
+      group.addEventListener('click', event => {
+        const target = event.target.closest('.chip');
+        if (!target) return;
+        group.querySelectorAll('.chip').forEach(chip => chip.classList.remove('active'));
+        target.classList.add('active');
+      });
+    });
+    document.getElementById('randomizeBtn').addEventListener('click', () => {
+      const rooms = ['Frozen Dock', 'Orca Table', 'Penguin Vault', 'Krill Alley'];
+      const id = Math.floor(1000 + Math.random() * 8999);
+      const room = rooms[Math.floor(Math.random() * rooms.length)];
+      previewTitle.textContent = room;
+      previewId.textContent = `Room preview · FG-${id}`;
+    });
+
+    updateEmptyRoomsState();
+    renderBotSelector();
+    renderSeatsFromCurrentConfig();
+  </script>
+</body>
+</html>

@@ -1,10 +1,12 @@
 .banner {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  background: linear-gradient(rgba(9, 22, 38, 0.74), rgba(9, 22, 38, 0.74)), url("/src/assets/game-ice-bg.webp");
+  border: var(--fg-border-icy);
+  border-radius: var(--fg-radius-lg);
+  background: linear-gradient(rgba(9, 22, 38, 0.74), rgba(9, 22, 38, 0.78)), url("/assets/backgrounds/game-board-bg.webp");
   background-size: cover;
   background-position: center;
-  padding: 12px 14px;
+  padding: clamp(9px, 0.9vw, 12px) clamp(10px, 1vw, 14px);
+  box-shadow: var(--fg-shadow-panel);
+  backdrop-filter: var(--fg-backdrop-blur-sm);
 }
 
 .bannerNeutral {
@@ -31,6 +33,15 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  color: var(--fg-color-ice-100);
+  text-shadow: 0 1px 2px rgba(2, 8, 18, 0.9);
+}
+
+.bannerDetail {
+  margin: 6px 0 0;
+  color: var(--fg-color-ice-200);
+  text-shadow: 0 1px 0 rgba(2, 8, 18, 0.75);
+  font-size: clamp(0.84rem, 0.75vw, 1rem);
 }
 
 .bannerModeIcon {
@@ -42,7 +53,34 @@
 .dice {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: clamp(8px, 0.9vw, 12px);
+  border: var(--fg-border-icy);
+  border-radius: var(--fg-radius-md);
+  box-shadow: var(--fg-shadow-inner-frost);
+}
+
+.diceAvailable {
+  border: 1px solid rgba(125, 239, 171, 0.35);
+  border-radius: var(--radius-md);
+  padding: 8px 10px;
+  background: rgba(20, 45, 37, 0.24);
+}
+
+.diceDisabled {
+  border: 1px solid rgba(255, 166, 166, 0.2);
+  border-radius: var(--radius-md);
+  padding: 8px 10px;
+  background: rgba(48, 24, 24, 0.2);
+  opacity: 0.72;
+}
+
+.diceValueIdle {
+  color: var(--muted);
+}
+
+.diceValueRolled {
+  color: #8effbd;
+  text-shadow: 0 0 10px rgba(142, 255, 189, 0.2);
 }
 
 .diceIcon {
@@ -52,28 +90,45 @@
 }
 
 .panelBlock {
-  margin-top: 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--surface);
-  padding: 12px;
-  display: grid;
-  gap: 8px;
+  width: min(100%, 400px);
+  min-height: 46px;
+  margin: 0 auto clamp(8px, 0.9vw, 12px);
+  border: 1px solid rgba(125, 220, 255, 0.18);
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, rgba(125, 220, 255, 0.1), rgba(8, 26, 44, 0.42) 48%, rgba(125, 239, 171, 0.08)),
+    rgba(5, 18, 32, 0.42);
+  padding: 7px 12px;
+  display: flex;
+  align-items: center;
+  box-shadow:
+    inset 0 1px 0 rgba(234, 250, 255, 0.08),
+    0 8px 22px rgba(2, 8, 18, 0.2);
+  overflow: hidden;
 }
 
 .helper {
   margin: 0;
   color: var(--muted);
-  font-size: 0.92rem;
+  font-size: clamp(0.82rem, 0.72vw, 0.94rem);
 }
 
 .helperRow {
   margin: 0;
-  color: var(--muted);
-  font-size: 0.92rem;
+  width: 100%;
+  min-width: 0;
+  color: rgba(218, 244, 255, 0.86);
+  font-size: clamp(0.82rem, 0.72vw, 0.94rem);
   display: flex;
   align-items: center;
   gap: 8px;
+  white-space: nowrap;
+}
+
+.helperRow > span:last-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .modeIcon {
@@ -84,13 +139,24 @@
 }
 
 .modeChip {
-  border: 1px solid var(--border);
+  border: 1px solid rgba(125, 220, 255, 0.22);
   border-radius: 999px;
   padding: 1px 8px;
   font-size: 0.78rem;
-  color: var(--text);
-  background: var(--surface-2);
+  color: var(--fg-color-ice-100);
+  background: rgba(8, 26, 44, 0.64);
   white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+.modeChipInteractive {
+  border-color: rgba(125, 239, 171, 0.45);
+  color: #8effbd;
+  background: rgba(20, 45, 37, 0.55);
+}
+
+.modeChipWaiting {
+  opacity: 0.72;
 }
 
 .actionRow {
@@ -106,12 +172,19 @@
 }
 
 .choiceButton {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface-2);
-  color: var(--text);
-  padding: 6px 10px;
+  border: var(--fg-border-icy);
+  border-radius: var(--fg-radius-sm);
+  background: linear-gradient(160deg, rgba(234, 250, 255, 0.06), rgba(8, 26, 44, 0.9));
+  color: var(--fg-color-ice-100);
+  padding: clamp(5px, 0.5vw, 7px) clamp(8px, 0.8vw, 10px);
   cursor: pointer;
+  transition: transform var(--fg-transition-fast), box-shadow var(--fg-transition-fast), border-color var(--fg-transition-fast);
+}
+
+.choiceButton:hover {
+  transform: translateY(-1px);
+  border-color: rgba(125, 220, 255, 0.58);
+  box-shadow: 0 0 14px rgba(22, 217, 255, 0.25);
 }
 
 .choiceButtonSelected {
@@ -121,9 +194,9 @@
 .select {
   width: 100%;
   margin-top: 4px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface-2);
-  color: var(--text);
-  padding: 8px;
+  border: var(--fg-border-icy);
+  border-radius: var(--fg-radius-sm);
+  background: rgba(8, 26, 44, 0.95);
+  color: var(--fg-color-ice-100);
+  padding: clamp(7px, 0.7vw, 9px);
 }

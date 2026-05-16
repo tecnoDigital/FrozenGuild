@@ -1,64 +1,187 @@
-.panel {
+.panel,
+.panelRail {
+  --player-row-min-height: clamp(130px, 15vh, 170px);
+  --player-row-padding-block: clamp(4px, 0.5vw, 6px);
+  --player-row-padding-inline: clamp(8px, 0.8vw, 10px);
+  --player-row-gap: clamp(6px, 0.8vw, 10px);
+  --player-row-shadow: 0 10px 22px rgba(2, 8, 18, 0.4), inset 0 0 12px rgba(125, 220, 255, 0.1);
+
   display: grid;
-  gap: 10px;
+  gap: clamp(5px, 0.6vw, 8px);
+  justify-items: var(--player-row-justify, end);
+}
+
+.panel {
+  --player-row-inline-offset: clamp(0px, 6vw, 100px);
+  --player-row-justify: end;
+  --player-row-margin: auto;
+}
+
+.panelRail {
+  --player-row-inline-offset: 0px;
+  --player-row-justify: stretch;
+  --player-row-margin: 0;
 }
 
 .row {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 10px;
-  background: var(--surface);
+  box-sizing: border-box;
+  inline-size: calc(100% - var(--player-row-inline-offset));
+  min-block-size: var(--player-row-min-height);
+  margin-inline-start: var(--player-row-margin);
+  border: var(--fg-border-icy);
+  border-radius: var(--fg-radius-md);
+  padding: var(--player-row-padding-block) var(--player-row-padding-inline);
+  background: url("/assets/ui/frames/opponent-row-frame.png");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  box-shadow: var(--player-row-shadow);
+  display: flex;
+  align-items: center;
+  gap: var(--player-row-gap);
+}
+
+.rowLocal {
+  border-color: rgba(125, 220, 255, 0.58);
+  box-shadow: 0 12px 24px rgba(2, 8, 18, 0.45), 0 0 16px rgba(22, 217, 255, 0.24), inset 0 0 12px rgba(125, 220, 255, 0.16);
+}
+
+.rowActiveTurn {
+  border-color: rgba(253, 220, 120, 0.72);
+  box-shadow: 0 0 0 1px rgba(125, 239, 171, 0.45), 0 0 20px rgba(115, 220, 255, 0.4), 0 8px 20px rgba(20, 45, 37, 0.3);
+}
+
+.rowIdentity {
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, 0.9vw, 12px);
+  flex-shrink: 0;
+}
+
+.identityInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.identityInfo .name {
+  font-size: clamp(0.88rem, 0.9vw, 1.05rem);
+}
+
+.rowHand {
+  margin-left: auto;
+  min-width: 0;
+}
+
+.rowHand .hand {
+  margin-top: 0;
+}
+
+.avatar {
+  width: clamp(44px, 3.2vw, 58px);
+  height: clamp(44px, 3.2vw, 58px);
+  border-radius: 999px;
+  border: 1px solid rgba(125, 220, 255, 0.42);
+  background: radial-gradient(circle at 20% 20%, rgba(160, 227, 255, 0.5), rgba(8, 30, 51, 0.95));
+  color: var(--fg-color-ice-100);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(0.78rem, 0.85vw, 0.92rem);
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-shadow: 0 1px 2px rgba(2, 8, 18, 0.9);
+  box-shadow: inset 0 0 12px rgba(125, 220, 255, 0.2), 0 0 12px rgba(22, 217, 255, 0.18);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.avatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .rowHeader {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
+}
+
+.identityBlock {
+  display: grid;
+  gap: 4px;
+}
+
+.metaRow {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
 .name {
   margin: 0;
-  font-weight: 700;
+  font-weight: 800;
   display: flex;
   align-items: center;
   gap: 6px;
+  color: var(--fg-color-ice-100);
+  text-shadow: 0 1px 1px rgba(2, 8, 18, 0.95);
+  font-size: clamp(0.98rem, 0.98vw, 1.16rem);
 }
 
 .metaChip {
   border: 1px solid var(--border);
   border-radius: 999px;
   padding: 1px 7px;
-  font-size: 0.72rem;
+  font-size: clamp(0.66rem, 0.58vw, 0.74rem);
   font-weight: 600;
   color: var(--text);
   background: var(--surface-2);
 }
 
 .metaChipActive {
-  border: 1px solid rgba(125, 239, 171, 0.45);
+  border: 1px solid rgba(253, 220, 120, 0.7);
   border-radius: 999px;
-  padding: 1px 7px;
-  font-size: 0.72rem;
+  padding: 1px 9px;
+  font-size: clamp(0.66rem, 0.58vw, 0.74rem);
   font-weight: 700;
-  color: #8effbd;
-  background: rgba(20, 45, 37, 0.55);
+  color: #ffe39f;
+  background: rgba(72, 52, 12, 0.52);
+  box-shadow: 0 0 12px rgba(255, 208, 96, 0.24);
+}
+
+.metaChipMuted {
+  border: 1px solid rgba(125, 220, 255, 0.3);
+  border-radius: 999px;
+  padding: 1px 9px;
+  font-size: clamp(0.62rem, 0.56vw, 0.72rem);
+  font-weight: 600;
+  color: rgba(214, 242, 255, 0.75);
+  background: rgba(10, 27, 44, 0.5);
 }
 
 .hand {
   display: flex;
-  gap: 6px;
-  margin-top: 8px;
-  flex-wrap: wrap;
+  gap: 0;
+  margin-top: 12px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding: 2px 2px 4px;
 }
 
 .compactCard {
-  width: 38px;
-  height: 54px;
-  border: 1px solid var(--border);
+  width: clamp(42px, 3vw, 56px);
+  height: clamp(62px, 4.5vw, 84px);
+  border: 1px solid rgba(125, 220, 255, 0.3);
   border-radius: 8px;
-  background: var(--surface-2);
+  background: linear-gradient(160deg, rgba(234, 250, 255, 0.08), rgba(8, 26, 44, 0.9));
   overflow: hidden;
+  box-shadow: 0 6px 16px rgba(2, 8, 18, 0.46), 0 0 10px rgba(125, 220, 255, 0.12);
+  position: relative;
+  z-index: 1;
 }
 
 .compactCardImg {
@@ -70,23 +193,235 @@
 .compactCardButton {
   appearance: none;
   border: 0;
-  padding: 3px;
+  padding: 2px;
   background: transparent;
   border-radius: 8px;
-  min-width: 44px;
-  min-height: 60px;
+  margin-left: clamp(-18px, -1vw, -10px);
+  min-width: clamp(38px, 2.8vw, 50px);
+  min-height: clamp(64px, 4.8vw, 86px);
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  transition: transform var(--fg-transition-fast);
+  position: relative;
+}
+
+.compactCardButton:first-child {
+  margin-left: 0;
 }
 
 .compactCardButton:disabled {
   cursor: default;
+  opacity: 1;
+}
+
+.compactCardButton.compactCardSelectable:hover {
+  transform: translateY(-4px) scale(1.02);
+}
+
+.compactCardButton.compactCardSelectable:active {
+  transform: translateY(-2px) scale(0.98);
+}
+
+.compactCardButton:focus-visible {
+  outline: 3px solid rgba(124, 238, 255, 0.85);
+  outline-offset: 2px;
+  border-radius: 10px;
 }
 
 .compactCardSelected {
-  outline: 2px solid var(--accent);
+  outline: 2px solid rgba(255, 214, 107, 0.95);
   outline-offset: 1px;
+  box-shadow: 0 0 16px rgba(255, 201, 120, 0.34);
+}
+
+.compactCardSelectable {
+  position: relative;
+  cursor: pointer;
+  outline: 2px solid rgba(124, 238, 255, 0.22);
+  outline-offset: 1px;
+  border-color: rgba(126, 239, 255, 0.78);
+  box-shadow:
+    0 0 0 2px rgba(124, 238, 255, 0.22),
+    0 0 32px rgba(124, 238, 255, 0.28),
+    0 16px 30px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease;
+}
+
+.compactCardSelectable::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.25),
+    transparent
+  );
+  animation: sweep 1.25s linear infinite;
+}
+
+.compactCardButton.compactCardSelected::after {
+  animation: none;
+  background: transparent;
+}
+
+.localHandFrame {
+  position: relative;
+  border: 1px solid rgba(125, 220, 255, 0.44);
+  border-radius: var(--fg-radius-lg);
+  padding: clamp(14px, 1.1vw, 18px) clamp(22px, 2vw, 34px);
+  min-height: 0;
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  background:
+    url("/assets/ui/frames/player-hand-frame.png"),
+    linear-gradient(180deg, #0e2034, #05111f);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  box-shadow: 0 16px 26px rgba(2, 8, 18, 0.42), inset 0 0 16px rgba(125, 220, 255, 0.14);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  align-content: stretch;
+}
+
+.localHandActionBanner {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, -56%);
+  z-index: 3;
+  max-width: min(92%, 720px);
+  padding: clamp(4px, 0.6dvh, 7px) clamp(10px, 1vw, 14px);
+  border-radius: 999px;
+  border: 1px solid rgba(151, 238, 255, 0.64);
+  background: linear-gradient(140deg, rgba(10, 33, 52, 0.94), rgba(7, 19, 33, 0.94));
+  color: #dff8ff;
+  font-size: clamp(0.62rem, 0.68vw, 0.74rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-align: left;
+  text-wrap: balance;
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(6px, 0.8vw, 10px);
+  box-shadow:
+    0 8px 20px rgba(3, 11, 24, 0.48),
+    0 0 0 1px rgba(113, 223, 255, 0.2) inset,
+    0 0 14px rgba(93, 220, 255, 0.2);
+  pointer-events: none;
+}
+
+.localHandActionBannerText {
+  opacity: 0.95;
+}
+
+.localHandActionBannerButton {
+  pointer-events: auto;
+  border: 1px solid rgba(173, 242, 255, 0.62);
+  background: linear-gradient(145deg, rgba(44, 106, 130, 0.92), rgba(21, 62, 84, 0.96));
+  color: #ecfbff;
+  font-size: clamp(0.72rem, 0.8vw, 0.86rem);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  border-radius: 999px;
+  padding: 7px 16px;
+  min-height: 34px;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.localHandActionBannerButton:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.localHandHeader {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.localHandTitle {
+  margin: 0;
+  color: #f2fbff;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  font-size: clamp(0.88rem, 0.95vw, 1.05rem);
+  text-shadow: 0 1px 2px rgba(2, 8, 18, 0.9);
+}
+
+.localHandMeta {
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: clamp(0.72rem, 0.74vw, 0.84rem);
+  color: rgba(224, 244, 255, 0.9);
+}
+
+.handLocal {
+  margin-top: 0;
+  align-items: end;
+  min-height: 0;
+  overflow-x: clip;
+  overflow-y: visible;
+  padding: clamp(4px, 1dvh, 10px) clamp(8px, 1.4vw, 18px) clamp(4px, 0.8dvh, 8px);
+  justify-content: center;
+}
+
+.compactCardLocal {
+  width: clamp(170px, 12vw, 260px);
+  height: clamp(240px, 32dvh, 380px);
+}
+
+.compactCardButtonLocal {
+  margin-left: clamp(-64px, -4.5vw, -44px);
+  min-width: clamp(150px, 10.5vw, 220px);
+  min-height: clamp(244px, 32.3dvh, 384px);
+}
+
+.compactCardButtonLocal:first-child {
+  margin-left: 0;
+}
+
+.scoreBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 214, 120, 0.56);
+  background: linear-gradient(145deg, rgba(95, 64, 9, 0.56), rgba(45, 32, 8, 0.72));
+  color: #ffe9b8;
+  padding: 4px 10px;
+  box-shadow: 0 0 0 1px rgba(255, 226, 148, 0.22), inset 0 0 8px rgba(255, 218, 120, 0.16);
+}
+
+.scoreIcon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
+.scoreValue {
+  font-size: clamp(1rem, 1.2vw, 1.24rem);
+  line-height: 1;
+  font-weight: 800;
+}
+
+.scoreUnit {
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .issue {
@@ -95,30 +430,750 @@
   color: var(--danger);
 }
 
-@media (max-width: 900px) {
-  .panel {
-    gap: 8px;
+/* ── HUD Row Layout (variant=rail) ─────────────────────────────────────────── */
+
+.hudRow {
+  box-sizing: border-box;
+  width: 100%;
+  min-block-size: var(--player-row-min-height);
+  border: var(--fg-border-icy);
+  border-radius: var(--fg-radius-md);
+  padding: 8px 14px;
+  background: url("../../assets/opponet-row-frame .png");
+  background-size: 100% 80%;
+  background-repeat: no-repeat;
+  background-position: center;
+  box-shadow: var(--player-row-shadow);
+  display: grid;
+  grid-template-columns: clamp(96px, 7vw, 116px) 1fr auto;
+  align-items: center;
+  gap: clamp(8px, 0.8vw, 12px);
+}
+
+.hudRowLocal {
+  border-color: rgba(125, 220, 255, 0.58);
+  box-shadow: 0 12px 24px rgba(2, 8, 18, 0.45), 0 0 16px rgba(22, 217, 255, 0.24), inset 0 0 12px rgba(125, 220, 255, 0.16);
+}
+
+.hudRowActiveTurn {
+  border-color: rgba(253, 220, 120, 0.72);
+  box-shadow: 0 0 0 1px rgba(125, 239, 171, 0.45), 0 0 20px rgba(115, 220, 255, 0.4), 0 8px 20px rgba(20, 45, 37, 0.3);
+}
+
+/* Zone 1: Avatar */
+.hudAvatar {
+  width: clamp(92px, 6.6vw, 112px);
+  height: clamp(92px, 6.6vw, 112px);
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid rgba(255, 196, 80, 0.8);
+  box-shadow: 0 0 12px rgba(255, 196, 80, 0.3), inset 0 0 8px rgba(255, 196, 80, 0.1);
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  background: var(--hud-avatar-color, radial-gradient(circle at 20% 20%, rgba(160, 227, 255, 0.3), rgba(8, 30, 51, 0.95)));
+}
+
+.hudAvatarFilled {
+  padding: clamp(4px, 0.5vw, 6px);
+}
+
+.hudAvatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: translateY(7px);
+}
+
+.hudAvatarFallback {
+  font-size: clamp(1.4rem, 1.2vw, 2rem);
+  font-weight: 800;
+  color: #f7d38a;
+  text-shadow: 0 1px 2px rgba(2, 8, 18, 0.9);
+}
+
+/* Zone 2: Info */
+.hudInfo {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+}
+
+.hudName {
+  margin: 0;
+  font-size: clamp(0.9rem, 0.95vw, 1.1rem);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #f7d38a;
+  text-shadow: 0 1px 2px rgba(2, 8, 18, 0.9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hudScore {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: clamp(0.92rem, 1vw, 1.15rem);
+  font-weight: 700;
+  color: #ffd36a;
+}
+
+.hudScoreIcon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.hudIssue {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  color: var(--danger);
+  margin-top: 2px;
+}
+
+/* Zone 3: Cards */
+.hudCards {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 0;
+  padding-right: 2px;
+}
+
+.hudHand {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.hudCard {
+  width: clamp(44px, 3.2vw, 56px);
+  height: clamp(66px, 4.8vw, 84px);
+  border: 1px solid rgba(125, 220, 255, 0.3);
+  border-radius: 8px;
+  background: linear-gradient(160deg, rgba(234, 250, 255, 0.08), rgba(8, 26, 44, 0.9));
+  overflow: hidden;
+  box-shadow: 0 6px 16px rgba(2, 8, 18, 0.46), 0 0 10px rgba(125, 220, 255, 0.12);
+  position: relative;
+  z-index: 1;
+}
+
+.hudCardImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hudCardButton {
+  appearance: none;
+  border: 0;
+  padding: 2px;
+  background: transparent;
+  border-radius: 8px;
+  margin-left: clamp(-14px, -1vw, -10px);
+  min-width: clamp(40px, 2.8vw, 52px);
+  min-height: clamp(62px, 4.6vw, 80px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--fg-transition-fast);
+  transform-origin: bottom center;
+  position: relative;
+}
+
+.hudCardButton:first-child {
+  margin-left: 0;
+}
+
+.hudCardButton:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.hudCardButton.hudCardSelectable:hover {
+  transform: translateY(-4px) scale(1.02);
+}
+
+.hudCardButton.hudCardSelectable:active {
+  transform: translateY(-2px) scale(0.98);
+}
+
+.hudCardButton:focus-visible {
+  outline: 3px solid rgba(124, 238, 255, 0.85);
+  outline-offset: 2px;
+  border-radius: 10px;
+}
+
+.hudCardSelected {
+  outline: 2px solid rgba(255, 214, 107, 0.95);
+  outline-offset: 1px;
+  box-shadow: 0 0 16px rgba(255, 201, 120, 0.34);
+}
+
+.hudCardSelectable {
+  position: relative;
+  cursor: pointer;
+  outline: 2px solid rgba(124, 238, 255, 0.22);
+  outline-offset: 1px;
+  border-color: rgba(126, 239, 255, 0.78);
+  box-shadow:
+    0 0 0 2px rgba(124, 238, 255, 0.22),
+    0 0 32px rgba(124, 238, 255, 0.28),
+    0 16px 30px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease;
+}
+
+.hudCardSelectable::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.25),
+    transparent
+  );
+  animation: sweep 1.25s linear infinite;
+}
+
+.hudCardButton.hudCardSelected::after {
+  animation: none;
+  background: transparent;
+}
+
+/* ── Local Premium Fan Layout ─────────────────────────────────────────────── */
+
+.handLocalFan {
+  position: relative;
+  /* Increased height to prevent clipping on large cards and low viewports */
+  height: clamp(340px, 40dvh, 520px);
+  align-items: flex-end;
+  justify-content: center;
+  overflow: visible;
+  padding: clamp(6px, 1.2dvh, 14px) clamp(8px, 1.4vw, 18px) 0;
+}
+
+.fanCardLocal {
+  position: absolute;
+  bottom: clamp(10px, 1.5dvh, 22px);
+  left: 50%;
+  --card-width: clamp(170px, 12vw, 260px);
+  width: var(--card-width);
+  height: clamp(240px, 32dvh, 380px);
+  transform: translate3d(var(--card-x, 0), var(--card-y, 0), 0);
+  z-index: var(--card-z, 1);
+  margin-left: calc(var(--card-width) / -2);
+  will-change: transform;
+}
+
+.fanCardNew {
+  animation: fanCardAlignIn 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes fanCardAlignIn {
+  0% {
+    opacity: 0;
+    transform: translate3d(calc(var(--card-x, 0) + 90px), calc(var(--card-y, 0) + 74px), 0);
+  }
+  62% {
+    opacity: 1;
+    transform: translate3d(calc(var(--card-x, 0) - 8px), calc(var(--card-y, 0) - 5px), 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(var(--card-x, 0), var(--card-y, 0), 0);
+  }
+}
+
+.fanCardInnerLocal {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform: rotate(var(--card-r, 0deg));
+  transform-origin: 50% 108%;
+  will-change: transform;
+}
+
+.fanCardButtonLocal {
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  border-radius: 8px;
+  width: 100%;
+  height: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--fg-transition-fast);
+  position: relative;
+}
+
+.fanCardButtonLocal:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.fanCardButtonLocal.fanCardButtonLocalSelectable:hover {
+  transform: translateY(-6px) scale(1.03);
+}
+
+.fanCardButtonLocal.fanCardButtonLocalSelectable:active {
+  transform: translateY(-3px) scale(0.98);
+}
+
+.fanCardButtonLocal:focus-visible {
+  outline: 3px solid rgba(124, 238, 255, 0.85);
+  outline-offset: 2px;
+  border-radius: 10px;
+}
+
+.fanCardButtonLocalSelectable .fanCardFaceLocal {
+  cursor: pointer;
+  outline: 2px solid rgba(124, 238, 255, 0.22);
+  outline-offset: 1px;
+  border-color: rgba(126, 239, 255, 0.78);
+  box-shadow:
+    0 0 0 2px rgba(124, 238, 255, 0.22),
+    0 0 32px rgba(124, 238, 255, 0.28),
+    0 16px 30px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease;
+}
+
+.fanCardButtonLocalSelectable .fanCardFaceLocal::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.25),
+    transparent
+  );
+  animation: sweep 1.25s linear infinite;
+}
+
+.fanCardButtonLocalSelected .fanCardFaceLocal::after {
+  animation: none;
+  background: transparent;
+}
+
+.fanCardButtonLocalSelected {
+  outline: 2px solid rgba(255, 214, 107, 0.95);
+  outline-offset: 2px;
+  box-shadow: 0 0 20px rgba(255, 201, 120, 0.38);
+}
+
+.fanCardFaceLocal {
+  width: 100%;
+  height: 100%;
+  border: 1px solid rgba(125, 220, 255, 0.3);
+  border-radius: 8px;
+  background: linear-gradient(160deg, rgba(234, 250, 255, 0.08), rgba(8, 26, 44, 0.9));
+  overflow: hidden;
+  box-shadow: 0 6px 16px rgba(2, 8, 18, 0.46), 0 0 10px rgba(125, 220, 255, 0.12);
+  position: relative;
+  z-index: 1;
+}
+
+.fanCardImgLocal {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.stackLayers {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.stackLayerBack {
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  border: 1px solid rgba(213, 250, 255, 0.46);
+  background: linear-gradient(180deg, rgba(235, 252, 255, 0.9), rgba(105, 186, 215, 0.86));
+  box-shadow: 0 18px 30px rgba(0, 0, 0, 0.28), 0 0 14px rgba(125, 220, 255, 0.16);
+  transform: translate3d(12px, -14px, 0) rotate(4deg);
+  opacity: 0.56;
+}
+
+.stackLayerMid {
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  border: 1px solid rgba(213, 250, 255, 0.55);
+  background: linear-gradient(180deg, rgba(235, 252, 255, 0.94), rgba(120, 196, 225, 0.9));
+  box-shadow: 0 13px 22px rgba(0, 0, 0, 0.22), 0 0 10px rgba(125, 220, 255, 0.12);
+  transform: translate3d(7px, -8px, 0) rotate(2.1deg);
+  opacity: 0.8;
+}
+
+.stackCount {
+  position: absolute;
+  top: 50%;
+  left: -14px;
+  transform: translateY(-50%);
+  z-index: 9;
+  min-width: 40px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  color: #1a1200;
+  font-size: 14px;
+  font-weight: 1000;
+  letter-spacing: -0.02em;
+  background: radial-gradient(circle at 35% 22%, #ffffff, #fff7d9 30%, #ffd870 60%, #f3ab2f 100%);
+  border: 2px solid rgba(255, 233, 160, 0.95);
+  box-shadow:
+    0 6px 14px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(42, 25, 4, 0.35) inset,
+    0 0 18px rgba(255, 193, 77, 0.35);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+  pointer-events: none;
+}
+
+.hudStackCount {
+  position: absolute;
+  top: 50%;
+  left: -12px;
+  transform: translateY(-50%);
+  z-index: 8;
+  min-width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  color: #1a1200;
+  font-size: 11px;
+  font-weight: 1000;
+  letter-spacing: -0.02em;
+  background: radial-gradient(circle at 35% 22%, #ffffff, #fff7d9 30%, #ffd870 60%, #f3ab2f 100%);
+  border: 2px solid rgba(255, 233, 160, 0.95);
+  box-shadow:
+    0 6px 14px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(42, 25, 4, 0.35) inset,
+    0 0 18px rgba(255, 193, 77, 0.35);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+  pointer-events: none;
+}
+
+.compactStackCount {
+  position: absolute;
+  top: 50%;
+  left: -12px;
+  transform: translateY(-50%);
+  z-index: 8;
+  min-width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  color: #1a1200;
+  font-size: 11px;
+  font-weight: 1000;
+  letter-spacing: -0.02em;
+  background: radial-gradient(circle at 35% 22%, #ffffff, #fff7d9 30%, #ffd870 60%, #f3ab2f 100%);
+  border: 2px solid rgba(255, 233, 160, 0.95);
+  box-shadow:
+    0 6px 14px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(42, 25, 4, 0.35) inset,
+    0 0 18px rgba(255, 193, 77, 0.35);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+  pointer-events: none;
+}
+
+@keyframes sweep {
+  from {
+    transform: translateX(-130%) skewX(-16deg);
+  }
+  to {
+    transform: translateX(130%) skewX(-16deg);
+  }
+}
+
+@media (max-height: 800px) and (min-width: 900px) {
+  .panel,
+  .panelRail {
+    --player-row-min-height: clamp(110px, 16vh, 145px);
   }
 
-  .row {
-    padding: 8px;
+  .hand {
+    margin-top: 6px;
+    gap: 4px;
   }
 
   .rowHeader {
     gap: 6px;
   }
 
-  .name {
-    font-size: 0.95rem;
+  .compactCard {
+    width: clamp(38px, 2.6vw, 50px);
+    height: clamp(56px, 4vw, 76px);
+  }
+
+  .compactCardButton {
+    min-width: clamp(34px, 2.4vw, 46px);
+    min-height: clamp(58px, 4.2vw, 78px);
+    margin-left: clamp(-14px, -0.8vw, -8px);
+  }
+
+  .localHandFrame {
+    padding-block: clamp(8px, 1dvh, 12px);
+    padding-inline: clamp(18px, 1.6vw, 26px);
+  }
+
+  .compactCardLocal {
+    width: clamp(130px, 9vw, 195px);
+    height: clamp(185px, 24dvh, 275px);
+  }
+
+  .compactCardButtonLocal {
+    min-width: clamp(115px, 7.8vw, 165px);
+    min-height: clamp(188px, 24.3dvh, 279px);
+    margin-left: clamp(-50px, -3.2vw, -34px);
+  }
+
+  .handLocalFan {
+    height: clamp(260px, 32dvh, 360px);
+  }
+
+  .fanCardLocal {
+    bottom: clamp(6px, 1dvh, 14px);
+    --card-width: clamp(130px, 9vw, 195px);
+    width: var(--card-width);
+    height: clamp(185px, 24dvh, 275px);
+    margin-left: calc(var(--card-width) / -2);
+  }
+
+  .fanCardButtonLocal {
+    min-height: clamp(185px, 24dvh, 275px);
+  }
+
+  .hudRow {
+    padding: 6px 10px;
+    gap: 8px;
+    grid-template-columns: clamp(82px, 6vw, 98px) 1fr auto;
+  }
+
+  .hudAvatar {
+    width: clamp(78px, 5.6vw, 94px);
+    height: clamp(78px, 5.6vw, 94px);
+  }
+
+  .hudName {
+    font-size: 0.86rem;
+  }
+
+  .hudScore {
+    font-size: 0.88rem;
+  }
+
+  .hudCard {
+    width: clamp(38px, 2.8vw, 48px);
+    height: clamp(56px, 4.2vw, 72px);
+  }
+
+  .hudCardButton {
+    min-width: clamp(34px, 2.4vw, 44px);
+    min-height: clamp(54px, 4vw, 70px);
+    margin-left: clamp(-12px, -0.9vw, -8px);
+  }
+}
+
+@media (max-width: 900px) {
+  .panel,
+  .panelRail {
+    --player-row-inline-offset: 0px;
+    --player-row-min-height: clamp(115px, 24vw, 155px);
+    --player-row-padding-block: 6px;
+    --player-row-padding-inline: 6px;
+    --player-row-gap: 6px;
+
+    gap: 6px;
+  }
+
+  .row {
+    inline-size: 100%;
+  }
+
+  .rowIdentity {
+    gap: 6px;
+  }
+
+  .avatar {
+    width: 42px;
+    height: 42px;
+  }
+
+  .identityInfo .name {
+    font-size: 0.82rem;
   }
 
   .hand {
-    gap: 8px;
+    gap: 0;
     margin-top: 6px;
   }
 
   .compactCard {
-    width: 34px;
-    height: 48px;
+    width: 40px;
+    height: 58px;
+  }
+
+  .compactCardButton {
+    margin-left: -10px;
+    min-width: 36px;
+    min-height: 60px;
+  }
+
+  .localHandFrame {
+    min-height: 200px;
+    padding: 12px;
+  }
+
+  /* Allow child hand strip to own horizontal overflow/scroll on small screens. */
+  .handLocal {
+    overflow-x: visible;
+  }
+
+  .compactCardLocal {
+    width: clamp(130px, 26vw, 190px);
+    height: clamp(185px, 38vw, 270px);
+  }
+
+  .compactCardButtonLocal {
+    margin-left: clamp(-40px, -7vw, -24px);
+    min-width: clamp(118px, 24vw, 172px);
+    min-height: clamp(188px, 38.3dvh, 274px);
+  }
+
+  .handLocalFan {
+    position: relative;
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: visible;
+    /* Portrait-safe: avoid over-relying on vw (too small on narrow devices). */
+    height: clamp(220px, 30dvh, 310px);
+    align-items: flex-end;
+    padding-bottom: clamp(4px, 0.8dvh, 8px);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .fanCardLocal {
+    position: relative;
+    left: auto;
+    bottom: auto;
+    transform: none;
+    --card-width: clamp(130px, 26vw, 190px);
+    width: var(--card-width);
+    height: auto;
+    aspect-ratio: 2 / 3;
+    margin-left: clamp(-48px, -8.5vw, -28px);
+  }
+
+  .fanCardLocal:first-child {
+    margin-left: 0;
+  }
+
+  .fanCardInnerLocal {
+    transform: none;
+  }
+
+  .fanCardButtonLocal {
+    min-height: auto;
+  }
+
+  .stackCount {
+    top: 50%;
+    left: -10px;
+    transform: translateY(-50%);
+    min-width: 32px;
+    height: 26px;
+    font-size: 12px;
+  }
+
+  .stackLayerBack {
+    transform: translate3d(6px, -8px, 0) rotate(2.5deg);
+  }
+
+  .stackLayerMid {
+    transform: translate3d(4px, -5px, 0) rotate(1.4deg);
+  }
+
+  .hudRow {
+    grid-template-columns: clamp(60px, 14vw, 76px) 1fr auto;
+    padding: 6px 10px;
+    gap: 6px;
+  }
+
+  .hudAvatar {
+    width: clamp(56px, 12vw, 72px);
+    height: clamp(56px, 12vw, 72px);
+  }
+
+  .hudName {
+    font-size: 0.8rem;
+  }
+
+  .hudScore {
+    font-size: 0.84rem;
+  }
+
+  .hudScoreIcon {
+    width: 14px;
+    height: 14px;
+  }
+
+  .hudCard {
+    width: clamp(36px, 8vw, 48px);
+    height: clamp(54px, 12vw, 72px);
+  }
+
+  .hudCardButton {
+    min-width: clamp(32px, 7vw, 44px);
+    min-height: clamp(52px, 11vw, 70px);
+    margin-left: clamp(-10px, -2vw, -8px);
+  }
+}
+
+@media (orientation: portrait) and (max-width: 900px) {
+  .handLocalFan {
+    height: clamp(240px, 34dvh, 330px);
+    padding-inline: clamp(6px, 2.5vw, 14px);
+  }
+
+  .fanCardLocal {
+    --card-width: clamp(136px, 34vw, 198px);
+    margin-left: clamp(-42px, -7.8vw, -24px);
+  }
+
+  .fanCardButtonLocal {
+    min-height: 100%;
   }
 }

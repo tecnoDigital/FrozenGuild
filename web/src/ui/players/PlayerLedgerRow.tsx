@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { CompactHand } from "./CompactHand.js";
 import { ConnectionIssueBadge } from "./ConnectionIssueBadge.js";
 import { DisconnectCountdown } from "./DisconnectCountdown.js";
@@ -10,6 +11,8 @@ type PlayerLedgerRowProps = {
   score: number;
   cardCount: number;
   cardIDs: string[];
+  avatarSrc?: string;
+  avatarColorValue?: string | undefined;
   isActiveTurn?: boolean;
   isLocalPlayer?: boolean;
   status?: "reconnecting" | "absent";
@@ -17,6 +20,8 @@ type PlayerLedgerRowProps = {
   clickableCardIndexes?: number[];
   selectedCardIndexes?: number[];
   onCardClick?: (playerID: string, index: number) => void;
+  layout?: "default" | "hud";
+  isLeader?: boolean;
 };
 
 export function PlayerLedgerRow({
@@ -25,35 +30,115 @@ export function PlayerLedgerRow({
   score,
   cardCount,
   cardIDs,
+  avatarSrc,
+  avatarColorValue,
   isActiveTurn = false,
   isLocalPlayer = false,
   status,
   disconnectSeconds = null,
   clickableCardIndexes = [],
   selectedCardIndexes = [],
-  onCardClick
+  onCardClick,
+  layout = "default",
+  isLeader = false
 }: PlayerLedgerRowProps) {
+  const avatarFallback = name.trim().charAt(0).toUpperCase() || "?";
+  const isHud = layout === "hud";
+
+  const rowClass = isHud
+    ? `${styles.hudRow} ${isLocalPlayer ? styles.hudRowLocal : ""} ${isActiveTurn ? styles.hudRowActiveTurn : ""}`
+    : `${styles.row} ${isLocalPlayer ? styles.rowLocal : ""} ${isActiveTurn ? styles.rowActiveTurn : ""}`;
+
   return (
-    <article className={styles.row}>
-      <div className={styles.rowHeader}>
-        <p className={styles.name}>
-          {name}
-          {isLocalPlayer ? <span className={styles.metaChip}>Tu</span> : null}
-          {isActiveTurn ? <span className={styles.metaChipActive}>Turno</span> : null}
-        </p>
-        <ScoreBadge score={score} />
-      </div>
-      <CompactHand
-        cardIDs={cardIDs.slice(0, Math.max(1, cardCount))}
-        clickableIndexes={clickableCardIndexes}
-        selectedIndexes={selectedCardIndexes}
-        {...(onCardClick ? { onCardClick: (index: number) => onCardClick(id, index) } : {})}
-      />
-      {status ? (
-        <p className={styles.issue}>
-          <ConnectionIssueBadge status={status} /> {status === "reconnecting" && disconnectSeconds !== null ? <DisconnectCountdown seconds={disconnectSeconds} /> : null}
-        </p>
-      ) : null}
-    </article>
+    <motion.article
+      className={rowClass}
+      data-active-turn={isActiveTurn ? "true" : "false"}
+      data-player-ledger-row="true"
+      initial={false}
+      animate={{ scale: isActiveTurn ? 1.01 : 1, y: isActiveTurn ? -1 : 0 }}
+      transition={{ duration: 0.18, ease: "easeOut" }}
+    >
+      {isHud ? (
+        <>
+          {/* Zone 1: Avatar */}
+          <div className={styles.hudAvatarWrap}>
+            <div
+              className={`${styles.hudAvatar} ${avatarColorValue && avatarSrc ? styles.hudAvatarFilled : ""} ${isActiveTurn ? styles.hudAvatarActiveTurn : ""}`}
+              aria-label={`Avatar de ${name}`}
+              data-avatar-fallback={avatarSrc ? "false" : "true"}
+              style={avatarColorValue ? ({ "--hud-avatar-color": avatarColorValue } as React.CSSProperties) : undefined}
+            >
+              {avatarSrc ? (
+                <img src={avatarSrc} alt="" className={styles.hudAvatarImg} />
+              ) : (
+                <span className={styles.hudAvatarFallback}>{avatarFallback}</span>
+              )}
+            </div>
+            {isLeader ? (
+              <span className={styles.hudLeaderCrown} aria-label="Lider actual" title="Lider actual">
+                <img src="/assets/ui/icons/crown.svg" alt="" className={styles.hudLeaderCrownIcon} />
+              </span>
+            ) : null}
+            <p className={styles.hudAvatarName}>{name}</p>
+          </div>
+
+          {/* Zone 2: Info */}
+          <div className={styles.hudInfo}>
+            <div className={styles.hudScore}>
+              <img
+                src="/assets/ui/icons/fish.png"
+                alt=""
+                className={styles.hudScoreIcon}
+              />
+              <span>{score}</span>
+            </div>
+            {status ? (
+              <div className={styles.hudIssue}>
+                <ConnectionIssueBadge status={status} />
+                {status === "reconnecting" && disconnectSeconds !== null ? (
+                  <DisconnectCountdown seconds={disconnectSeconds} />
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+
+          {/* Zone 3: Cards */}
+          <div className={styles.hudCards}>
+            <CompactHand
+              cardIDs={cardIDs.slice(0, Math.max(1, cardCount))}
+              clickableIndexes={clickableCardIndexes}
+              selectedIndexes={selectedCardIndexes}
+              size="hud"
+              {...(onCardClick ? { onCardClick: (index: number) => onCardClick(id, index) } : {})}
+            />
+          </div>
+        </>
+      ) : (
+        <>
+          <div className={styles.rowIdentity}>
+            <div className={styles.avatar} aria-label={`Avatar de ${name}`} data-avatar-fallback={avatarSrc ? "false" : "true"}>
+              {avatarSrc ? <img src={avatarSrc} alt="" className={styles.avatarImg} /> : <span>{avatarFallback}</span>}
+            </div>
+            <div className={styles.identityInfo}>
+              <p className={styles.name}>{name}</p>
+              <ScoreBadge score={score} />
+            </div>
+          </div>
+          <div className={styles.rowHand}>
+            <CompactHand
+              cardIDs={cardIDs.slice(0, Math.max(1, cardCount))}
+              clickableIndexes={clickableCardIndexes}
+              selectedIndexes={selectedCardIndexes}
+              {...(onCardClick ? { onCardClick: (index: number) => onCardClick(id, index) } : {})}
+            />
+          </div>
+          {status ? (
+            <p className={styles.issue}>
+              <ConnectionIssueBadge status={status} /> {status === "reconnecting" && disconnectSeconds !== null ? <DisconnectCountdown seconds={disconnectSeconds} /> : null}
+            </p>
+          ) : null}
+        </>
+      )}
+    </motion.article>
   );
 }

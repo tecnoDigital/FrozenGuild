@@ -1,0 +1,22 @@
+.panel {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.75rem;
+  border-radius: var(--fg-radius-lg);
+  border: var(--fg-border-icy-strong);
+  background: var(--fg-bg-panel-soft);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--fg-font-family-display);
+  color: var(--fg-color-ice-100);
+  font-size: var(--fg-font-size-sm);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.list {
+  display: grid;
+  gap: 0.45rem;
+}

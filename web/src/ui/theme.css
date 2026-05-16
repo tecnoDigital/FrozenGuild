@@ -1,0 +1,79 @@
+:root {
+  --fg-color-ice-100: #eafaff;
+  --fg-color-ice-200: #c9f2ff;
+  --fg-color-ice-300: #7ddcff;
+  --fg-color-cyan-glow: #16d9ff;
+  --fg-color-frost: #a8ebff;
+  --fg-color-gold: #f5b84b;
+  --fg-color-danger: #ff4b6a;
+  --fg-color-success: #32e68a;
+  --fg-color-purple: #9b5cff;
+
+  --fg-bg-deep-900: #020812;
+  --fg-bg-deep-800: #061423;
+  --fg-bg-deep-700: #0b1f33;
+  --fg-bg-panel: rgba(5, 18, 32, 0.86);
+  --fg-bg-panel-soft: rgba(10, 34, 54, 0.72);
+  --fg-bg-panel-strong: rgba(8, 26, 44, 0.94);
+
+  --fg-border-icy: 1px solid rgba(125, 220, 255, 0.35);
+  --fg-border-icy-strong: 1px solid rgba(125, 220, 255, 0.55);
+
+  --fg-radius-sm: 8px;
+  --fg-radius-md: 14px;
+  --fg-radius-lg: 22px;
+  --fg-radius-xl: 32px;
+  --fg-radius-pill: 999px;
+
+  --fg-shadow-glow-sm: 0 0 12px rgba(22, 217, 255, 0.24);
+  --fg-shadow-glow-md: 0 0 24px rgba(22, 217, 255, 0.32);
+  --fg-shadow-glow-lg: 0 0 36px rgba(22, 217, 255, 0.42);
+  --fg-shadow-inner-frost: inset 0 0 14px rgba(125, 220, 255, 0.16);
+  --fg-shadow-panel:
+    0 16px 38px rgba(2, 8, 18, 0.55),
+    0 0 24px rgba(22, 217, 255, 0.22),
+    inset 0 0 18px rgba(125, 220, 255, 0.12);
+  --fg-shadow-card:
+    0 8px 22px rgba(2, 8, 18, 0.45),
+    0 0 18px rgba(125, 220, 255, 0.45);
+  --fg-shadow-premium-stack:
+    0 22px 52px rgba(0, 0, 0, 0.5),
+    0 0 28px rgba(22, 217, 255, 0.3),
+    inset 0 1px 0 rgba(234, 250, 255, 0.2),
+    inset 0 -10px 20px rgba(2, 8, 18, 0.3);
+
+  --fg-backdrop-blur-sm: blur(6px);
+  --fg-backdrop-blur-md: blur(10px);
+  --fg-backdrop-blur-lg: blur(16px);
+  --fg-backdrop-filter-premium: saturate(130%) blur(12px);
+
+  --fg-icy-border-soft: linear-gradient(145deg, rgba(234, 250, 255, 0.35), rgba(125, 220, 255, 0.08));
+  --fg-cold-cyan-glow: 0 0 18px rgba(22, 217, 255, 0.45);
+  --fg-inner-shadow-cold: inset 0 0 18px rgba(125, 220, 255, 0.15), inset 0 -8px 12px rgba(2, 8, 18, 0.2);
+
+  --fg-z-base: 1;
+  --fg-z-board: 10;
+  --fg-z-panel: 20;
+  --fg-z-overlay: 40;
+  --fg-z-modal: 60;
+  --fg-z-toast: 80;
+
+  --fg-font-family-display: "Cinzel", "Trajan Pro", "Times New Roman", serif;
+  --fg-font-family-ui: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --fg-font-size-2xs: 0.6875rem;
+  --fg-font-size-xs: 0.75rem;
+  --fg-font-size-sm: 0.875rem;
+  --fg-font-size-md: 1rem;
+  --fg-font-size-lg: 1.125rem;
+  --fg-font-size-xl: 1.375rem;
+  --fg-font-size-2xl: 1.75rem;
+  --fg-font-size-3xl: 2.25rem;
+
+  --fg-line-height-tight: 1.1;
+  --fg-line-height-base: 1.4;
+  --fg-line-height-relaxed: 1.6;
+
+  --fg-transition-fast: 120ms ease-out;
+  --fg-transition-normal: 220ms ease-out;
+  --fg-transition-slow: 420ms ease-out;
+}

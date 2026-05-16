@@ -1,0 +1,29 @@
+.panel {
+  padding: 0.75rem 0.85rem;
+  border-radius: var(--fg-radius-md);
+  border: var(--fg-border-icy);
+  background: var(--fg-bg-panel-strong);
+}
+
+.label,
+.player,
+.turn {
+  margin: 0;
+}
+
+.label {
+  color: var(--fg-color-frost);
+  font-size: var(--fg-font-size-xs);
+  text-transform: uppercase;
+}
+
+.player {
+  color: var(--fg-color-ice-100);
+  font-size: var(--fg-font-size-md);
+  font-weight: 700;
+}
+
+.turn {
+  color: var(--fg-color-ice-200);
+  font-size: var(--fg-font-size-sm);
+}

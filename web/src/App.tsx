@@ -1,12 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import { getCardById } from "../../shared/game/cards.js";
-import { calculateFinalScores } from "../../shared/game/scoring.js";
 import { createFrozenGuildClient } from "./boardgame/client.js";
 import { useSocketStatus } from "./hooks/useSocketStatus.js";
 import { useFrozenGuildClient } from "./hooks/useFrozenGuildClient.js";
 import { GameScreen } from "./ui/screens/GameScreen.js";
 import { LobbyScreen } from "./ui/screens/LobbyScreen.js";
-import type { FrozenGuildState, SwapLocation } from "../../shared/game/types.js";
+import type { FinalResults, FrozenGuildState, SwapLocation } from "../../shared/game/types.js";
+import {
+  selectLobbyAvatar,
+  selectLobbyColor,
+  selectLobbyName,
+  useLobbyProfileStore
+} from "./features/lobby/lobbyStore.js";
 
 type LobbySession = {
   matchID: string;
@@ -47,14 +52,22 @@ type AvailableLobbyMatch = {
 function mapAvailableLobbyMatches(payload: MatchListResponse): AvailableLobbyMatch[] {
   return payload.matches
     .map((match) => {
-      const totalPlayers = Math.max(1, Math.min(4, Number(match.setupData?.numPlayers ?? 4)));
-      const allSeats = Array.from({ length: totalPlayers }, (_, index) => String(index));
-
       const rawPlayers = Array.isArray(match.players)
         ? match.players
         : match.players
           ? Object.values(match.players)
           : [];
+
+      const inferredMaxSeat = rawPlayers
+        .map((player) => (player.id !== undefined && player.id !== null ? Number(player.id) : NaN))
+        .filter((id) => Number.isInteger(id) && id >= 0)
+        .reduce((max, id) => Math.max(max, id), -1);
+
+      const setupPlayers = Number(match.setupData?.numPlayers);
+      const setupPlayersSafe = Number.isInteger(setupPlayers) ? setupPlayers : null;
+      const inferredPlayers = Math.max(2, inferredMaxSeat + 1);
+      const totalPlayers = Math.max(2, Math.min(4, setupPlayersSafe ?? inferredPlayers));
+      const allSeats = Array.from({ length: totalPlayers }, (_, index) => String(index));
 
       const occupiedPlayers = rawPlayers
         .map((player) => ({
@@ -136,6 +149,11 @@ function isSpyTurn(G: FrozenGuildState): boolean {
 }
 
 function isSwapTurn(G: FrozenGuildState): boolean {
+  const players = Object.values(G.players);
+  if (players.length === 2 && players.some((player) => player.zone.length === 0)) {
+    return false;
+  }
+
   return G.dice.rolled && (G.dice.value === 5 || (G.dice.value === 6 && G.turn.padrinoAction === 5));
 }
 
@@ -172,7 +190,6 @@ function sameSwapLocation(a: SwapLocation | null, b: SwapLocation): boolean {
 }
 
 export function App() {
-  const [playerName, setPlayerName] = useState("Jugador");
   const [numPlayers, setNumPlayers] = useState(2);
   const [selectedBotPlayerIDs, setSelectedBotPlayerIDs] = useState<string[]>([]);
   const [botPulseNow, setBotPulseNow] = useState(() => Date.now());
@@ -200,6 +217,12 @@ export function App() {
     "1": 0
   });
   const { client, gameState } = useFrozenGuildClient({ serverUrl: SERVER_URL, session });
+  const playerName = useLobbyProfileStore(selectLobbyName);
+  const selectedAvatarID = useLobbyProfileStore(selectLobbyAvatar);
+  const selectedColorID = useLobbyProfileStore(selectLobbyColor);
+  const setLobbyName = useLobbyProfileStore((state) => state.setName);
+  const setLobbyAvatar = useLobbyProfileStore((state) => state.setAvatar);
+  const setLobbyColor = useLobbyProfileStore((state) => state.setColor);
 
   const adminClient0 = useMemo(() => {
     if (!adminSession) {
@@ -457,6 +480,36 @@ export function App() {
     };
   }, [session]);
 
+  useEffect(() => {
+    if (!client || !session || !gameState) {
+      return;
+    }
+
+    if (!gameState.G?.players) {
+      return;
+    }
+
+    const isMyTurn = gameState.currentPlayer === session.playerID;
+    if (!isMyTurn) {
+      return;
+    }
+
+    const currentPlayerProfile = gameState.G.players[session.playerID];
+    if (
+      currentPlayerProfile?.name === session.playerName &&
+      currentPlayerProfile.avatarId === selectedAvatarID &&
+      currentPlayerProfile.colorId === selectedColorID
+    ) {
+      return;
+    }
+
+    client.moves?.setPlayerProfile?.({
+      nickname: session.playerName,
+      avatarId: selectedAvatarID,
+      colorId: selectedColorID
+    });
+  }, [client, gameState, selectedAvatarID, selectedColorID, session]);
+
   function selectJoinMatch(matchID: string) {
     setSelectedJoinMatchID(matchID);
   }
@@ -675,13 +728,17 @@ export function App() {
       <>
         <LobbyScreen
           playerName={playerName}
+          avatarID={selectedAvatarID}
+          colorID={selectedColorID}
           numPlayers={numPlayers}
           selectedBotPlayerIDs={selectedBotPlayerIDs}
           players={lobbyPlayersPreview}
           availableMatches={matches}
           selectedJoinMatchID={selectedJoinMatchID}
           busy={isBusy}
-          onPlayerNameChange={setPlayerName}
+          onPlayerNameChange={setLobbyName}
+          onAvatarChange={setLobbyAvatar}
+          onColorChange={setLobbyColor}
           onNumPlayersChange={setNumPlayers}
           onToggleBotPlayerID={toggleBotPlayerID}
           onSelectJoinMatchID={selectJoinMatch}
@@ -719,18 +776,58 @@ export function App() {
   }
 
   if (import.meta.env.VITE_PREMIUM_GAME_UI !== "0") {
+    const isGameOver = !!gameState.gameover;
+    const finalResults =
+      (gameState.gameover as { finalResults?: FinalResults } | undefined)?.finalResults ?? null;
+
     return (
       <GameScreen
-        onRollDice={() => client?.moves?.rollDice?.()}
-        onFishFromIce={(slot) => client?.moves?.fishFromIce?.(slot)}
-        onChoosePadrinoAction={(action) => client?.moves?.choosePadrinoAction?.(action)}
-        onEndTurn={() => client?.moves?.endTurn?.()}
-        onSwapCards={(source, target) => client?.moves?.swapCards?.(source, target)}
-        onResolveOrca={(targetCardID) => client?.moves?.resolveOrcaDestroy?.(targetCardID)}
-        onResolveSealBomb={(targetCardIDs) => client?.moves?.resolveSealBombExplosion?.(targetCardIDs)}
-        onSpyOnIce={(slots) => client?.moves?.spyOnIce?.(slots)}
-        onSpyGiveCard={(slot, targetPlayerID) => client?.moves?.spyGiveCard?.(slot, targetPlayerID)}
-        onCompleteSpy={() => client?.moves?.completeSpy?.()}
+        finalResults={finalResults}
+        gameOver={isGameOver}
+        onReturnToLobby={leaveMatch}
+        onRollDice={() => {
+          if (isGameOver) return;
+          client?.moves?.rollDice?.();
+        }}
+onFishFromIce={(slot) => {
+          if (isGameOver) {
+            console.log("[UI:BLOCKED] fishFromIce called after gameover", { slot, gameover: gameState.gameover });
+            return;
+          }
+          client?.moves?.fishFromIce?.(slot);
+        }}
+        onChoosePadrinoAction={(action) => {
+          if (isGameOver) return;
+          client?.moves?.choosePadrinoAction?.(action);
+        }}
+        onEndTurn={() => {
+          if (isGameOver) return;
+          client?.moves?.endTurn?.();
+        }}
+        onSwapCards={(source, target) => {
+          if (isGameOver) return;
+          client?.moves?.swapCards?.(source, target);
+        }}
+        onResolveOrca={(targetCardID) => {
+          if (isGameOver) return;
+          client?.moves?.resolveOrcaDestroy?.(targetCardID);
+        }}
+        onResolveSealBomb={(targetCardIDs) => {
+          if (isGameOver) return;
+          client?.moves?.resolveSealBombExplosion?.(targetCardIDs);
+        }}
+        onSpyOnIce={(slots) => {
+          if (isGameOver) return;
+          client?.moves?.spyOnIce?.(slots);
+        }}
+        onSpyGiveCard={(slot, targetPlayerID) => {
+          if (isGameOver) return;
+          client?.moves?.spyGiveCard?.(slot, targetPlayerID);
+        }}
+        onCompleteSpy={() => {
+          if (isGameOver) return;
+          client?.moves?.completeSpy?.();
+        }}
       />
     );
   }
@@ -752,7 +849,7 @@ export function App() {
             id="player-name"
             className="select-control"
             value={playerName}
-            onChange={(event) => setPlayerName(event.target.value)}
+            onChange={(event) => setLobbyName(event.target.value)}
             placeholder="Jugador"
           />
 
@@ -1198,7 +1295,7 @@ export function App() {
                 return (
                   <button
                     key={`${slot}-${cardId ?? "empty"}`}
-                    className={`ice-slot ${cardId ? "" : "ice-slot--empty"} ${(canInteract || isSelectedForSpy || isSelectedSpyGiftSlot) ? "ice-slot--clickable" : ""} ${(isSelectedForSpy || isSelectedSpyGiftSlot) ? "card-choice--selected" : ""}`}
+                    className={`ice-slot ${cardId ? "" : "ice-slot--empty"} ${canInteract ? "ice-slot--selectable" : ""} ${(isSelectedForSpy || isSelectedSpyGiftSlot) ? "card-choice--selected" : ""}`}
                     disabled={!canInteract}
                     onClick={() => {
                       if (canFish) {
@@ -1217,8 +1314,10 @@ export function App() {
                       }
                     }}
                   >
-                    <span className="slot-index">Slot {slot + 1}</span>
-                    <strong>{formatCard(cardId)}</strong>
+                    <div className="slot-body">
+                      <span className="slot-index">Slot {slot + 1}</span>
+                      <strong>{formatCard(cardId)}</strong>
+                    </div>
                   </button>
                 );
               })}
@@ -1271,7 +1370,7 @@ export function App() {
                       return (
                         <button
                           key={cardId}
-                          className={`mini-card ${canSelectSwapCard || isSelectedForSwap ? "ice-slot--clickable" : ""} ${isSelectedForSwap ? "card-choice--selected" : ""}`}
+                          className={`mini-card ${canSelectSwapCard ? "mini-card--selectable" : ""} ${isSelectedForSwap ? "card-choice--selected" : ""}`}
                           disabled={!canSelectSwapCard}
                           onClick={() => {
                             if (canSelectSwapCard) {
@@ -1279,8 +1378,10 @@ export function App() {
                             }
                           }}
                         >
-                          <strong>{formatCard(cardId)}</strong>
-                          <span className="slot-id">{cardId}</span>
+                          <div className="mini-card-body">
+                            <strong>{formatCard(cardId)}</strong>
+                            <span className="slot-id">{cardId}</span>
+                          </div>
                         </button>
                       );
                     })}
@@ -1295,13 +1396,13 @@ export function App() {
             <div className="subpanel">
               <h3>Resultado final</h3>
               <div className="scoreboard-grid">
-                {Object.values(calculateFinalScores(gameState.G.players)).map((score) => (
+                {(((gameState.gameover as { finalResults?: FinalResults } | undefined)?.finalResults?.players ?? [])).map((score) => (
                   <article key={score.playerID} className="score-card">
                     <div className="score-card__header">
-                      <h4>Jugador {score.playerID}</h4>
+                      <h4>{score.nickname}</h4>
                       <div className="score-total">
-                        <span>Total</span>
-                        <strong>{score.total}</strong>
+                        <span>Peces</span>
+                        <strong>{score.fishes}</strong>
                       </div>
                     </div>
                   </article>

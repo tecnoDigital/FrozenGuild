@@ -1,5 +1,6 @@
 import { createDeck, drawCard, shuffleDeck } from "./deck.js";
 import { getCardById } from "./cards.js";
+import { playerColorCycle } from "./playerColors.js";
 import type {
   CardId,
   FrozenGuildState,
@@ -31,13 +32,16 @@ function createPlayers(
 ): Record<PlayerID, PlayerState> {
   const players: Record<PlayerID, PlayerState> = {};
   const botIds = new Set(setupData?.botPlayerIDs ?? []);
+  const avatarCycle = ["penguin1", "penguin2", "penguin3", "walrus"] as const;
 
-for (let index = 0; index < playerCount; index += 1) {
+  for (let index = 0; index < playerCount; index += 1) {
     const playerID = String(index);
     const isBot = botIds.has(playerID);
     const playerName = isBot ? `BOT ${playerID}` : `Player ${index + 1}`;
     players[playerID] = {
       name: playerName,
+      avatarId: avatarCycle[index % avatarCycle.length] ?? "penguin1",
+      colorId: playerColorCycle[index % playerColorCycle.length] ?? "ice",
       zone: [],
       hasBombAtStart: false,
       hasBombAtEnd: false,

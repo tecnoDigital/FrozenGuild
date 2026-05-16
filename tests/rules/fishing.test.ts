@@ -77,8 +77,12 @@ describe("fishing move", () => {
     const G = createInitialState(2, () => 0.3);
     const ctx = makeCtx("0");
     let gameOverPayload: unknown;
+    let endTurnCalls = 0;
 
     G.deck = [];
+    for (let i = 1; i < G.iceGrid.length; i++) {
+      G.iceGrid[i] = null;
+    }
 
     rollDice({ G, ctx, playerID: "0", random: { D6: () => 3 } });
     const result = fishFromIce(
@@ -97,7 +101,84 @@ describe("fishing move", () => {
 
     expect(result).toBeUndefined();
     expect(G.iceGrid[0]).toBeNull();
-    expect(gameOverPayload).toMatchObject({ reason: "ICE_CANNOT_REFILL" });
-    expect(gameOverPayload).toHaveProperty("scores");
+    expect(gameOverPayload).toBeUndefined();
+
+    endTurn({
+      G,
+      ctx,
+      playerID: "0",
+      events: {
+        endGame: (arg) => {
+          gameOverPayload = arg;
+        },
+        endTurn: () => {
+          endTurnCalls += 1;
+        }
+      }
+    });
+
+    expect(endTurnCalls).toBe(0);
+    expect(gameOverPayload).toMatchObject({ reason: "NO_ICE_CARDS_AVAILABLE" });
+    expect(gameOverPayload).toHaveProperty("finalResults.players");
+  });
+
+  it("ends game instead of deadlocking when no ice cards exist for fishing", () => {
+    const G = createInitialState(2, () => 0.3);
+    const ctx = makeCtx("0");
+    let gameOverPayload: unknown;
+    let endTurnCalls = 0;
+
+    G.iceGrid = G.iceGrid.map(() => null);
+
+    rollDice({ G, ctx, playerID: "0", random: { D6: () => 2 } });
+    const result = endTurn({
+      G,
+      ctx,
+      playerID: "0",
+      events: {
+        endGame: (arg) => {
+          gameOverPayload = arg;
+        },
+        endTurn: () => {
+          endTurnCalls += 1;
+        }
+      }
+    });
+
+    expect(result).toBeUndefined();
+    expect(endTurnCalls).toBe(0);
+    expect(gameOverPayload).toMatchObject({ reason: "NO_ICE_CARDS_AVAILABLE" });
+    expect(gameOverPayload).toHaveProperty("finalResults.players");
+  });
+
+  it("calculates dense ranking placements in finalResults", () => {
+    const G = createInitialState(4, () => 0.3);
+    const ctx = makeCtx("0");
+    let gameOverPayload: unknown;
+
+    G.iceGrid = G.iceGrid.map(() => null);
+    G.players["0"].zone = ["penguin-001", "penguin-002", "penguin-003", "krill-001"];
+    G.players["1"].zone = ["penguin-004", "penguin-005", "penguin-006", "krill-002"];
+    G.players["2"].zone = ["penguin-007", "krill-003"];
+    G.players["3"].zone = ["penguin-008"];
+
+    rollDice({ G, ctx, playerID: "0", random: { D6: () => 2 } });
+    endTurn({
+      G,
+      ctx,
+      playerID: "0",
+      events: {
+        endGame: (arg) => {
+          gameOverPayload = arg;
+        }
+      }
+    });
+
+    const players =
+      (gameOverPayload as { finalResults?: { players?: Array<{ placement: number; fishes: number }> } })
+        .finalResults?.players ?? [];
+
+    expect(players.map((player) => player.fishes)).toEqual([8, 8, 6, -2]);
+    expect(players.map((player) => player.placement)).toEqual([1, 1, 2, 3]);
   });
 });

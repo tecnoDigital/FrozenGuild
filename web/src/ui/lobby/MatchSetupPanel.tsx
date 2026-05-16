@@ -1,0 +1,93 @@
+import styles from "./LobbyGlass.module.css";
+
+type MatchSetupPanelProps = {
+  mode: "create" | "join";
+  numPlayers: number;
+  botCount: number;
+  maxBots: number;
+  onModeChange?: ((mode: "create" | "join") => void) | undefined;
+  onNumPlayersChange?: ((value: number) => void) | undefined;
+  onBotCountChange?: ((value: number) => void) | undefined;
+};
+
+export function MatchSetupPanel({
+  mode,
+  numPlayers,
+  botCount,
+  maxBots,
+  onModeChange,
+  onNumPlayersChange,
+  onBotCountChange,
+}: MatchSetupPanelProps) {
+  const isCreate = mode === "create";
+
+  return (
+    <section className={styles.section}>
+      <div className={styles.fieldStack}>
+        <div className={styles.toggleBar} role="tablist" aria-label="Lobby mode">
+          <button
+            type="button"
+            className={`${styles.modeBtn} ${isCreate ? styles.modeBtnActive : ""}`}
+            onClick={() => onModeChange?.("create")}
+            role="tab"
+            aria-selected={isCreate}
+          >
+            Create
+          </button>
+          <button
+            type="button"
+            className={`${styles.modeBtn} ${!isCreate ? styles.modeBtnActive : ""}`}
+            onClick={() => onModeChange?.("join")}
+            role="tab"
+            aria-selected={!isCreate}
+          >
+            Join
+          </button>
+        </div>
+
+        <div className={styles.setupGrid} style={{ display: isCreate ? "grid" : "none" }}>
+          <div>
+            <label htmlFor="players" className={styles.fieldLabel}>
+              Players
+            </label>
+            <select
+              id="players"
+              className={styles.selectInput}
+              value={numPlayers}
+              onChange={(e) => onNumPlayersChange?.(Number(e.target.value))}
+            >
+              <option value={1}>1 player test</option>
+              <option value={2}>2 players</option>
+              <option value={3}>3 players</option>
+              <option value={4}>4 players</option>
+            </select>
+          </div>
+          <div>
+            <span className={styles.fieldLabel}>Bots</span>
+            <div
+              className={styles.botSegmented}
+              role="group"
+              aria-label="Bots selector"
+            >
+              {Array.from({ length: maxBots + 1 }, (_, i) => {
+                const active = i === botCount;
+                return (
+                  <button
+                    key={`bot-${i}`}
+                    type="button"
+                    className={`${styles.botSegment} ${active ? styles.botSegmentActive : ""}`}
+                    onClick={() => onBotCountChange?.(i)}
+                    aria-pressed={active}
+                  >
+                    {i}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  );
+}

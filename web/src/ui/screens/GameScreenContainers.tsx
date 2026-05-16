@@ -1,135 +1,71 @@
 import { useEffect, useMemo, useState } from "react";
 import type { SwapLocation } from "../../../../shared/game/types.js";
+import { resolvePlayerColorValue } from "../../../../shared/game/playerColors.js";
 import { useFrozenGuildStore } from "../../store/frozenGuildStore.js";
 import {
+  selectIsMyTurn,
   selectActionFlowView,
   selectCanChoosePadrino,
-  selectCurrentTurnLabel,
-  selectDeckCount,
-  selectDiscardCount,
-  selectLocalPlayerName,
+  selectGameOverOverlayView,
   selectOrcaResolutionView,
   selectSealBombResolutionView,
   selectSpyResolutionView,
-  selectTableActive,
-  selectActionBannerView,
+  selectDeckCount,
+  selectDiscardCount,
   selectPlayersLedger,
   selectUnstablePlayers
 } from "../../store/selectors.js";
-import { selectIceGridCardsView } from "../../view-model/iceGridView.js";
+import { FrozenTurnBanner } from "../layout/FrozenTurnBanner.js";
 import { CenterActionDock } from "../layout/CenterActionDock.js";
-import { CenterBoardStage } from "../layout/CenterBoardStage.js";
 import { LeftStatusRail } from "../layout/LeftStatusRail.js";
 import { RightLedgerRail } from "../layout/RightLedgerRail.js";
-import { PlayerLedgerPanel } from "../players/PlayerLedgerPanel.js";
+import { LocalPlayerHandPanel } from "../players/LocalPlayerHandPanel.js";
+import {
+  resolveLobbyAvatarSrc,
+  type LobbyAvatarID,
+  selectLobbyAvatar,
+  useLobbyProfileStore
+} from "../../features/lobby/lobbyStore.js";
+import { assets } from "../../ui/assets.js";
+import botAvatarSrc from "../../assets/avatars/avatar-bot.png";
 
-export function LeftStatusRailContainer() {
-  const playerName = useFrozenGuildStore(selectLocalPlayerName);
-  const turnLabel = useFrozenGuildStore(selectCurrentTurnLabel);
-  const deckCount = useFrozenGuildStore(selectDeckCount);
-  const discardCount = useFrozenGuildStore(selectDiscardCount);
-  const tableActive = useFrozenGuildStore(selectTableActive);
+type LedgerAvatarPlayer = {
+  name: string;
+  avatarId?: string;
+};
 
-  return (
-    <LeftStatusRail
-      playerName={playerName}
-      turnLabel={turnLabel}
-      deckCount={deckCount}
-      discardCount={discardCount}
-      tableStatus={tableActive ? "activa" : "pausada"}
-    />
-  );
+function isBotLedgerPlayer(player: LedgerAvatarPlayer) {
+  return player.name.trim().toUpperCase().startsWith("BOT ");
 }
 
-export function CenterBoardStageContainer({ onFishFromIce }: { onFishFromIce: (slot: number) => void }) {
-  const actionView = useFrozenGuildStore(selectActionBannerView);
-  const flow = useFrozenGuildStore(selectActionFlowView);
-  const iceCards = useFrozenGuildStore(selectIceGridCardsView);
-  const spy = useFrozenGuildStore(selectSpyResolutionView);
-  const spyDraftSlots = useFrozenGuildStore((state) => state.spyDraftSlots);
-  const spyDraftGiftSlot = useFrozenGuildStore((state) => state.spyDraftGiftSlot);
-  const toggleSpyDraftSlot = useFrozenGuildStore((state) => state.toggleSpyDraftSlot);
-  const setSpyDraftGiftSlot = useFrozenGuildStore((state) => state.setSpyDraftGiftSlot);
-  const swapSourceKey = useFrozenGuildStore((state) => state.swapDraftSourceKey);
-  const swapTargetKey = useFrozenGuildStore((state) => state.swapDraftTargetKey);
-  const setSwapSourceKey = useFrozenGuildStore((state) => state.setSwapDraftSourceKey);
-  const setSwapTargetKey = useFrozenGuildStore((state) => state.setSwapDraftTargetKey);
-  const canFish = useFrozenGuildStore((state) => {
-    if (!state.G || !state.ctx || !state.localPlayerID) {
-      return false;
-    }
-    const isMyTurn = state.ctx.currentPlayer === state.localPlayerID;
-    if (!isMyTurn || state.G.turn.actionCompleted) {
-      return false;
-    }
-    const effectiveValue = state.G.dice.value === 6 ? state.G.turn.padrinoAction : state.G.dice.value;
-    return state.G.dice.rolled && effectiveValue !== null && effectiveValue >= 1 && effectiveValue <= 3;
-  });
+function resolveLedgerAvatarSrc(player: LedgerAvatarPlayer, isLocal: boolean, localAvatarSrc: string) {
+  if (isBotLedgerPlayer(player)) {
+    return botAvatarSrc;
+  }
 
-  return (
-    <CenterBoardStage
-      title={actionView.title}
-      detail={actionView.detail}
-      severity={actionView.severity}
-      mode={flow.mode}
-      cards={iceCards}
-      clickableSlots={
-        canFish
-          ? iceCards.map((card, index) => (card.empty ? -1 : index)).filter((slot) => slot >= 0)
-          : flow.mode === "swap"
-            ? iceCards.map((card, index) => (card.empty ? -1 : index)).filter((slot) => slot >= 0)
-          : flow.mode === "spy" && spy
-            ? (spy.active ? spy.revealedSlots : spy.availableSlots)
-            : []
-      }
-      selectedSlots={
-        flow.mode === "swap"
-          ? [swapSourceKey, swapTargetKey]
-              .filter((value) => value.startsWith("ice:"))
-              .map((value) => Number(value.split(":")[1]))
-              .filter((value) => Number.isInteger(value) && value >= 0)
-          : flow.mode === "spy" && spy
-          ? (spy.active ? (spyDraftGiftSlot !== null ? [spyDraftGiftSlot] : []) : spyDraftSlots)
-          : []
-      }
-      onSlotClick={(slot) => {
-        if (canFish) {
-          onFishFromIce(slot);
-          return;
-        }
-        if (flow.mode === "swap") {
-          const slotKey = `ice:${slot}`;
-          if (!swapSourceKey || swapSourceKey === slotKey) {
-            setSwapSourceKey(slotKey);
-            if (swapTargetKey === slotKey) {
-              setSwapTargetKey("");
-            }
-            return;
-          }
-          if (!swapTargetKey || swapTargetKey === slotKey) {
-            setSwapTargetKey(slotKey);
-            return;
-          }
-          setSwapSourceKey(slotKey);
-          setSwapTargetKey("");
-          return;
-        }
-        if (flow.mode === "spy" && spy) {
-          if (!spy.active && spy.availableSlots.includes(slot)) {
-            toggleSpyDraftSlot(slot);
-            return;
-          }
-          if (spy.active && spy.revealedSlots.includes(slot)) {
-            setSpyDraftGiftSlot(slot);
-          }
-        }
-      }}
-    />
-  );
+  if (isLocal) {
+    return localAvatarSrc;
+  }
+
+  return resolveLobbyAvatarSrc(player.avatarId as LobbyAvatarID);
+}
+
+export function LeftStatusRailContainer() {
+  const deckCount = useFrozenGuildStore(selectDeckCount);
+  const discardCount = useFrozenGuildStore(selectDiscardCount);
+
+  return <LeftStatusRail deckCount={deckCount} discardCount={discardCount} cardBackSrc={assets.cards.back} />;
 }
 
 export function useMobileActionFlow() {
   return useFrozenGuildStore(selectActionFlowView);
+}
+
+export function TurnBannerContainer() {
+  const round = useFrozenGuildStore((state) => state.ctx?.turn ?? 1);
+  const isMyTurn = useFrozenGuildStore(selectIsMyTurn);
+
+  return <FrozenTurnBanner round={round} isMyTurn={isMyTurn} />;
 }
 
 type CenterActionDockContainerProps = {
@@ -161,20 +97,13 @@ export function CenterActionDockContainer({
   const diceDisabled = !flow.canRoll;
   const canChoosePadrino = useFrozenGuildStore(selectCanChoosePadrino);
   const localPlayerID = useFrozenGuildStore((state) => state.localPlayerID);
-  const iceGrid = useFrozenGuildStore((state) => state.G?.iceGrid ?? null);
   const playersMap = useFrozenGuildStore((state) => state.G?.players ?? null);
   const swapOptions = useMemo(() => {
-    if (!iceGrid || !playersMap) {
+    if (!playersMap) {
       return [] as Array<{ key: string; label: string; location: SwapLocation }>;
     }
 
     const options: Array<{ key: string; label: string; location: SwapLocation }> = [];
-
-    iceGrid.forEach((slot, index) => {
-      if (typeof slot === "string") {
-        options.push({ key: `ice:${index}`, label: `Hielo ${index + 1}`, location: { area: "ice_grid", slot: index } });
-      }
-    });
 
     Object.entries(playersMap).forEach(([playerID, player]) => {
       player.zone.forEach((cardID, index) => {
@@ -187,7 +116,11 @@ export function CenterActionDockContainer({
     });
 
     return options;
-  }, [iceGrid, playersMap]);
+  }, [playersMap]);
+  const swapSourceOptions = useMemo(
+    () => swapOptions.filter((item) => item.location.area === "player_zone" && item.location.playerID === localPlayerID),
+    [localPlayerID, swapOptions]
+  );
   const orca = useFrozenGuildStore(selectOrcaResolutionView);
   const seal = useFrozenGuildStore(selectSealBombResolutionView);
   const spy = useFrozenGuildStore(selectSpyResolutionView);
@@ -199,13 +132,18 @@ export function CenterActionDockContainer({
   const setSwapSourceKey = useFrozenGuildStore((state) => state.setSwapDraftSourceKey);
   const setSwapTargetKey = useFrozenGuildStore((state) => state.setSwapDraftTargetKey);
   const clearSwapDraft = useFrozenGuildStore((state) => state.clearSwapDraft);
-  const [orcaTarget, setOrcaTarget] = useState<string | null>(null);
-  const [sealTargets, setSealTargets] = useState<string[]>([]);
+  const orcaTarget = useFrozenGuildStore((state) => state.orcaDraftCardID);
+  const setOrcaTarget = useFrozenGuildStore((state) => state.setOrcaDraftCardID);
+  const sealTargets = useFrozenGuildStore((state) => state.sealDraftCardIDs);
+  const toggleSealDraftCardID = useFrozenGuildStore((state) => state.toggleSealDraftCardID);
+  const clearSealDraft = useFrozenGuildStore((state) => state.clearSealDraft);
   const spySlots = useFrozenGuildStore((state) => state.spyDraftSlots);
   const spyGiftSlot = useFrozenGuildStore((state) => state.spyDraftGiftSlot);
   const toggleSpyDraftSlot = useFrozenGuildStore((state) => state.toggleSpyDraftSlot);
   const setSpyDraftGiftSlot = useFrozenGuildStore((state) => state.setSpyDraftGiftSlot);
   const clearSpyDraft = useFrozenGuildStore((state) => state.clearSpyDraft);
+  const padrinoDraftAction = useFrozenGuildStore((state) => state.padrinoDraftAction);
+  const clearPadrinoDraft = useFrozenGuildStore((state) => state.clearPadrinoDraft);
   const [spyGiftTarget, setSpyGiftTarget] = useState("");
 
   useEffect(() => {
@@ -218,12 +156,15 @@ export function CenterActionDockContainer({
       setOrcaTarget(null);
     }
     if (flow.mode !== "seal") {
-      setSealTargets([]);
+      clearSealDraft();
     }
     if (flow.mode !== "spy") {
       clearSpyDraft();
     }
-  }, [clearSpyDraft, clearSwapDraft, flow.mode]);
+    if (!flow.showPadrinoOptions) {
+      clearPadrinoDraft();
+    }
+  }, [clearPadrinoDraft, clearSealDraft, clearSpyDraft, clearSwapDraft, flow.mode, flow.showPadrinoOptions, setOrcaTarget]);
 
   useEffect(() => {
     if (!spy || spy.targetPlayerIDs.length === 0) {
@@ -265,18 +206,20 @@ export function CenterActionDockContainer({
     }
   }, [flow.mode, localPlayerID, swapOptions, swapSourceKey]);
 
-  const swapCanConfirm = !!(swapSource && swapTarget);
+  const swapCanConfirm = !!(
+    swapSource
+    && swapTarget
+    && swapSource.area === "player_zone"
+    && swapTarget.area === "player_zone"
+    && swapSource.playerID === localPlayerID
+    && swapTarget.playerID !== localPlayerID
+  );
   const swapHelperText = swapCanConfirm
     ? "Listo para confirmar intercambio."
-    : "Selecciona origen y destino para intercambiar.";
+    : "Selecciona una carta de tu mano como origen y otra de un rival como destino.";
 
   const onToggleSealTarget = (cardID: string) => {
-    setSealTargets((current) => {
-      if (current.includes(cardID)) {
-        return current.filter((value) => value !== cardID);
-      }
-      return [...current, cardID];
-    });
+    toggleSealDraftCardID(cardID, seal?.requiredDiscardCount ?? 1);
   };
 
   return (
@@ -286,7 +229,11 @@ export function CenterActionDockContainer({
       disabled={diceDisabled}
       onRoll={onRollDice}
       flow={flow}
-      onChoosePadrinoAction={onChoosePadrinoAction}
+      onChoosePadrinoAction={(action) => {
+        onChoosePadrinoAction(action);
+        clearPadrinoDraft();
+      }}
+      padrinoSelectedAction={padrinoDraftAction}
       onEndTurn={onEndTurn}
       swap={{
         source: swapSource,
@@ -295,11 +242,8 @@ export function CenterActionDockContainer({
         helperText: canChoosePadrino ? "" : swapHelperText,
         sourceKey: swapSourceKey,
         targetKey: swapTargetKey,
-        options: swapOptions,
-        onSourceKeyChange: setSwapSourceKey,
-        onTargetKeyChange: setSwapTargetKey,
         onConfirm: () => {
-          if (swapSource && swapTarget) {
+          if (swapCanConfirm && swapSource && swapTarget) {
             onSwapCards(swapSource, swapTarget);
             setSwapSource(null);
             setSwapTarget(null);
@@ -317,7 +261,17 @@ export function CenterActionDockContainer({
         selectedCardID: orcaTarget,
         onSelectCardID: setOrcaTarget,
         onResolve: () => {
-          if (orcaTarget) {
+          const state = useFrozenGuildStore.getState();
+          const pending = state.G?.orcaResolution;
+          const localPlayerID = state.localPlayerID;
+
+          if (
+            orcaTarget
+            && pending
+            && !!localPlayerID
+            && pending.playerID === localPlayerID
+            && pending.validTargetCardIDs.includes(orcaTarget)
+          ) {
             onResolveOrca(orcaTarget);
             setOrcaTarget(null);
           }
@@ -329,9 +283,20 @@ export function CenterActionDockContainer({
         requiredDiscardCount: seal.requiredDiscardCount,
         onToggleCardID: onToggleSealTarget,
         onResolve: () => {
-          if (sealTargets.length === seal.requiredDiscardCount) {
+          const state = useFrozenGuildStore.getState();
+          const pending = state.G?.sealBombResolution;
+          const localPlayerID = state.localPlayerID;
+          const isValidSelection =
+            !!pending
+            && !!localPlayerID
+            && pending.playerID === localPlayerID
+            && sealTargets.length === pending.requiredDiscardCount
+            && new Set(sealTargets).size === sealTargets.length
+            && sealTargets.every((cardID) => pending.validTargetCardIDs.includes(cardID));
+
+          if (isValidSelection) {
             onResolveSealBomb(sealTargets);
-            setSealTargets([]);
+            clearSealDraft();
           }
         }
       } : null}
@@ -372,6 +337,8 @@ export function RightLedgerRailContainer() {
   const unstablePlayers = useFrozenGuildStore(selectUnstablePlayers);
   const localPlayerID = useFrozenGuildStore((state) => state.localPlayerID);
   const currentTurnPlayerID = useFrozenGuildStore((state) => state.ctx?.currentPlayer ?? null);
+  const lobbyAvatar = useLobbyProfileStore(selectLobbyAvatar);
+  const lobbyAvatarSrc = resolveLobbyAvatarSrc(lobbyAvatar);
   const flow = useFrozenGuildStore(selectActionFlowView);
   const swapSourceKey = useFrozenGuildStore((state) => state.swapDraftSourceKey);
   const swapTargetKey = useFrozenGuildStore((state) => state.swapDraftTargetKey);
@@ -381,8 +348,10 @@ export function RightLedgerRailContainer() {
   const clickableCardsByPlayerID: Record<string, number[]> = {};
   const selectedCardsByPlayerID: Record<string, number[]> = {};
 
+  const rivals = players.filter((player) => player.id !== localPlayerID);
+
   if (flow.mode === "swap") {
-    players.forEach((player) => {
+    rivals.forEach((player) => {
       clickableCardsByPlayerID[player.id] = player.cardIDs.map((_, index) => index);
     });
 
@@ -404,29 +373,19 @@ export function RightLedgerRailContainer() {
       return;
     }
     const nextKey = `player:${playerID}:${index}`;
-    if (!swapSourceKey || swapSourceKey === nextKey) {
-      setSwapSourceKey(nextKey);
-      if (swapTargetKey === nextKey) {
-        setSwapTargetKey("");
-      }
-      return;
-    }
-    if (!swapTargetKey || swapTargetKey === nextKey) {
-      setSwapTargetKey(nextKey);
-      return;
-    }
-    setSwapSourceKey(nextKey);
-    setSwapTargetKey("");
+    setSwapTargetKey(nextKey);
   };
 
   return (
     <RightLedgerRail
-      players={players.map((player) => ({
+      players={rivals.map((player) => ({
         ...player,
-        isLocalPlayer: localPlayerID === player.id,
+        avatarSrc: resolveLedgerAvatarSrc(player, false, lobbyAvatarSrc),
+        avatarColorValue: resolvePlayerColorValue(player.colorId),
+        isLocalPlayer: false,
         isActiveTurn: currentTurnPlayerID === player.id
       }))}
-      unstablePlayers={unstablePlayers}
+      unstablePlayers={unstablePlayers.filter((player) => player.id !== localPlayerID)}
       clickableCardsByPlayerID={clickableCardsByPlayerID}
       selectedCardsByPlayerID={selectedCardsByPlayerID}
       onPlayerCardClick={onPlayerCardClick}
@@ -434,9 +393,25 @@ export function RightLedgerRailContainer() {
   );
 }
 
-export function LocalHandContainer() {
+type LocalHandContainerProps = {
+  onResolveOrca: (targetCardID: string) => void;
+  onResolveSealBomb: (targetCardIDs: string[]) => void;
+};
+
+export function LocalHandContainer({ onResolveOrca, onResolveSealBomb }: LocalHandContainerProps) {
   const players = useFrozenGuildStore(selectPlayersLedger);
   const localPlayerID = useFrozenGuildStore((state) => state.localPlayerID);
+  const flow = useFrozenGuildStore(selectActionFlowView);
+  const orca = useFrozenGuildStore(selectOrcaResolutionView);
+  const seal = useFrozenGuildStore(selectSealBombResolutionView);
+  const orcaTarget = useFrozenGuildStore((state) => state.orcaDraftCardID);
+  const setOrcaTarget = useFrozenGuildStore((state) => state.setOrcaDraftCardID);
+  const sealTargets = useFrozenGuildStore((state) => state.sealDraftCardIDs);
+  const toggleSealDraftCardID = useFrozenGuildStore((state) => state.toggleSealDraftCardID);
+  const swapSourceKey = useFrozenGuildStore((state) => state.swapDraftSourceKey);
+  const swapTargetKey = useFrozenGuildStore((state) => state.swapDraftTargetKey);
+  const setSwapSourceKey = useFrozenGuildStore((state) => state.setSwapDraftSourceKey);
+  const setSwapTargetKey = useFrozenGuildStore((state) => state.setSwapDraftTargetKey);
 
   const local = players.find((player) => player.id === localPlayerID) ?? null;
 
@@ -444,14 +419,131 @@ export function LocalHandContainer() {
     return <p>Sin mano local.</p>;
   }
 
+  const clickableCardIndexes =
+    flow.mode === "swap"
+      ? local.cardIDs.map((_, index) => index)
+      : flow.mode === "orca" && orca
+        ? local.cardIDs
+            .map((cardID, index) => (orca.validTargetCardIDs.includes(cardID) ? index : -1))
+            .filter((index) => index >= 0)
+        : flow.mode === "seal" && seal
+          ? local.cardIDs
+              .map((cardID, index) => (seal.validTargetCardIDs.includes(cardID) ? index : -1))
+              .filter((index) => index >= 0)
+        : [];
+
+  const selectedCardIndexes: number[] = [];
+
+  [swapSourceKey, swapTargetKey].forEach((value) => {
+    if (!value.startsWith(`player:${local.id}:`)) {
+      return;
+    }
+    const index = Number(value.split(":")[2]);
+    if (Number.isInteger(index) && index >= 0) {
+      selectedCardIndexes.push(index);
+    }
+  });
+
+  if (flow.mode === "orca" && orcaTarget) {
+    const selectedIndex = local.cardIDs.findIndex((cardID) => cardID === orcaTarget);
+    if (selectedIndex >= 0) {
+      selectedCardIndexes.push(selectedIndex);
+    }
+  }
+
+  if (flow.mode === "seal") {
+    sealTargets.forEach((cardID) => {
+      const selectedIndex = local.cardIDs.findIndex((localCardID) => localCardID === cardID);
+      if (selectedIndex >= 0) {
+        selectedCardIndexes.push(selectedIndex);
+      }
+    });
+  }
+
+  const onLocalCardClick = (index: number) => {
+    if (flow.mode === "swap") {
+      const nextKey = `player:${local.id}:${index}`;
+      setSwapSourceKey(nextKey);
+      return;
+    }
+
+    if (flow.mode === "orca" && orca) {
+      const cardID = local.cardIDs[index];
+      if (!cardID || !orca.validTargetCardIDs.includes(cardID)) {
+        return;
+      }
+      setOrcaTarget(orcaTarget === cardID ? null : cardID);
+      return;
+    }
+
+    if (flow.mode === "seal" && seal) {
+      const cardID = local.cardIDs[index];
+      if (!cardID || !seal.validTargetCardIDs.includes(cardID)) {
+        return;
+      }
+      toggleSealDraftCardID(cardID, seal.requiredDiscardCount);
+    }
+  };
+
+  const actionBannerText =
+    flow.mode === "orca"
+      ? "Pacto de Orca · Una carta debe caer"
+      : flow.mode === "seal"
+        ? `Protocolo de escarcha · Sella ${seal?.requiredDiscardCount ?? 1} carta(s) para estabilizar`
+        : null;
+
+  const canConfirmOrca =
+    flow.mode === "orca"
+    && !!orca
+    && !!orcaTarget
+    && orca.validTargetCardIDs.includes(orcaTarget);
+
+  const canConfirmSeal =
+    flow.mode === "seal"
+    && !!seal
+    && sealTargets.length === seal.requiredDiscardCount
+    && new Set(sealTargets).size === sealTargets.length
+    && sealTargets.every((cardID) => seal.validTargetCardIDs.includes(cardID));
+
+  const actionBannerButtonLabel =
+    flow.mode === "orca"
+      ? "Cumplir pacto"
+      : flow.mode === "seal"
+        ? "Estabilizar"
+        : null;
+
+  const actionBannerButtonDisabled =
+    flow.mode === "orca"
+      ? !canConfirmOrca
+      : flow.mode === "seal"
+        ? !canConfirmSeal
+        : true;
+
+  const onActionBannerButtonClick = () => {
+    if (flow.mode === "orca" && canConfirmOrca && orcaTarget) {
+      onResolveOrca(orcaTarget);
+      setOrcaTarget(null);
+      return;
+    }
+
+    if (flow.mode === "seal" && canConfirmSeal) {
+      onResolveSealBomb(sealTargets);
+      useFrozenGuildStore.getState().clearSealDraft();
+    }
+  };
+
   return (
-    <PlayerLedgerPanel
-      players={[
-        {
-          ...local,
-          isLocalPlayer: true
-        }
-      ]}
+    <LocalPlayerHandPanel
+      playerName={local.name}
+      score={local.score}
+      cardIDs={local.cardIDs}
+      actionBannerText={actionBannerText}
+      actionBannerButtonLabel={actionBannerButtonLabel}
+      actionBannerButtonDisabled={actionBannerButtonDisabled}
+      onActionBannerButtonClick={onActionBannerButtonClick}
+      clickableCardIndexes={clickableCardIndexes}
+      selectedCardIndexes={selectedCardIndexes}
+      onCardClick={onLocalCardClick}
     />
   );
 }
@@ -461,17 +553,23 @@ export function RivalsLedgerContainer() {
   const unstablePlayers = useFrozenGuildStore(selectUnstablePlayers);
   const localPlayerID = useFrozenGuildStore((state) => state.localPlayerID);
   const currentTurnPlayerID = useFrozenGuildStore((state) => state.ctx?.currentPlayer ?? null);
+  const lobbyAvatar = useLobbyProfileStore(selectLobbyAvatar);
+  const lobbyAvatarSrc = resolveLobbyAvatarSrc(lobbyAvatar);
 
   return (
     <RightLedgerRail
-      players={players
-        .filter((player) => player.id !== localPlayerID)
-        .map((player) => ({
+      players={players.map((player) => {
+        const isLocal = player.id === localPlayerID;
+        const avatarSrc = resolveLedgerAvatarSrc(player, isLocal, lobbyAvatarSrc);
+        return {
           ...player,
           isActiveTurn: currentTurnPlayerID === player.id,
-          isLocalPlayer: false
-        }))}
-      unstablePlayers={unstablePlayers.filter((player) => player.id !== localPlayerID)}
+          isLocalPlayer: isLocal,
+          avatarSrc,
+          avatarColorValue: resolvePlayerColorValue(player.colorId)
+        };
+      })}
+      unstablePlayers={unstablePlayers}
     />
   );
 }

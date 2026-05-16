@@ -1,0 +1,187 @@
+.roundBanner {
+  --banner-glow: rgba(59, 205, 255, 0.28);
+  position: relative;
+  z-index: 2;
+  width: min(100%, 480px);
+  min-width: min(360px, 100%);
+  height: 74px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 17px;
+  padding: 0 34px;
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(23, 51, 77, 0.92), rgba(5, 20, 34, 0.97)) padding-box,
+    linear-gradient(180deg, rgba(141, 232, 255, 0.72), rgba(47, 114, 158, 0.3)) border-box;
+  border: 2px solid transparent;
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(173, 240, 255, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -18px 20px rgba(0, 0, 0, 0.28),
+    0 0 26px var(--banner-glow);
+  isolation: isolate;
+  transition:
+    min-width 220ms ease,
+    filter 220ms ease,
+    box-shadow 220ms ease,
+    transform 220ms ease;
+  pointer-events: none;
+  transform: scale(0.75);
+  transform-origin: top center;
+}
+
+.roundBanner::before {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border-radius: inherit;
+  border: 1px solid rgba(133, 230, 255, 0.16);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 48%);
+  z-index: -1;
+}
+
+.roundBanner::after {
+  content: "";
+  position: absolute;
+  left: 14%;
+  right: 14%;
+  top: 9px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(197, 247, 255, 0.62), transparent);
+  opacity: 0.9;
+}
+
+.roundBannerActive {
+  --banner-glow: rgba(93, 237, 255, 0.42);
+  min-width: min(380px, 100%);
+  transform: translateY(2px) scale(0.7725);
+  filter: brightness(1.04) saturate(1.05);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(232, 245, 255, 0.96)) padding-box,
+    linear-gradient(180deg, rgba(170, 235, 255, 0.9), rgba(70, 160, 220, 0.55)) border-box;
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.42),
+    0 0 0 1px rgba(214, 250, 255, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    inset 0 -14px 18px rgba(92, 171, 214, 0.13),
+    0 0 30px var(--banner-glow);
+  animation: turnPulse 1.15s ease-in-out infinite;
+}
+
+.roundBannerActive::before {
+  border: 1px solid rgba(108, 194, 235, 0.22);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.08));
+}
+
+.roundBannerActive::after {
+  background: linear-gradient(90deg, transparent, rgba(69, 158, 217, 0.46), transparent);
+}
+
+.roundText {
+  min-width: 160px;
+  text-align: center;
+  font-size: clamp(22px, 3vw, 31px);
+  line-height: 1;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  color: #d8f2ff;
+  text-shadow:
+    0 0 10px rgba(106, 202, 255, 0.5),
+    0 2px 0 rgba(0, 0, 0, 0.86);
+  animation: textSwap 260ms ease both;
+  white-space: nowrap;
+}
+
+.roundBannerActive .roundText {
+  color: #1162a8;
+  text-shadow:
+    0 0 10px rgba(126, 214, 255, 0.35),
+    0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.roundIcon {
+  font-size: 34px;
+  line-height: 1;
+  color: #bfeeff;
+  text-shadow:
+    0 0 12px rgba(110, 224, 255, 0.8),
+    0 2px 0 rgba(0, 0, 0, 0.6);
+  opacity: 0.96;
+}
+
+.roundChevron {
+  font-size: 26px;
+  font-weight: 900;
+  color: rgba(199, 239, 255, 0.78);
+  text-shadow: 0 0 10px rgba(73, 195, 255, 0.45);
+  transform: translateY(-1px);
+}
+
+.roundBannerActive .roundIcon,
+.roundBannerActive .roundChevron {
+  color: #2c78bb;
+  text-shadow: 0 0 10px rgba(126, 214, 255, 0.28);
+}
+
+@keyframes textSwap {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+    filter: blur(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes turnPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 16px 36px rgba(0, 0, 0, 0.42),
+      0 0 0 1px rgba(214, 250, 255, 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.92),
+      inset 0 -14px 18px rgba(92, 171, 214, 0.13),
+      0 0 26px rgba(93, 237, 255, 0.36);
+  }
+
+  50% {
+    box-shadow:
+      0 18px 42px rgba(0, 0, 0, 0.48),
+      0 0 0 1px rgba(214, 250, 255, 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 1),
+      inset 0 -14px 18px rgba(92, 171, 214, 0.18),
+      0 0 46px rgba(93, 237, 255, 0.62);
+  }
+}
+
+@media (max-width: 520px) {
+  .roundBanner,
+  .roundBannerActive {
+    transform: none;
+    width: min(92vw, 390px);
+    min-width: 0;
+    height: 64px;
+    gap: 11px;
+    padding: 0 20px;
+  }
+
+  .roundText {
+    min-width: 130px;
+    letter-spacing: 0.055em;
+  }
+
+  .roundIcon {
+    font-size: 27px;
+  }
+
+  .roundChevron {
+    font-size: 22px;
+  }
+}

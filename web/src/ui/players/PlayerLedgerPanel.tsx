@@ -9,6 +9,9 @@ type PlayerLedgerPanelProps = {
     score: number;
     cards: number;
     cardIDs: string[];
+    avatarId?: string;
+    avatarSrc?: string;
+    avatarColorValue?: string | undefined;
     isActiveTurn?: boolean;
     isLocalPlayer?: boolean;
     status?: "reconnecting" | "absent";
@@ -17,12 +20,23 @@ type PlayerLedgerPanelProps = {
   clickableCardsByPlayerID?: Record<string, number[]>;
   selectedCardsByPlayerID?: Record<string, number[]>;
   onPlayerCardClick?: (playerID: string, index: number) => void;
+  variant?: "default" | "rail";
 };
 
-export function PlayerLedgerPanel({ players, clickableCardsByPlayerID = {}, selectedCardsByPlayerID = {}, onPlayerCardClick }: PlayerLedgerPanelProps) {
+export function PlayerLedgerPanel({
+  players,
+  clickableCardsByPlayerID = {},
+  selectedCardsByPlayerID = {},
+  onPlayerCardClick,
+  variant = "default"
+}: PlayerLedgerPanelProps) {
+  const panelClass = variant === "rail" ? styles.panelRail : styles.panel;
+  const rowLayout = variant === "rail" ? "hud" : "default";
+  const highestScore = players.length > 0 ? Math.max(...players.map((player) => player.score)) : null;
+
   return (
-    <Panel title="Ledger de jugadores">
-      <div className={styles.panel}>
+    <Panel {...(variant === "rail" ? {} : { title: "Ledger de jugadores" })} variant={variant === "rail" ? "ghost" : "default"}>
+      <div className={panelClass}>
         {players.map((player) => (
           <PlayerLedgerRow
             key={player.id}
@@ -35,6 +49,10 @@ export function PlayerLedgerPanel({ players, clickableCardsByPlayerID = {}, sele
             isLocalPlayer={!!player.isLocalPlayer}
             clickableCardIndexes={clickableCardsByPlayerID[player.id] ?? []}
             selectedCardIndexes={selectedCardsByPlayerID[player.id] ?? []}
+            layout={rowLayout}
+            isLeader={highestScore !== null && player.score === highestScore}
+            {...(player.avatarSrc ? { avatarSrc: player.avatarSrc } : {})}
+            {...(player.avatarColorValue ? { avatarColorValue: player.avatarColorValue } : {})}
             {...(onPlayerCardClick ? { onCardClick: onPlayerCardClick } : {})}
             {...(player.status ? { status: player.status } : {})}
             {...(player.disconnectSeconds !== undefined ? { disconnectSeconds: player.disconnectSeconds } : {})}

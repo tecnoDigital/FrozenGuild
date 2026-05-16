@@ -1,0 +1,28 @@
+.hand {
+  position: relative;
+  padding: 0.9rem;
+  border-radius: var(--fg-radius-lg);
+  border: var(--fg-border-icy-strong);
+  background: var(--fg-bg-panel-strong);
+  box-shadow: var(--fg-shadow-panel);
+}
+
+.frame {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.cards {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(82px, 1fr));
+  gap: 0.6rem;
+}
+
+.cardSlot {
+  max-inline-size: 125px;
+}

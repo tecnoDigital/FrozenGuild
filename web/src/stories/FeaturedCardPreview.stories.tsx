@@ -7,7 +7,7 @@ const meta: Meta<typeof FeaturedCardPreview> = {
   args: {
     id: "orca-001",
     label: "Orca",
-    image: "/src/assets/cards/orca.png",
+    image: "/assets/cards/types/orca.png",
     detail: "Destruye una carta propia para continuar."
   }
 };

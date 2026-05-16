@@ -22,6 +22,8 @@ describe("match setup", () => {
     expect(Object.keys(state.players)).toEqual(["0", "1"]);
     expect(state.players["0"]?.name).toBe("Player 1");
     expect(state.players["1"]?.name).toBe("Player 2");
+    expect(state.players["0"]?.colorId).toBe("ice");
+    expect(state.players["1"]?.colorId).toBe("aurora");
     expect(state.dice).toEqual({ value: null, rolled: false });
     expect(state.turn).toEqual({ actionCompleted: false, padrinoAction: null });
     expect(state.orcaResolution).toBeNull();

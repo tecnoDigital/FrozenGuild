@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { fn } from "storybook/test";
+import { expect, fn, userEvent } from "storybook/test";
 import { CenterActionDock } from "../ui/layout/CenterActionDock.js";
+
+const onChoosePadrinoAction = fn();
 
 const meta: Meta<typeof CenterActionDock> = {
   title: "Layout/CenterActionDock",
@@ -10,7 +12,8 @@ const meta: Meta<typeof CenterActionDock> = {
     value: 6,
     disabled: false,
     onRoll: fn(),
-    onChoosePadrinoAction: fn(),
+    onChoosePadrinoAction,
+    padrinoSelectedAction: null,
     onEndTurn: fn(),
     flow: {
       mode: "padrino",
@@ -28,9 +31,6 @@ const meta: Meta<typeof CenterActionDock> = {
       helperText: "",
       sourceKey: "",
       targetKey: "",
-      options: [],
-      onSourceKeyChange: fn(),
-      onTargetKeyChange: fn(),
       onConfirm: fn(),
       onClearSelection: fn()
     },
@@ -43,7 +43,18 @@ const meta: Meta<typeof CenterActionDock> = {
 export default meta;
 type Story = StoryObj<typeof CenterActionDock>;
 
-export const PadrinoVisible: Story = {};
+export const PadrinoSelecting: Story = {};
+
+export const PadrinoConfirm: Story = {
+  args: {
+    padrinoSelectedAction: 4
+  },
+  play: async ({ canvas }) => {
+    const confirmButton = canvas.getByRole("button", { name: /Confirmar ESPIONAJE/i });
+    await userEvent.click(confirmButton);
+    await expect(onChoosePadrinoAction).toHaveBeenCalledWith(4);
+  }
+};
 
 export const Hidden: Story = {
   args: {

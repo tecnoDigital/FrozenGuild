@@ -3,7 +3,7 @@ import { useFrozenGuildStore } from "./frozenGuildStore.js";
 
 type BgioState = {
   G: FrozenGuildState;
-  ctx: { currentPlayer: string; gameover?: unknown };
+  ctx: { currentPlayer: string; turn?: number; gameover?: unknown };
 };
 
 export function pushBgioSnapshotToStore(state: BgioState | null, localPlayerID: string | null) {
@@ -16,7 +16,10 @@ export function pushBgioSnapshotToStore(state: BgioState | null, localPlayerID: 
 
   setSnapshot({
     G: state.G,
-    ctx: { currentPlayer: state.ctx.currentPlayer },
+    ctx: {
+      currentPlayer: state.ctx.currentPlayer,
+      ...(state.ctx.turn !== undefined ? { turn: state.ctx.turn } : {})
+    },
     gameover: state.ctx.gameover,
     localPlayerID
   });
