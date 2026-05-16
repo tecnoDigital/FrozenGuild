@@ -32,8 +32,10 @@ export function PlayerLedgerPanel({
 }: PlayerLedgerPanelProps) {
   const panelClass = variant === "rail" ? styles.panelRail : styles.panel;
   const rowLayout = variant === "rail" ? "hud" : "default";
+  const highestScore = players.length > 0 ? Math.max(...players.map((player) => player.score)) : null;
+
   return (
-    <Panel title="Ledger de jugadores" variant={variant === "rail" ? "ghost" : "default"}>
+    <Panel {...(variant === "rail" ? {} : { title: "Ledger de jugadores" })} variant={variant === "rail" ? "ghost" : "default"}>
       <div className={panelClass}>
         {players.map((player) => (
           <PlayerLedgerRow
@@ -48,6 +50,7 @@ export function PlayerLedgerPanel({
             clickableCardIndexes={clickableCardsByPlayerID[player.id] ?? []}
             selectedCardIndexes={selectedCardsByPlayerID[player.id] ?? []}
             layout={rowLayout}
+            isLeader={highestScore !== null && player.score === highestScore}
             {...(player.avatarSrc ? { avatarSrc: player.avatarSrc } : {})}
             {...(player.avatarColorValue ? { avatarColorValue: player.avatarColorValue } : {})}
             {...(onPlayerCardClick ? { onCardClick: onPlayerCardClick } : {})}

@@ -21,6 +21,7 @@ type PlayerLedgerRowProps = {
   selectedCardIndexes?: number[];
   onCardClick?: (playerID: string, index: number) => void;
   layout?: "default" | "hud";
+  isLeader?: boolean;
 };
 
 export function PlayerLedgerRow({
@@ -38,7 +39,8 @@ export function PlayerLedgerRow({
   clickableCardIndexes = [],
   selectedCardIndexes = [],
   onCardClick,
-  layout = "default"
+  layout = "default",
+  isLeader = false
 }: PlayerLedgerRowProps) {
   const avatarFallback = name.trim().charAt(0).toUpperCase() || "?";
   const isHud = layout === "hud";
@@ -59,22 +61,29 @@ export function PlayerLedgerRow({
       {isHud ? (
         <>
           {/* Zone 1: Avatar */}
-          <div
-            className={`${styles.hudAvatar} ${avatarColorValue && avatarSrc ? styles.hudAvatarFilled : ""}`}
-            aria-label={`Avatar de ${name}`}
-            data-avatar-fallback={avatarSrc ? "false" : "true"}
-            style={avatarColorValue ? ({ "--hud-avatar-color": avatarColorValue } as React.CSSProperties) : undefined}
-          >
-            {avatarSrc ? (
-              <img src={avatarSrc} alt="" className={styles.hudAvatarImg} />
-            ) : (
-              <span className={styles.hudAvatarFallback}>{avatarFallback}</span>
-            )}
+          <div className={styles.hudAvatarWrap}>
+            <div
+              className={`${styles.hudAvatar} ${avatarColorValue && avatarSrc ? styles.hudAvatarFilled : ""} ${isActiveTurn ? styles.hudAvatarActiveTurn : ""}`}
+              aria-label={`Avatar de ${name}`}
+              data-avatar-fallback={avatarSrc ? "false" : "true"}
+              style={avatarColorValue ? ({ "--hud-avatar-color": avatarColorValue } as React.CSSProperties) : undefined}
+            >
+              {avatarSrc ? (
+                <img src={avatarSrc} alt="" className={styles.hudAvatarImg} />
+              ) : (
+                <span className={styles.hudAvatarFallback}>{avatarFallback}</span>
+              )}
+            </div>
+            {isLeader ? (
+              <span className={styles.hudLeaderCrown} aria-label="Lider actual" title="Lider actual">
+                <img src="/assets/ui/icons/crown.svg" alt="" className={styles.hudLeaderCrownIcon} />
+              </span>
+            ) : null}
+            <p className={styles.hudAvatarName}>{name}</p>
           </div>
 
           {/* Zone 2: Info */}
           <div className={styles.hudInfo}>
-            <p className={styles.hudName}>{name}</p>
             <div className={styles.hudScore}>
               <img
                 src="/assets/ui/icons/fish.png"

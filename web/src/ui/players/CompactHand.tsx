@@ -65,6 +65,7 @@ export function CompactHand({
   const isLocal = size === "local";
 
   const prevCardIDs = usePrevious(cardIDs);
+  const adaptiveStackThreshold = cardIDs.length >= 7 ? 2 : 3;
   const newestCardID = useMemo(() => {
     if (!prevCardIDs || prevCardIDs.length >= cardIDs.length) return null;
     const prevSet = new Set(prevCardIDs);
@@ -79,8 +80,9 @@ export function CompactHand({
       buildVisualSlots(cardIDs, {
         selectableIndexes: rawSelectable,
         selectedIndexes,
+        stackThreshold: adaptiveStackThreshold,
       }),
-    [cardIDs, rawSelectable, selectedIndexes]
+    [cardIDs, rawSelectable, selectedIndexes, adaptiveStackThreshold]
   );
 
   const localTransforms = useMemo(() => {
@@ -159,6 +161,7 @@ export function CompactHand({
           !isStack && targetIndex !== null && selected.has(targetIndex);
 
         const label = `${getCardLabel(cardID)} ${isSelectable ? "seleccionable" : "bloqueada"}`;
+        const layoutId = isStack ? `stack-${slot.id}` : `card-${cardID}`;
 
         // Local desktop fan layout
         if (isLocal) {
@@ -178,6 +181,7 @@ export function CompactHand({
                   : undefined
               }
             >
+              {isStack ? <span className={styles.stackCount}>×{slot.count}</span> : null}
               <div className={styles.fanCardInnerLocal}>
                 {isStack ? (
                   <div className={styles.stackLayers} aria-hidden="true">
@@ -185,7 +189,6 @@ export function CompactHand({
                     <div className={styles.stackLayerMid} />
                   </div>
                 ) : null}
-                {isStack ? <span className={styles.stackCount}>×{slot.count}</span> : null}
                 <button
                   type="button"
                   className={`${styles.fanCardButtonLocal} ${isSelectable ? styles.fanCardButtonLocalSelectable : ""} ${isSelected ? styles.fanCardButtonLocalSelected : ""}`}
@@ -198,10 +201,10 @@ export function CompactHand({
                   aria-pressed={isSelected}
                   aria-label={label}
                 >
-                  <motion.div
-                    layout
-                    layoutId={`card-${cardID}`}
-                    className={styles.fanCardFaceLocal}
+                    <motion.div
+                      layout
+                      layoutId={layoutId}
+                      className={styles.fanCardFaceLocal}
                     title={cardID}
                     initial={false}
                     animate={{
@@ -241,7 +244,7 @@ export function CompactHand({
             >
               <motion.div
                 layout
-                layoutId={`card-${cardID}`}
+                layoutId={layoutId}
                 className={styles.hudCard}
                 title={cardID}
                 initial={false}
@@ -283,7 +286,7 @@ export function CompactHand({
           >
             <motion.div
               layout
-              layoutId={`card-${cardID}`}
+              layoutId={layoutId}
               className={`${styles.compactCard} ${isLocal ? styles.compactCardLocal : ""}`}
               title={cardID}
               initial={false}

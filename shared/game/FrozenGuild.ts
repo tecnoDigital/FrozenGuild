@@ -86,14 +86,19 @@ function getEffectiveActionValue(G: FrozenGuildState): number | null {
   return G.dice.value;
 }
 
-function botCanSwap(G: FrozenGuildState): boolean {
-  const playersWithCards = Object.values(G.players).filter((player) => player.zone.length > 0).length;
-  return playersWithCards >= 2;
+function botCanSwap(G: FrozenGuildState, playerID: string): boolean {
+  const botPlayer = G.players[playerID];
+  if (!botPlayer || botPlayer.zone.length === 0) {
+    return false;
+  }
+
+  return Object.entries(G.players).some(
+    ([id, player]) => id !== playerID && player.zone.length > 0
+  );
 }
 
-function botShouldSkipSwapTurn(G: FrozenGuildState): boolean {
-  const players = Object.values(G.players);
-  return players.length === 2 && players.some((player) => player.zone.length === 0);
+function botShouldSkipSwapTurn(G: FrozenGuildState, playerID: string): boolean {
+  return !botCanSwap(G, playerID);
 }
 
 function readSetupData(value: unknown): SetupData | undefined {
@@ -221,7 +226,7 @@ function runBasicBotTurn(args: {
   }
 
   if (G.dice.value === 6) {
-    const padrinoOptions = [1, 2, 3, 4, 5].filter((value) => value !== 5 || botCanSwap(G));
+    const padrinoOptions = [1, 2, 3, 4, 5].filter((value) => value !== 5 || botCanSwap(G, playerID));
     const chosen = randomPick(padrinoOptions, randomFn);
     if (chosen !== null) {
       choosePadrinoAction({ G, ctx, playerID }, chosen as 1 | 2 | 3 | 4 | 5);
@@ -292,8 +297,8 @@ function runBasicBotTurn(args: {
       }
     }
   } else if (action === 5) {
-    if (botShouldSkipSwapTurn(G)) {
-      // Isolated 2-player edge case: one hand is empty, so swap cannot execute.
+    if (botShouldSkipSwapTurn(G, playerID)) {
+      // Swap is impossible when the bot has no cards or no rival has cards.
       // Let endTurn run and close the turn cleanly.
     } else {
       const localPlayer = G.players[playerID];

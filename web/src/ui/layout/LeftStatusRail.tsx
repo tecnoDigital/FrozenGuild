@@ -3,12 +3,11 @@ import styles from "./LeftStatusRail.module.css";
 
 type CardPileKind = "deck" | "discard";
 
-type CardPileStatProps = {
+type CardStackProps = {
   kind: CardPileKind;
-  label: string;
   count: number;
   cardBackSrc: string;
-  isActive: boolean;
+  label: string;
 };
 
 type LeftStatusRailProps = {
@@ -29,33 +28,25 @@ function formatCount(count: number) {
   return Number.isFinite(count) ? Math.max(0, count) : 0;
 }
 
-function CardPileStat({ kind, label, count, cardBackSrc, isActive }: CardPileStatProps) {
+export function CardStack({ kind, count, cardBackSrc, label }: CardStackProps) {
   const safeCount = formatCount(count);
   const isEmpty = safeCount === 0;
-  const pileClassName = `${styles.pile} ${kind === "discard" ? styles.discardPile : styles.deckPile}`;
+  const stackClassName = `${styles.cardStack} ${kind === "discard" ? styles.discardStack : styles.deckStack}`;
 
   return (
-    <section
-      className={styles.pileStation}
-      data-kind={kind}
-      data-active={isActive ? "true" : "false"}
-      data-empty={isEmpty ? "true" : "false"}
-      aria-label={`${label}: ${safeCount} cartas`}
-    >
-      <div className={styles.pileHeader}>
-        <span className={styles.pileLabel}>{label}</span>
-        <span className={styles.pileCount}>{safeCount}</span>
-      </div>
-
-      <div className={pileClassName} data-empty={isEmpty ? "true" : "false"} aria-hidden="true">
-        {kind === "deck" ? (
+    <div className={stackClassName} data-empty={isEmpty ? "true" : "false"} aria-label={`${label}: ${safeCount} cartas`}>
+      <span className={styles.stackBadge} aria-hidden="true">
+        {safeCount}
+      </span>
+      <div className={styles.cardStackArt} aria-hidden="true">
+        {isEmpty ? (
+          <span className={styles.emptyStack} />
+        ) : kind === "deck" ? (
           <>
             <img className={`${styles.cardBack} ${styles.cardBackBottom}`} src={cardBackSrc} alt="" />
             <img className={`${styles.cardBack} ${styles.cardBackMiddle}`} src={cardBackSrc} alt="" />
             <img className={`${styles.cardBack} ${styles.cardBackTop}`} src={cardBackSrc} alt="" />
           </>
-        ) : isEmpty ? (
-          <span className={styles.emptyDiscard} />
         ) : (
           <>
             <img className={`${styles.cardBack} ${styles.discardBackA}`} src={cardBackSrc} alt="" />
@@ -64,6 +55,20 @@ function CardPileStat({ kind, label, count, cardBackSrc, isActive }: CardPileSta
           </>
         )}
       </div>
+    </div>
+  );
+}
+
+type CardPileStationProps = CardStackProps;
+
+function CardPileStation({ kind, label, count, cardBackSrc }: CardPileStationProps) {
+  const safeCount = formatCount(count);
+  const isEmpty = safeCount === 0;
+
+  return (
+    <section className={styles.pileStation} data-kind={kind} data-empty={isEmpty ? "true" : "false"}>
+      <span className={styles.pileLabel}>{label}</span>
+      <CardStack kind={kind} count={safeCount} cardBackSrc={cardBackSrc} label={label} />
     </section>
   );
 }
@@ -93,32 +98,28 @@ export function LeftStatusRail({
     );
   }
 
-  const activePile: CardPileKind | null = null;
-
   return (
     <div className={styles.rail}>
       <div className={styles.logoWrap}>
         <img className={styles.logo} src={assets.brand.logoMain} alt="Frozen Guild" />
       </div>
 
-      <div className={styles.tableSurface} aria-label="Pilas de cartas de la mesa">
+      <div className={styles.iceSupplyRail} aria-label="Ice Supply Rail: pilas de cartas de la mesa">
         <div className={styles.iceWake} aria-hidden="true" />
-        <CardPileStat
+        <CardPileStation
           kind="deck"
           label="MAZO"
           count={deckCount}
           cardBackSrc={cardBackSrc}
-          isActive={activePile === "deck"}
         />
-        <div className={styles.flowArrow} aria-hidden="true">
+        <div className={styles.flowCrack} aria-hidden="true">
           <span />
         </div>
-        <CardPileStat
+        <CardPileStation
           kind="discard"
           label="DESCARTE"
           count={discardCount}
           cardBackSrc={cardBackSrc}
-          isActive={activePile === "discard"}
         />
       </div>
     </div>

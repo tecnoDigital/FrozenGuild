@@ -19,6 +19,10 @@ export type VisualSlot = {
   count: number;
 };
 
+type VisualSlotWithAnchor = VisualSlot & {
+  anchorIndex: number;
+};
+
 export function buildVisualSlots(
   cardIDs: string[],
   options: {
@@ -36,48 +40,55 @@ export function buildVisualSlots(
   const selectableSet = new Set(selectableIndexes);
   const selectedSet = new Set(selectedIndexes);
 
-  // Build consecutive groups preserving original order
-  const groups: { key: string; items: { cardID: string; index: number }[] }[] = [];
+  // Build global groups by key (not only consecutive runs).
+  const groupsByKey = new Map<string, { cardID: string; index: number }[]>();
 
   cardIDs.forEach((cardID, index) => {
     const key = getCardStackKey(cardID);
-    const lastGroup = groups[groups.length - 1];
-    if (lastGroup && lastGroup.key === key) {
-      lastGroup.items.push({ cardID, index });
-    } else {
-      groups.push({ key, items: [{ cardID, index }] });
+    if (!groupsByKey.has(key)) {
+      groupsByKey.set(key, []);
     }
+    groupsByKey.get(key)!.push({ cardID, index });
   });
 
-  return groups.flatMap((group): VisualSlot[] => {
-    const hasSelectable = group.items.some((item) =>
+  const slotCandidates: VisualSlotWithAnchor[] = [];
+
+  groupsByKey.forEach((items, key) => {
+    const hasSelectable = items.some((item) =>
       selectableSet.has(item.index)
     );
-    const hasSelected = group.items.some((item) => selectedSet.has(item.index));
+    const hasSelected = items.some((item) => selectedSet.has(item.index));
     const shouldStack =
-      group.items.length >= stackThreshold && !hasSelectable && !hasSelected;
+      items.length >= stackThreshold && !hasSelectable && !hasSelected;
 
     if (shouldStack) {
-      const firstIndex = group.items[0].index;
-      return [
-        {
-          id: `stack:${group.key}@${firstIndex}`,
-          kind: "stack",
-          displayCardID: group.items[group.items.length - 1]!.cardID,
-          realIndexes: group.items.map((item) => item.index),
-          count: group.items.length,
-        },
-      ];
+      const anchorIndex = items[0]!.index;
+      slotCandidates.push({
+        id: `stack:${key}@${anchorIndex}`,
+        kind: "stack",
+        displayCardID: items[items.length - 1]!.cardID,
+        realIndexes: items.map((item) => item.index),
+        count: items.length,
+        anchorIndex,
+      });
+      return;
     }
 
-    return group.items.map((item) => ({
-      id: item.cardID,
-      kind: "single",
-      displayCardID: item.cardID,
-      realIndexes: [item.index],
-      count: 1,
-    }));
+    items.forEach((item) => {
+      slotCandidates.push({
+        id: item.cardID,
+        kind: "single",
+        displayCardID: item.cardID,
+        realIndexes: [item.index],
+        count: 1,
+        anchorIndex: item.index,
+      });
+    });
   });
+
+  return slotCandidates
+    .sort((a, b) => a.anchorIndex - b.anchorIndex)
+    .map(({ anchorIndex: _anchorIndex, ...slot }) => slot);
 }
 
 export type FanTransform = {

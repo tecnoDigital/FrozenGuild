@@ -142,6 +142,8 @@ export function CenterActionDockContainer({
   const toggleSpyDraftSlot = useFrozenGuildStore((state) => state.toggleSpyDraftSlot);
   const setSpyDraftGiftSlot = useFrozenGuildStore((state) => state.setSpyDraftGiftSlot);
   const clearSpyDraft = useFrozenGuildStore((state) => state.clearSpyDraft);
+  const padrinoDraftAction = useFrozenGuildStore((state) => state.padrinoDraftAction);
+  const clearPadrinoDraft = useFrozenGuildStore((state) => state.clearPadrinoDraft);
   const [spyGiftTarget, setSpyGiftTarget] = useState("");
 
   useEffect(() => {
@@ -159,7 +161,10 @@ export function CenterActionDockContainer({
     if (flow.mode !== "spy") {
       clearSpyDraft();
     }
-  }, [clearSealDraft, clearSpyDraft, clearSwapDraft, flow.mode, setOrcaTarget]);
+    if (!flow.showPadrinoOptions) {
+      clearPadrinoDraft();
+    }
+  }, [clearPadrinoDraft, clearSealDraft, clearSpyDraft, clearSwapDraft, flow.mode, flow.showPadrinoOptions, setOrcaTarget]);
 
   useEffect(() => {
     if (!spy || spy.targetPlayerIDs.length === 0) {
@@ -224,7 +229,11 @@ export function CenterActionDockContainer({
       disabled={diceDisabled}
       onRoll={onRollDice}
       flow={flow}
-      onChoosePadrinoAction={onChoosePadrinoAction}
+      onChoosePadrinoAction={(action) => {
+        onChoosePadrinoAction(action);
+        clearPadrinoDraft();
+      }}
+      padrinoSelectedAction={padrinoDraftAction}
       onEndTurn={onEndTurn}
       swap={{
         source: swapSource,

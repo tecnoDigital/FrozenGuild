@@ -30,7 +30,7 @@ describe("buildVisualSlots", () => {
     expect(slots[2].realIndexes).toEqual([2]);
   });
 
-  it("stacks identical consecutive cards when count meets threshold", () => {
+  it("stacks identical cards when count meets threshold", () => {
     const cardIDs = [
       "penguin-001",
       "penguin-002",
@@ -95,22 +95,23 @@ describe("buildVisualSlots", () => {
     expect(slotsHigh.every((s) => s.kind === "single")).toBe(true);
   });
 
-  it("preserves original order with non-consecutive identical cards", () => {
+  it("stacks non-consecutive identical cards into one slot", () => {
     const cardIDs = [
       "penguin-001",
       "orca-001",
       "penguin-002",
       "penguin-003",
     ];
-    const slots = buildVisualSlots(cardIDs, { stackThreshold: 5 });
-    expect(slots).toHaveLength(4);
-    expect(slots[0].realIndexes).toEqual([0]);
+    const slots = buildVisualSlots(cardIDs);
+    expect(slots).toHaveLength(2);
+    expect(slots[0].kind).toBe("stack");
+    expect(slots[0].count).toBe(3);
+    expect(slots[0].realIndexes).toEqual([0, 2, 3]);
+    expect(slots[1].kind).toBe("single");
     expect(slots[1].realIndexes).toEqual([1]);
-    expect(slots[2].realIndexes).toEqual([2]);
-    expect(slots[3].realIndexes).toEqual([3]);
   });
 
-  it("stacks only the consecutive run, leaving later identical cards separate", () => {
+  it("merges separated runs of same key into one global stack", () => {
     const cardIDs = [
       "penguin-001",
       "penguin-002",
@@ -120,19 +121,66 @@ describe("buildVisualSlots", () => {
       "penguin-005",
     ];
     const slots = buildVisualSlots(cardIDs);
-    expect(slots).toHaveLength(4);
+    expect(slots).toHaveLength(2);
     expect(slots[0].kind).toBe("stack");
-    expect(slots[0].count).toBe(3);
+    expect(slots[0].count).toBe(5);
+    expect(slots[0].realIndexes).toEqual([0, 1, 2, 4, 5]);
     expect(slots[1].kind).toBe("single");
     expect(slots[1].displayCardID).toBe("orca-001");
-    // Later run of 2 is below default threshold 3, so singles
-    expect(slots[2].kind).toBe("single");
-    expect(slots[2].displayCardID).toBe("penguin-004");
-    expect(slots[3].kind).toBe("single");
-    expect(slots[3].displayCardID).toBe("penguin-005");
   });
 
-  it("assigns unique ids to separated identical stacks", () => {
+  it("compacts stacked cards at their first position so following cards close gaps", () => {
+    const cardIDs = [
+      "penguin-001",
+      "orca-001",
+      "penguin-002",
+      "walrus-001",
+      "penguin-003",
+      "seal_bomb-001",
+    ];
+
+    const slots = buildVisualSlots(cardIDs);
+
+    expect(slots).toHaveLength(4);
+    expect(slots.map((slot) => slot.kind)).toEqual([
+      "stack",
+      "single",
+      "single",
+      "single",
+    ]);
+    expect(slots[0].realIndexes).toEqual([0, 2, 4]);
+    expect(slots[1].realIndexes).toEqual([1]);
+    expect(slots[2].realIndexes).toEqual([3]);
+    expect(slots[3].realIndexes).toEqual([5]);
+  });
+
+  it("compacts multiple stacks into adjacent visual slots", () => {
+    const cardIDs = [
+      "penguin-001",
+      "penguin-002",
+      "orca-001",
+      "orca-002",
+      "walrus-001",
+      "walrus-002",
+      "seal_bomb-001",
+    ];
+
+    const slots = buildVisualSlots(cardIDs, { stackThreshold: 2 });
+
+    expect(slots).toHaveLength(4);
+    expect(slots.map((slot) => slot.kind)).toEqual([
+      "stack",
+      "stack",
+      "stack",
+      "single",
+    ]);
+    expect(slots[0].realIndexes).toEqual([0, 1]);
+    expect(slots[1].realIndexes).toEqual([2, 3]);
+    expect(slots[2].realIndexes).toEqual([4, 5]);
+    expect(slots[3].realIndexes).toEqual([6]);
+  });
+
+  it("uses first index in id for deterministic global stack ids", () => {
     const cardIDs = [
       "penguin-001",
       "penguin-002",
@@ -143,17 +191,14 @@ describe("buildVisualSlots", () => {
       "penguin-006",
     ];
     const slots = buildVisualSlots(cardIDs);
-    expect(slots).toHaveLength(3);
+    expect(slots).toHaveLength(2);
     expect(slots[0].kind).toBe("stack");
-    expect(slots[0].count).toBe(3);
+    expect(slots[0].count).toBe(6);
     expect(slots[1].kind).toBe("single");
-    expect(slots[2].kind).toBe("stack");
-    expect(slots[2].count).toBe(3);
-    // The two separated stacks must have different ids to avoid React key collisions
-    expect(slots[0].id).not.toBe(slots[2].id);
+    expect(slots[0].id).toBe("stack:penguin:1@0");
   });
 
-  it("embeds the first real index into stack ids for determinism", () => {
+  it("does not stack a key when any card in that key is selected/selectable", () => {
     const cardIDs = [
       "penguin-001",
       "penguin-002",
@@ -163,10 +208,9 @@ describe("buildVisualSlots", () => {
       "penguin-005",
       "penguin-006",
     ];
-    const slots = buildVisualSlots(cardIDs);
-    expect(slots).toHaveLength(3);
-    expect(slots[0].id).toBe("stack:penguin:1@0");
-    expect(slots[2].id).toBe("stack:penguin:1@4");
+    const slots = buildVisualSlots(cardIDs, { selectedIndexes: [4] });
+    expect(slots.filter((slot) => slot.kind === "stack")).toHaveLength(0);
+    expect(slots).toHaveLength(7);
   });
 });
 

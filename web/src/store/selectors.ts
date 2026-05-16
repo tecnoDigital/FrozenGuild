@@ -63,9 +63,21 @@ function calculatePenguinScore(cardIDs: string[]): number {
   }, 0);
 }
 
-function shouldSkipTwoPlayerSwap(players: PlayersMap): boolean {
-  const playerList = Object.values(players);
-  return playerList.length === 2 && playerList.some((player) => player.zone.length === 0);
+function shouldSkipImpossibleSwap(players: PlayersMap, playerID?: string | null): boolean {
+  if (!playerID) {
+    return false;
+  }
+
+  const activePlayer = players[playerID];
+  if (!activePlayer) {
+    return false;
+  }
+
+  const hasRivalWithCards = Object.entries(players).some(
+    ([id, player]) => id !== playerID && player.zone.length > 0
+  );
+
+  return activePlayer.zone.length === 0 || !hasRivalWithCards;
 }
 
 let lastCurrentTurnKey = "";
@@ -168,7 +180,9 @@ export function selectActionBannerView(state: FrozenGuildUiStore) {
         ? { title: "Espionaje activo", detail: "Entrega una carta revelada a otro jugador.", severity: "your-turn" }
         : { title: "Espionaje", detail: "Selecciona cartas del Hielo para espiar.", severity: "your-turn" };
     } else if (effectiveValue === 5) {
-      next = { title: "Intercambio", detail: "Selecciona origen y destino para intercambiar.", severity: "your-turn" };
+      next = shouldSkipImpossibleSwap(state.G.players, state.localPlayerID)
+        ? { title: "Intercambio imposible", detail: "No hay intercambio valido; termina tu turno.", severity: "success" }
+        : { title: "Intercambio", detail: "Selecciona origen y destino para intercambiar.", severity: "your-turn" };
     } else {
       next = { title: "Tu turno", detail: "Elige una accion valida.", severity: "your-turn" };
     }
@@ -572,7 +586,7 @@ export function selectActionFlowView(state: FrozenGuildUiStore): ActionFlowView 
           canEndTurn: false,
           showPadrinoOptions: false
         };
-      } else if (effectiveValue === 5 && !shouldSkipTwoPlayerSwap(state.G.players)) {
+      } else if (effectiveValue === 5 && !shouldSkipImpossibleSwap(state.G.players, state.localPlayerID)) {
         next = {
           mode: "swap",
           helperText: "Intercambio: elige carta origen y luego destino.",
@@ -580,6 +594,16 @@ export function selectActionFlowView(state: FrozenGuildUiStore): ActionFlowView 
           isMyTurn,
           canRoll: false,
           canEndTurn: false,
+          showPadrinoOptions: false
+        };
+      } else if (effectiveValue === 5 && shouldSkipImpossibleSwap(state.G.players, state.localPlayerID)) {
+        next = {
+          mode: "done",
+          helperText: "Intercambio imposible. Termina tu turno.",
+          diceValue,
+          isMyTurn,
+          canRoll: false,
+          canEndTurn: true,
           showPadrinoOptions: false
         };
       } else {

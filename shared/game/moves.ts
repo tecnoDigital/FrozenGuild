@@ -477,9 +477,21 @@ function requiresSwapAction(G: FrozenGuildState): boolean {
   return requiresActionForDiceValue(G, 5);
 }
 
-function shouldSkipTwoPlayerSwap(G: FrozenGuildState): boolean {
-  const players = Object.values(G.players);
-  return players.length === 2 && players.some((player) => player.zone.length === 0);
+function shouldSkipImpossibleSwap(G: FrozenGuildState, playerID?: string): boolean {
+  if (!playerID) {
+    return false;
+  }
+
+  const activePlayer = G.players[playerID];
+  if (!activePlayer) {
+    return false;
+  }
+
+  const hasRivalWithCards = Object.entries(G.players).some(
+    ([id, player]) => id !== playerID && player.zone.length > 0
+  );
+
+  return activePlayer.zone.length === 0 || !hasRivalWithCards;
 }
 
 function requiresPadrinoSelection(G: FrozenGuildState): boolean {
@@ -1322,7 +1334,7 @@ export function endTurn({ G, ctx, playerID, events }: MoveCtx): typeof INVALID_M
     return INVALID_MOVE;
   }
 
-  if (requiresSwapAction(G) && !G.turn.actionCompleted && !shouldSkipTwoPlayerSwap(G)) {
+  if (requiresSwapAction(G) && !G.turn.actionCompleted && !shouldSkipImpossibleSwap(G, playerID)) {
     return INVALID_MOVE;
   }
 

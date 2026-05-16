@@ -22,7 +22,7 @@
   object-fit: contain;
 }
 
-.tableSurface {
+.iceSupplyRail {
   position: relative;
   flex: 1;
   min-height: 0;
@@ -30,34 +30,33 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: clamp(10px, 1.4dvh, 18px);
-  padding: clamp(16px, 1.5vw, 24px) clamp(8px, 1vw, 14px);
+  gap: clamp(12px, 1.8dvh, 24px);
+  width: min(100%, 250px);
+  margin-inline: auto;
+  padding: clamp(12px, 1.4vw, 22px) clamp(6px, 1vw, 12px);
   overflow: hidden;
-  border-radius: calc(var(--fg-radius-lg, 16px) + 2px);
-  border: 1px solid rgba(154, 231, 255, 0.28);
+  border: 0;
   background:
     radial-gradient(ellipse at 72% 44%, rgba(72, 215, 255, 0.14), transparent 52%),
-    radial-gradient(ellipse at 50% 12%, rgba(234, 250, 255, 0.08), transparent 44%),
-    linear-gradient(160deg, rgba(234, 250, 255, 0.055), rgba(8, 26, 44, 0.54) 48%, rgba(5, 18, 32, 0.84));
+    radial-gradient(ellipse at 50% 12%, rgba(234, 250, 255, 0.08), transparent 44%);
   box-shadow:
-    inset 0 0 0 1px rgba(234, 250, 255, 0.08),
-    inset 18px 0 38px rgba(5, 18, 32, 0.22),
-    0 18px 34px rgba(0, 0, 0, 0.26),
     0 0 30px rgba(43, 193, 255, 0.08);
   isolation: isolate;
 }
 
-.tableSurface::before {
+.iceSupplyRail::before {
   content: "";
   position: absolute;
-  inset: 1px;
-  border-radius: inherit;
-  border: 1px solid rgba(234, 250, 255, 0.08);
+  inset: 5% 18%;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(234, 250, 255, 0.08), rgba(84, 213, 255, 0.06), rgba(234, 250, 255, 0.03));
+  filter: blur(18px);
+  opacity: 0.5;
   pointer-events: none;
   z-index: -1;
 }
 
-.tableSurface::after {
+.iceSupplyRail::after {
   content: "";
   position: absolute;
   top: 8%;
@@ -86,13 +85,13 @@
 
 .pileStation {
   position: relative;
-  width: min(100%, 240px);
-  min-height: clamp(168px, 22dvh, 238px);
+  width: min(100%, 230px);
+  min-height: clamp(152px, 20dvh, 220px);
   display: grid;
   grid-template-rows: auto 1fr;
   align-items: center;
   justify-items: center;
-  gap: clamp(4px, 0.8dvh, 10px);
+  gap: clamp(8px, 1dvh, 14px);
   padding: clamp(6px, 0.7vw, 10px);
 }
 
@@ -115,18 +114,6 @@
   opacity: 0.52;
 }
 
-.pileStation[data-active="true"]::before {
-  animation: pileImpact 900ms ease-out;
-}
-
-.pileHeader {
-  width: 100%;
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 10px;
-}
-
 .pileLabel {
   font-size: clamp(15px, 1vw, 18px);
   font-weight: 800;
@@ -135,47 +122,48 @@
   color: rgba(203, 239, 255, 0.72);
 }
 
-.pileCount {
-  font-size: clamp(30px, 3vw, 46px);
-  line-height: 0.95;
-  font-weight: 900;
-  color: var(--fg-text-primary, #eafaff);
-  text-shadow: 0 0 16px rgba(95, 220, 255, 0.38);
-}
-
-.pileStation[data-kind="discard"] .pileLabel,
-.pileStation[data-kind="discard"] .pileCount {
+.pileStation[data-kind="discard"] .pileLabel {
   color: rgba(211, 231, 240, 0.78);
-  text-shadow: 0 0 12px rgba(154, 206, 226, 0.18);
 }
 
-.pile {
+.cardStack {
   position: relative;
-  width: clamp(112px, 9vw, 148px);
-  height: clamp(138px, 16dvh, 178px);
+  width: clamp(76px, 6.2vw, 88px);
+  height: clamp(114px, 13dvh, 132px);
   display: grid;
   place-items: center;
   filter: drop-shadow(0 18px 20px rgba(0, 0, 0, 0.34));
 }
 
-.deckPile {
+.deckStack {
+  opacity: 1;
   transform: translateY(1px);
+  filter:
+    drop-shadow(0 18px 20px rgba(0, 0, 0, 0.34))
+    drop-shadow(0 0 20px rgba(125, 220, 255, 0.3));
 }
 
-.discardPile {
-  opacity: 0.92;
+.discardStack {
+  opacity: 0.8;
+  filter:
+    saturate(0.48)
+    brightness(0.78)
+    drop-shadow(0 14px 18px rgba(0, 0, 0, 0.28));
 }
 
-.pileStation[data-active="true"] .deckPile,
-.pileStation[data-active="true"] .discardPile {
-  animation: pilePulse 900ms cubic-bezier(.16, 1, .3, 1);
+.cardStack[data-empty="true"] {
+  opacity: 0.68;
+  filter:
+    saturate(0.32)
+    brightness(0.82)
+    drop-shadow(0 12px 16px rgba(0, 0, 0, 0.22));
 }
 
-.pile::after {
+.cardStack::after {
   content: "";
   position: absolute;
-  left: 12%;
-  right: 12%;
+  left: -12%;
+  right: -12%;
   bottom: -10px;
   height: 18px;
   border-radius: 999px;
@@ -183,9 +171,49 @@
   filter: blur(4px);
 }
 
+.cardStackArt {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.stackBadge {
+  position: absolute;
+  z-index: 3;
+  top: -10px;
+  right: -14px;
+  min-width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(234, 250, 255, 0.72);
+  background:
+    radial-gradient(circle at 35% 20%, rgba(255, 255, 255, 0.78), rgba(154, 231, 255, 0.86) 34%, rgba(15, 69, 108, 0.94));
+  color: #041222;
+  font-size: clamp(14px, 1vw, 17px);
+  line-height: 1;
+  font-weight: 900;
+  box-shadow:
+    0 0 16px rgba(125, 220, 255, 0.42),
+    0 6px 14px rgba(0, 0, 0, 0.28);
+}
+
+.discardStack .stackBadge {
+  background:
+    radial-gradient(circle at 35% 20%, rgba(255, 255, 255, 0.56), rgba(179, 205, 214, 0.82) 36%, rgba(57, 83, 96, 0.94));
+  color: rgba(5, 18, 32, 0.92);
+  box-shadow:
+    0 0 10px rgba(154, 206, 226, 0.18),
+    0 6px 14px rgba(0, 0, 0, 0.24);
+}
+
 .cardBack {
   position: absolute;
-  width: 78%;
+  width: 100%;
   aspect-ratio: 2 / 3;
   object-fit: cover;
   border-radius: clamp(8px, 0.8vw, 12px);
@@ -227,81 +255,58 @@
   filter: saturate(0.84) brightness(0.88);
 }
 
-.emptyDiscard {
-  width: 78%;
+.emptyStack {
+  width: 100%;
   aspect-ratio: 2 / 3;
   border-radius: clamp(8px, 0.8vw, 12px);
   border: 1px dashed rgba(154, 206, 226, 0.32);
   background:
+    radial-gradient(circle at 50% 42%, rgba(125, 220, 255, 0.12), transparent 38%),
     linear-gradient(145deg, rgba(234, 250, 255, 0.04), rgba(8, 26, 44, 0.16)),
     rgba(5, 18, 32, 0.24);
   box-shadow: inset 0 0 28px rgba(72, 215, 255, 0.06);
 }
 
-.flowArrow {
+.flowCrack {
   position: relative;
   width: min(100%, 220px);
-  height: clamp(26px, 3.2dvh, 40px);
+  height: clamp(34px, 4dvh, 54px);
   display: grid;
   place-items: center;
   flex: 0 0 auto;
 }
 
-.flowArrow span {
+.flowCrack span {
   position: relative;
-  width: 2px;
+  width: 3px;
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(to bottom, rgba(125, 220, 255, 0), rgba(125, 220, 255, 0.72));
-  box-shadow: 0 0 12px rgba(125, 220, 255, 0.28);
+  background:
+    linear-gradient(to bottom, rgba(125, 220, 255, 0), rgba(203, 239, 255, 0.86) 48%, rgba(125, 220, 255, 0));
+  box-shadow:
+    0 0 12px rgba(125, 220, 255, 0.42),
+    0 0 28px rgba(125, 220, 255, 0.18);
 }
 
-.flowArrow span::after {
+.flowCrack span::before,
+.flowCrack span::after {
   content: "";
   position: absolute;
   left: 50%;
-  bottom: -1px;
-  width: 10px;
-  height: 10px;
-  border-right: 2px solid rgba(203, 239, 255, 0.78);
-  border-bottom: 2px solid rgba(203, 239, 255, 0.78);
-  transform: translateX(-50%) rotate(45deg);
+  width: 12px;
+  height: 1px;
+  background: rgba(203, 239, 255, 0.58);
+  box-shadow: 0 0 10px rgba(125, 220, 255, 0.32);
 }
 
-@keyframes pilePulse {
-  0% {
-    transform: translateY(1px) scale(1);
-    filter: drop-shadow(0 18px 20px rgba(0, 0, 0, 0.34));
-  }
-
-  28% {
-    transform: translateY(-5px) scale(1.045);
-    filter:
-      drop-shadow(0 18px 20px rgba(0, 0, 0, 0.34))
-      drop-shadow(0 0 22px rgba(125, 220, 255, 0.34));
-  }
-
-  100% {
-    transform: translateY(1px) scale(1);
-    filter: drop-shadow(0 18px 20px rgba(0, 0, 0, 0.34));
-  }
+.flowCrack span::before {
+  top: 34%;
+  transform: translateX(-1px) rotate(-34deg);
 }
 
-@keyframes pileImpact {
-  0% {
-    opacity: 0.55;
-    transform: scaleX(0.92);
-  }
-
-  24% {
-    opacity: 1;
-    transform: scaleX(1.08);
-  }
-
-  100% {
-    opacity: 0.58;
-    transform: scaleX(1);
-  }
+.flowCrack span::after {
+  top: 68%;
+  transform: translateX(-11px) rotate(28deg);
 }
 
 @media (max-width: 1200px) {
@@ -313,9 +318,9 @@
     min-height: clamp(148px, 18dvh, 210px);
   }
 
-  .pile {
-    width: clamp(96px, 10vw, 128px);
-    height: clamp(116px, 14dvh, 152px);
+  .cardStack {
+    width: clamp(70px, 8vw, 82px);
+    height: clamp(105px, 12dvh, 123px);
   }
 }
 
@@ -328,7 +333,7 @@
     gap: 8px;
   }
 
-  .tableSurface {
+  .iceSupplyRail {
     flex-direction: row;
     justify-content: flex-start;
     gap: 6px;
@@ -343,35 +348,40 @@
     flex: 0 0 auto;
   }
 
-  .pile {
+  .cardStack {
     width: 72px;
-    height: 92px;
+    height: 108px;
   }
 
-  .flowArrow {
+  .flowCrack {
     width: 28px;
-    height: 2px;
+    height: 3px;
     align-self: center;
   }
 
-  .flowArrow span {
+  .flowCrack span {
     width: 100%;
-    height: 2px;
+    height: 3px;
     background: linear-gradient(to right, rgba(125, 220, 255, 0), rgba(125, 220, 255, 0.72));
   }
 
-  .flowArrow span::after {
-    right: -1px;
-    left: auto;
-    bottom: 50%;
-    transform: translateY(50%) rotate(-45deg);
+  .flowCrack span::before,
+  .flowCrack span::after {
+    top: 50%;
+    width: 8px;
+  }
+
+  .flowCrack span::before {
+    transform: translateX(4px) rotate(-32deg);
+  }
+
+  .flowCrack span::after {
+    transform: translateX(15px) rotate(28deg);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pileStation[data-active="true"]::before,
-  .pileStation[data-active="true"] .deckPile,
-  .pileStation[data-active="true"] .discardPile {
+  .pileStation::before {
     animation: none;
   }
 }

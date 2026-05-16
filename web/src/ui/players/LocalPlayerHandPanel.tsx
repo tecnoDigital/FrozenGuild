@@ -1,5 +1,5 @@
 import { CompactHand } from "./CompactHand.js";
-import styles from "./Players.module.css";
+import styles from "./LocalPlayerHand.module.css";
 
 type LocalPlayerHandPanelProps = {
   playerName: string;

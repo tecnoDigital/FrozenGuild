@@ -835,58 +835,77 @@
 
 .stackCount {
   position: absolute;
-  top: -18px;
-  right: -14px;
+  top: 50%;
+  left: -14px;
+  transform: translateY(-50%);
   z-index: 9;
-  min-width: 36px;
-  height: 30px;
+  min-width: 40px;
+  height: 34px;
   display: grid;
   place-items: center;
   border-radius: 999px;
-  color: #062034;
-  font-size: 13px;
+  color: #1a1200;
+  font-size: 14px;
   font-weight: 1000;
-  letter-spacing: -0.04em;
-  background: radial-gradient(circle at 35% 22%, #ffffff, #bdf7ff 34%, #5ed8f5 100%);
-  border: 1px solid rgba(239, 253, 255, 0.84);
-  box-shadow: 0 8px 14px rgba(0, 0, 0, 0.32), 0 0 18px rgba(97, 226, 255, 0.32);
+  letter-spacing: -0.02em;
+  background: radial-gradient(circle at 35% 22%, #ffffff, #fff7d9 30%, #ffd870 60%, #f3ab2f 100%);
+  border: 2px solid rgba(255, 233, 160, 0.95);
+  box-shadow:
+    0 6px 14px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(42, 25, 4, 0.35) inset,
+    0 0 18px rgba(255, 193, 77, 0.35);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
   pointer-events: none;
 }
 
 .hudStackCount {
   position: absolute;
-  top: -6px;
-  right: -6px;
+  top: 50%;
+  left: -12px;
+  transform: translateY(-50%);
   z-index: 8;
-  min-width: 18px;
-  height: 18px;
+  min-width: 28px;
+  height: 28px;
   display: grid;
   place-items: center;
   border-radius: 999px;
-  color: #062034;
-  font-size: 9px;
+  color: #1a1200;
+  font-size: 11px;
   font-weight: 1000;
-  background: radial-gradient(circle at 35% 22%, #ffffff, #bdf7ff 34%, #5ed8f5 100%);
-  border: 1px solid rgba(239, 253, 255, 0.84);
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.28);
+  letter-spacing: -0.02em;
+  background: radial-gradient(circle at 35% 22%, #ffffff, #fff7d9 30%, #ffd870 60%, #f3ab2f 100%);
+  border: 2px solid rgba(255, 233, 160, 0.95);
+  box-shadow:
+    0 6px 14px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(42, 25, 4, 0.35) inset,
+    0 0 18px rgba(255, 193, 77, 0.35);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+  pointer-events: none;
 }
 
 .compactStackCount {
   position: absolute;
-  top: -6px;
-  right: -6px;
+  top: 50%;
+  left: -12px;
+  transform: translateY(-50%);
   z-index: 8;
-  min-width: 18px;
-  height: 18px;
+  min-width: 28px;
+  height: 28px;
   display: grid;
   place-items: center;
   border-radius: 999px;
-  color: #062034;
-  font-size: 9px;
+  color: #1a1200;
+  font-size: 11px;
   font-weight: 1000;
-  background: radial-gradient(circle at 35% 22%, #ffffff, #bdf7ff 34%, #5ed8f5 100%);
-  border: 1px solid rgba(239, 253, 255, 0.84);
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.28);
+  letter-spacing: -0.02em;
+  background: radial-gradient(circle at 35% 22%, #ffffff, #fff7d9 30%, #ffd870 60%, #f3ab2f 100%);
+  border: 2px solid rgba(255, 233, 160, 0.95);
+  box-shadow:
+    0 6px 14px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(42, 25, 4, 0.35) inset,
+    0 0 18px rgba(255, 193, 77, 0.35);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+  pointer-events: none;
 }
 
 @keyframes sweep {
@@ -1091,11 +1110,12 @@
   }
 
   .stackCount {
-    top: -12px;
-    right: -10px;
-    min-width: 30px;
-    height: 24px;
-    font-size: 11px;
+    top: 50%;
+    left: -10px;
+    transform: translateY(-50%);
+    min-width: 32px;
+    height: 26px;
+    font-size: 12px;
   }
 
   .stackLayerBack {

@@ -1,6 +1,8 @@
 import { DicePanel } from "../actions/DicePanel.js";
 import { ActionPanel } from "../actions/ActionPanel.js";
+import { getPadrinoCardMeta } from "../actions/padrinoChoicePanel.logic.js";
 import type { ActionFlowView } from "../../store/selectors.js";
+import type { SwapLocation } from "../../../../shared/game/types.js";
 import styles from "./CenterActionDock.module.css";
 
 type CenterActionDockProps = {
@@ -10,9 +12,13 @@ type CenterActionDockProps = {
   onRoll: () => void;
   flow: ActionFlowView;
   onChoosePadrinoAction: (action: 1 | 4 | 5) => void;
+  padrinoSelectedAction: 1 | 4 | 5 | null;
   onEndTurn: () => void;
   swap: {
+    source: SwapLocation | null;
+    target: SwapLocation | null;
     canConfirm: boolean;
+    helperText: string;
     sourceKey: string;
     targetKey: string;
     onConfirm: () => void;
@@ -63,6 +69,7 @@ export function CenterActionDock({
   onRoll,
   flow,
   onChoosePadrinoAction,
+  padrinoSelectedAction,
   onEndTurn,
   swap,
   orca,
@@ -74,7 +81,8 @@ export function CenterActionDock({
   const showSpyConfirm = flow.mode === "spy" && spy != null && !spy.active && spy.selectedSlots.length > 0;
   const showSpyResolution = flow.mode === "spy" && spy != null && spy.active;
   const canGiveSpyCard = showSpyResolution && spy.selectedGiftSlot !== null && spy.targetPlayerIDs.length > 0;
-  const showOverlay = showEndTurnOverlay || showSwapActions || showSpyConfirm || showSpyResolution;
+  const showPadrinoConfirm = flow.showPadrinoOptions && padrinoSelectedAction !== null;
+  const showOverlay = showEndTurnOverlay || showSwapActions || showSpyConfirm || showSpyResolution || showPadrinoConfirm;
   const overlayToneClass = diceToneClass(value, flow.mode);
   const overlayButtonClassName = `${styles.overlayButton} ${overlayToneClass}`;
 
@@ -152,6 +160,16 @@ export function CenterActionDock({
                   </button>
                 </div>
               </div>
+            )}
+            {showPadrinoConfirm && padrinoSelectedAction !== null && (
+              <button
+                type="button"
+                className={overlayButtonClassName}
+                onClick={() => onChoosePadrinoAction(padrinoSelectedAction)}
+                aria-label={`Confirmar ${getPadrinoCardMeta(padrinoSelectedAction).label}`}
+              >
+                Confirmar {getPadrinoCardMeta(padrinoSelectedAction).label}
+              </button>
             )}
             {showEndTurnOverlay && (
               <button

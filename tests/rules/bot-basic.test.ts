@@ -161,4 +161,66 @@ describe("basic bot", () => {
     expect(G.players["0"]!.zone.includes("orca-001")).toBe(false);
     expect(G.discardPile).toEqual(expect.arrayContaining(["orca-001"]));
   });
+
+  it("ends a 3-player bot swap turn when the bot has no cards", async () => {
+    const { FrozenGuild } = await import("../../shared/game/FrozenGuild");
+
+    const G = createInitialState(3, () => 0.3);
+    G.players["0"]!.name = "BOT 0";
+    G.players["0"]!.zone = [];
+    G.players["1"]!.zone = ["krill-001"];
+    G.players["2"]!.zone = ["penguin-001"];
+
+    let endTurnCalls = 0;
+
+    FrozenGuild.turn?.onBegin?.({
+      G,
+      ctx: { currentPlayer: "0" } as never,
+      events: {
+        endTurn: () => {
+          endTurnCalls += 1;
+        }
+      },
+      random: {
+        D6: () => 5
+      }
+    } as never);
+
+    expect(G.dice.rolled).toBe(true);
+    expect(G.turn.actionCompleted).toBe(false);
+    expect(endTurnCalls).toBe(1);
+    expect(G.botActivity.playerID).toBe("0");
+    expect(G.botActivity.completedAt).not.toBeNull();
+  });
+
+  it("ends a 3-player bot swap turn when no rival has cards", async () => {
+    const { FrozenGuild } = await import("../../shared/game/FrozenGuild");
+
+    const G = createInitialState(3, () => 0.3);
+    G.players["0"]!.name = "BOT 0";
+    G.players["0"]!.zone = ["krill-001"];
+    G.players["1"]!.zone = [];
+    G.players["2"]!.zone = [];
+
+    let endTurnCalls = 0;
+
+    FrozenGuild.turn?.onBegin?.({
+      G,
+      ctx: { currentPlayer: "0" } as never,
+      events: {
+        endTurn: () => {
+          endTurnCalls += 1;
+        }
+      },
+      random: {
+        D6: () => 5
+      }
+    } as never);
+
+    expect(G.dice.rolled).toBe(true);
+    expect(G.turn.actionCompleted).toBe(false);
+    expect(endTurnCalls).toBe(1);
+    expect(G.botActivity.playerID).toBe("0");
+    expect(G.botActivity.completedAt).not.toBeNull();
+  });
 });

@@ -5,11 +5,13 @@ import {
   selectActionBannerView,
   selectActionFlowView,
   selectSpyResolutionView,
-  selectGameOverOverlayView
+  selectGameOverOverlayView,
+  selectCanChoosePadrino
 } from "../../../store/selectors.js";
 import { selectBoardCardsView } from "../../../view-model/boardView.js";
 import { BoardSurface } from "./BoardSurface.js";
 import { FrozenIceGrid } from "./FrozenIceGrid.js";
+import { PadrinoChoicePanel } from "../../../ui/actions/PadrinoChoicePanel.js";
 import styles from "./FrozenIceGrid.module.css";
 
 export type BoardContainerProps = {
@@ -31,6 +33,9 @@ export function BoardContainer({ onFishFromIce, overlayBanner }: BoardContainerP
   const swapTargetKey = useFrozenGuildStore((state) => state.swapDraftTargetKey);
   const setSwapSourceKey = useFrozenGuildStore((state) => state.setSwapDraftSourceKey);
   const setSwapTargetKey = useFrozenGuildStore((state) => state.setSwapDraftTargetKey);
+  const showPadrinoOptions = useFrozenGuildStore(selectCanChoosePadrino);
+  const padrinoDraftAction = useFrozenGuildStore((state) => state.padrinoDraftAction);
+  const setPadrinoDraftAction = useFrozenGuildStore((state) => state.setPadrinoDraftAction);
   const [pendingFishSlot, setPendingFishSlot] = useState<number | null>(null);
 
   const canFish = useFrozenGuildStore((state) => {
@@ -122,6 +127,12 @@ export function BoardContainer({ onFishFromIce, overlayBanner }: BoardContainerP
         selectedSlots={selectedSlots}
         onSlotClick={handleSlotClick}
       />
+      {showPadrinoOptions && (
+        <PadrinoChoicePanel
+          selectedAction={padrinoDraftAction}
+          onSelect={setPadrinoDraftAction}
+        />
+      )}
       {gameOverOverlay ? (
         <div className={styles.gameOverOverlay} role="dialog" aria-label="Game over">
           <div className={styles.gameOverOverlayCard}>

@@ -1,3 +1,7 @@
+import padrinoFish from "../assets/ui/padrino/Padrino-fish.png";
+import padrinoSpy from "../assets/ui/padrino/Padrino-spy.png";
+import padrinoSwap from "../assets/ui/padrino/Padrino-Swap.png";
+
 const root = "/assets";
 
 export const assets = {
@@ -98,6 +102,11 @@ export const assets = {
       frostDividerVertical: `${root}/ui/decor/frost-divider-vertical.png`,
       crackedIceOverlay: `${root}/ui/decor/cracked-ice-overlay.png`,
       auroraLightStrip: `${root}/ui/decor/aurora-light-strip.png`
+    },
+    padrino: {
+      fish: padrinoFish,
+      spy: padrinoSpy,
+      swap: padrinoSwap
     }
   },
   lobby: {
