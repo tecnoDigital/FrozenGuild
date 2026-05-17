@@ -168,6 +168,8 @@ export function selectActionBannerView(state: FrozenGuildUiStore) {
     };
   } else if (!state.G.dice.rolled) {
     next = { title: "Tu turno", detail: "Lanza el dado.", severity: "your-turn" };
+  } else if (!state.diceActionsReady) {
+    next = { title: "Dado en movimiento", detail: "Espera a que termine la animacion.", severity: "blocked" };
   } else if (state.G.turn.actionCompleted) {
     next = { title: "Accion completada", detail: "Termina tu turno para continuar.", severity: "success" };
   } else {
@@ -382,7 +384,7 @@ export function selectCanChoosePadrino(state: FrozenGuildUiStore): boolean {
   if (!state.G) {
     return false;
   }
-  return state.G.dice.rolled && state.G.dice.value === 6 && state.G.turn.padrinoAction === null;
+  return state.diceActionsReady && state.G.dice.rolled && state.G.dice.value === 6 && state.G.turn.padrinoAction === null;
 }
 
 export type ActionFlowView = {
@@ -535,6 +537,16 @@ export function selectActionFlowView(state: FrozenGuildUiStore): ActionFlowView 
       diceValue,
       isMyTurn,
       canRoll: true,
+      canEndTurn: false,
+      showPadrinoOptions: false
+    };
+  } else if (!state.diceActionsReady) {
+    next = {
+      mode: "waiting",
+      helperText: "El dado esta resolviendo la accion...",
+      diceValue,
+      isMyTurn,
+      canRoll: false,
       canEndTurn: false,
       showPadrinoOptions: false
     };

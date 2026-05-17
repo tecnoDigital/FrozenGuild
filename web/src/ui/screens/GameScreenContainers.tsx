@@ -95,6 +95,7 @@ export function CenterActionDockContainer({
   const diceRolled = useFrozenGuildStore((state) => !!state.G?.dice.rolled);
   const diceValue = useFrozenGuildStore((state) => state.G?.dice.value ?? null);
   const diceDisabled = !flow.canRoll;
+  const setDiceActionsReady = useFrozenGuildStore((state) => state.setDiceActionsReady);
   const canChoosePadrino = useFrozenGuildStore(selectCanChoosePadrino);
   const localPlayerID = useFrozenGuildStore((state) => state.localPlayerID);
   const playersMap = useFrozenGuildStore((state) => state.G?.players ?? null);
@@ -228,6 +229,7 @@ export function CenterActionDockContainer({
       value={diceValue}
       disabled={diceDisabled}
       onRoll={onRollDice}
+      onDiceActionsReadyChange={setDiceActionsReady}
       flow={flow}
       onChoosePadrinoAction={(action) => {
         onChoosePadrinoAction(action);
@@ -318,7 +320,7 @@ export function CenterActionDockContainer({
           }
         },
         onGiveCard: () => {
-          if (spyGiftSlot !== null && spyGiftTarget) {
+          if (spyGiftSlot !== null && spy.targetPlayerIDs.includes(spyGiftTarget)) {
             onSpyGiveCard(spyGiftSlot, spyGiftTarget);
             setSpyDraftGiftSlot(null);
           }

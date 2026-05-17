@@ -1,6 +1,6 @@
 import type { Ctx } from "boardgame.io";
 import { describe, expect, it } from "vitest";
-import { endTurn, resolveOrcaDestroy, rollDice, swapCards } from "../../shared/game/moves";
+import { endTurn, resolveOrcaDestroy, rollDice, spyGiveCard, spyOnIce, swapCards } from "../../shared/game/moves";
 import { createInitialState } from "../../shared/game/setup";
 
 function makeCtx(currentPlayer: string): Ctx {
@@ -16,7 +16,7 @@ describe("orca resolution", () => {
     G.players["1"]!.zone = ["krill-001", "petrel-001"];
 
     let endTurnCalls = 0;
-    let activePlayersCalls = 0;
+    const activePlayersCalls: unknown[] = [];
 
     rollDice({ G, ctx, playerID: "0", random: { D6: () => 5 } });
     swapCards(
@@ -25,8 +25,8 @@ describe("orca resolution", () => {
         ctx,
         playerID: "0",
         events: {
-          setActivePlayers: () => {
-            activePlayersCalls += 1;
+          setActivePlayers: (arg) => {
+            activePlayersCalls.push(arg);
           }
         }
       },
@@ -57,8 +57,8 @@ describe("orca resolution", () => {
         ctx,
         playerID: "1",
         events: {
-          setActivePlayers: () => {
-            activePlayersCalls += 1;
+          setActivePlayers: (arg) => {
+            activePlayersCalls.push(arg);
           }
         }
       },
@@ -70,7 +70,75 @@ describe("orca resolution", () => {
     expect(G.players["1"]!.zone.includes("orca-001")).toBe(false);
     expect(G.players["1"]!.zone.includes("petrel-001")).toBe(false);
     expect(G.discardPile).toEqual(expect.arrayContaining(["orca-001", "petrel-001"]));
-    expect(activePlayersCalls).toBeGreaterThan(0);
+    expect(activePlayersCalls).toContainEqual({ value: { "1": null } });
+    expect(activePlayersCalls).toContainEqual({});
+
+    const endOk = endTurn({
+      G,
+      ctx,
+      playerID: "0",
+      events: {
+        endTurn: () => {
+          endTurnCalls += 1;
+        }
+      }
+    });
+
+    expect(endOk).toBeUndefined();
+    expect(endTurnCalls).toBe(1);
+  });
+
+  it("lets original player end turn after gifted orca is resolved by recipient", () => {
+    const G = createInitialState(2, () => 0.3);
+    const ctx = makeCtx("0");
+
+    G.players["0"]!.zone = ["penguin-001"];
+    G.players["1"]!.zone = ["krill-001", "petrel-001"];
+    G.iceGrid[0] = "orca-001";
+
+    const activePlayersCalls: unknown[] = [];
+    let endTurnCalls = 0;
+
+    rollDice({ G, ctx, playerID: "0", random: { D6: () => 4 } });
+    spyOnIce({ G, ctx, playerID: "0" }, [0]);
+
+    const gift = spyGiveCard(
+      {
+        G,
+        ctx,
+        playerID: "0",
+        events: {
+          setActivePlayers: (arg) => {
+            activePlayersCalls.push(arg);
+          }
+        }
+      },
+      0,
+      "1"
+    );
+
+    expect(gift).toBeUndefined();
+    expect(G.pendingStage?.type).toBe("ORCA_DESTROY_SELECTION");
+    expect(G.pendingStage?.playerID).toBe("1");
+    expect(activePlayersCalls).toContainEqual({ value: { "1": null } });
+
+    const resolved = resolveOrcaDestroy(
+      {
+        G,
+        ctx,
+        playerID: "1",
+        events: {
+          setActivePlayers: (arg) => {
+            activePlayersCalls.push(arg);
+          }
+        }
+      },
+      "petrel-001"
+    );
+
+    expect(resolved).toBeUndefined();
+    expect(G.pendingStage).toBeNull();
+    expect(activePlayersCalls).toContainEqual({});
 
     const endOk = endTurn({
       G,

@@ -5,6 +5,7 @@ import { useSocketStatus } from "./hooks/useSocketStatus.js";
 import { useFrozenGuildClient } from "./hooks/useFrozenGuildClient.js";
 import { GameScreen } from "./ui/screens/GameScreen.js";
 import { LobbyScreen } from "./ui/screens/LobbyScreen.js";
+import { DevAdminPanel } from "./ui/dev/DevAdminPanel.js";
 import type { FinalResults, FrozenGuildState, SwapLocation } from "../../shared/game/types.js";
 import {
   selectLobbyAvatar,
@@ -211,10 +212,6 @@ export function App() {
   >({
     "0": null,
     "1": null
-  });
-  const [adminFishSlot, setAdminFishSlot] = useState<Record<AdminPlayerID, number>>({
-    "0": 0,
-    "1": 0
   });
   const { client, gameState } = useFrozenGuildClient({ serverUrl: SERVER_URL, session });
   const playerName = useLobbyProfileStore(selectLobbyName);
@@ -904,138 +901,17 @@ onFishFromIce={(slot) => {
           {session && <button className="secondary-button" onClick={leaveMatch}>Salir de la partida</button>}
           {error && <p className="helper-copy">{error}</p>}
 
-          <hr style={{ borderColor: "rgba(162, 194, 255, 0.25)", width: "100%" }} />
-          <h3 style={{ margin: 0 }}>Panel administrador</h3>
-          <p className="panel-copy" style={{ marginTop: 0 }}>
-            Controla Jugador 0 y Jugador 1 desde esta misma interfaz.
-          </p>
-
-          <button className="primary-button" onClick={createAndControlTwoPlayers} disabled={adminBusy}>
-            Crear sala + controlar 2 jugadores
-          </button>
-          <button className="secondary-button" onClick={attachTwoPlayersToExistingMatch} disabled={adminBusy}>
-            Adjuntar control dual al match seleccionado
-          </button>
-          {adminSession && (
-            <button className="secondary-button" onClick={stopAdminControl}>
-              Cerrar control dual
-            </button>
-          )}
-          {adminError && <p className="helper-copy">{adminError}</p>}
-
-          {adminSession && (
-            <div className="subpanel" style={{ width: "100%" }}>
-              <h4 style={{ marginTop: 0 }}>Control dual · Match {adminSession.matchID}</h4>
-              <div className="player-grid">
-                {(["0", "1"] as const).map((adminPlayerID) => {
-                  const adminClient = adminPlayerID === "0" ? adminClient0 : adminClient1;
-                  const state = adminState[adminPlayerID];
-                  const fishSlot = adminFishSlot[adminPlayerID];
-                  const isTurn = state?.currentPlayer === adminPlayerID;
-
-                  return (
-                    <article key={`admin-${adminPlayerID}`} className={`player-card ${isTurn ? "player-card--active" : ""}`}>
-                      <div className="player-card__header">
-                        <h4>Jugador {adminPlayerID}</h4>
-                        <span className="pill">{isTurn ? "Turno" : "Espera"}</span>
-                      </div>
-                      <p className="panel-copy">
-                        Dado: {state?.G.dice.value ?? "-"} · Padrino: {state?.G.turn.padrinoAction ?? "-"} · Orca: {state?.G.orcaResolution ? "si" : "no"} · Foca-bomba: {state?.G.sealBombResolution ? "si" : "no"} · Accion: {state?.G.turn.actionCompleted ? "si" : "no"}
-                      </p>
-
-                      <div className="turn-panel__actions">
-                        <button className="primary-button" onClick={() => adminClient?.moves?.rollDice?.()}>
-                          Tirar dado
-                        </button>
-                        <button className="secondary-button" onClick={() => adminClient?.moves?.endTurn?.()}>
-                          Finalizar turno
-                        </button>
-                      </div>
-
-                      <label className="field-label" htmlFor={`admin-fish-slot-${adminPlayerID}`}>Slot pesca (0-8)</label>
-                      <input
-                        id={`admin-fish-slot-${adminPlayerID}`}
-                        className="select-control"
-                        type="number"
-                        min={0}
-                        max={8}
-                        value={fishSlot}
-                        onChange={(event) => {
-                          const raw = Number(event.target.value);
-                          const safeSlot = Number.isFinite(raw) ? Math.max(0, Math.min(8, raw)) : 0;
-                          setAdminFishSlot((current) => ({ ...current, [adminPlayerID]: safeSlot }));
-                        }}
-                      />
-
-                      <div className="turn-panel__actions">
-                        <button className="secondary-button" onClick={() => adminClient?.moves?.fishFromIce?.(fishSlot)}>
-                          Pescar slot
-                        </button>
-                        <button
-                          className="secondary-button"
-                          onClick={() => adminClient?.moves?.choosePadrinoAction?.(1)}
-                        >
-                          Padrino accion 1
-                        </button>
-                        <button
-                          className="secondary-button"
-                          onClick={() => {
-                            adminClient?.moves?.spyOnIce?.([0]);
-                            adminClient?.moves?.completeSpy?.();
-                          }}
-                        >
-                          Resolver espionaje rapido
-                        </button>
-                        <button
-                          className="secondary-button"
-                          onClick={() => {
-                            const target = state?.G.orcaResolution?.validTargetCardIDs[0];
-                            if (target) {
-                              adminClient?.moves?.resolveOrcaDestroy?.(target);
-                            }
-                          }}
-                        >
-                          Resolver orca rapida
-                        </button>
-                        <button
-                          className="secondary-button"
-                          onClick={() => {
-                            const seal = state?.G.sealBombResolution;
-                            if (!seal) {
-                              return;
-                            }
-
-                            const targets = seal.validTargetCardIDs.slice(0, seal.requiredDiscardCount);
-                            if (targets.length === seal.requiredDiscardCount) {
-                              adminClient?.moves?.resolveSealBombExplosion?.(targets);
-                            }
-                          }}
-                        >
-                          Resolver foca rapida
-                        </button>
-                      </div>
-
-                      <button
-                        className="secondary-button"
-                        onClick={() =>
-                          adminClient?.moves?.swapCards?.(
-                            { area: "player_zone", playerID: adminPlayerID, index: 0 },
-                            {
-                              area: "player_zone",
-                              playerID: adminPlayerID === "0" ? "1" : "0",
-                              index: 0
-                            }
-                          )
-                        }
-                      >
-                        Intercambio rapido (jugador 0 ↔ jugador 1)
-                      </button>
-                    </article>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+          <DevAdminPanel
+            adminBusy={adminBusy}
+            adminError={adminError}
+            adminSession={adminSession}
+            adminState={adminState}
+            adminClient0={adminClient0}
+            adminClient1={adminClient1}
+            onCreateAndControlTwoPlayers={createAndControlTwoPlayers}
+            onAttachTwoPlayersToExistingMatch={attachTwoPlayersToExistingMatch}
+            onStopAdminControl={stopAdminControl}
+          />
         </div>
       </section>
 

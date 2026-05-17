@@ -5,9 +5,10 @@ export type DicePanelProps = {
   rolled: boolean;
   disabled?: boolean;
   onRoll?: (() => void) | undefined;
+  onActionsReadyChange?: ((ready: boolean) => void) | undefined;
 };
 
-export function DicePanel({ value, rolled, disabled = false, onRoll }: DicePanelProps) {
+export function DicePanel({ value, rolled, disabled = false, onRoll, onActionsReadyChange }: DicePanelProps) {
   return (
     <div
       data-action-available={disabled ? "false" : "true"}
@@ -18,6 +19,7 @@ export function DicePanel({ value, rolled, disabled = false, onRoll }: DicePanel
         rolled={rolled}
         disabled={disabled}
         onRoll={onRoll}
+        onActionsReadyChange={onActionsReadyChange}
       />
     </div>
   );

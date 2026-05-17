@@ -16,6 +16,7 @@ export type FrozenGuildUiStore = FrozenGuildSnapshot & {
   orcaDraftCardID: string | null;
   sealDraftCardIDs: string[];
   padrinoDraftAction: 1 | 4 | 5 | null;
+  diceActionsReady: boolean;
   setSnapshot: (snapshot: FrozenGuildSnapshot) => void;
   toggleSpyDraftSlot: (slot: number) => void;
   setSpyDraftGiftSlot: (slot: number | null) => void;
@@ -28,6 +29,7 @@ export type FrozenGuildUiStore = FrozenGuildSnapshot & {
   clearSealDraft: () => void;
   setPadrinoDraftAction: (action: 1 | 4 | 5 | null) => void;
   clearPadrinoDraft: () => void;
+  setDiceActionsReady: (ready: boolean) => void;
 };
 
 export const useFrozenGuildStore = create<FrozenGuildUiStore>((set) => ({
@@ -42,7 +44,11 @@ export const useFrozenGuildStore = create<FrozenGuildUiStore>((set) => ({
   orcaDraftCardID: null,
   sealDraftCardIDs: [],
   padrinoDraftAction: null,
-  setSnapshot: (snapshot) => set(snapshot),
+  diceActionsReady: true,
+  setSnapshot: (snapshot) => set((state) => ({
+    ...snapshot,
+    diceActionsReady: snapshot.G?.dice.rolled ? state.diceActionsReady : true
+  })),
   toggleSpyDraftSlot: (slot) =>
     set((state) => {
       if (state.spyDraftSlots.includes(slot)) {
@@ -71,5 +77,6 @@ export const useFrozenGuildStore = create<FrozenGuildUiStore>((set) => ({
     }),
   clearSealDraft: () => set({ sealDraftCardIDs: [] }),
   setPadrinoDraftAction: (action) => set({ padrinoDraftAction: action }),
-  clearPadrinoDraft: () => set({ padrinoDraftAction: null })
+  clearPadrinoDraft: () => set({ padrinoDraftAction: null }),
+  setDiceActionsReady: (ready) => set({ diceActionsReady: ready })
 }));

@@ -186,7 +186,7 @@ function syncPendingStageFromOrcaResolution(
     orcaCardID: G.orcaResolution.orcaCardID,
     validTargets: [...G.orcaResolution.validTargetCardIDs]
   };
-  events?.setActivePlayers?.({ [G.orcaResolution.playerID]: null });
+  events?.setActivePlayers?.({ value: { [G.orcaResolution.playerID]: null as unknown as string } });
 }
 
 function removeCardFromPlayerZoneById(

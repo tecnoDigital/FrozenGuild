@@ -41,6 +41,7 @@ export function BoardContainer({ onFishFromIce, overlayBanner }: BoardContainerP
   const canFish = useFrozenGuildStore((state) => {
     if (!state.G || !state.ctx || !state.localPlayerID) return false;
     if (state.gameover !== undefined) return false;
+    if (!state.diceActionsReady) return false;
     const isMyTurn = state.ctx.currentPlayer === state.localPlayerID;
     if (!isMyTurn || state.G.turn.actionCompleted) return false;
     const effectiveValue = state.G.dice.value === 6 ? state.G.turn.padrinoAction : state.G.dice.value;

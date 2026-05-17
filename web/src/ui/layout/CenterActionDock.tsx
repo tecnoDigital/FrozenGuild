@@ -10,6 +10,7 @@ type CenterActionDockProps = {
   value: number | null;
   disabled: boolean;
   onRoll: () => void;
+  onDiceActionsReadyChange?: ((ready: boolean) => void) | undefined;
   flow: ActionFlowView;
   onChoosePadrinoAction: (action: 1 | 4 | 5) => void;
   padrinoSelectedAction: 1 | 4 | 5 | null;
@@ -67,6 +68,7 @@ export function CenterActionDock({
   value,
   disabled,
   onRoll,
+  onDiceActionsReadyChange,
   flow,
   onChoosePadrinoAction,
   padrinoSelectedAction,
@@ -80,7 +82,9 @@ export function CenterActionDock({
   const showSwapActions = flow.mode === "swap" && (!!swap.sourceKey || !!swap.targetKey);
   const showSpyConfirm = flow.mode === "spy" && spy != null && !spy.active && spy.selectedSlots.length > 0;
   const showSpyResolution = flow.mode === "spy" && spy != null && spy.active;
-  const canGiveSpyCard = showSpyResolution && spy.selectedGiftSlot !== null && spy.targetPlayerIDs.length > 0;
+  const canGiveSpyCard = showSpyResolution
+    && spy.selectedGiftSlot !== null
+    && spy.targetPlayerIDs.includes(spy.targetPlayerID);
   const showPadrinoConfirm = flow.showPadrinoOptions && padrinoSelectedAction !== null;
   const showOverlay = showEndTurnOverlay || showSwapActions || showSpyConfirm || showSpyResolution || showPadrinoConfirm;
   const overlayToneClass = diceToneClass(value, flow.mode);
@@ -95,7 +99,13 @@ export function CenterActionDock({
         seal={seal}
       />
       <div className={styles.diceWrapper}>
-        <DicePanel rolled={rolled} value={value} disabled={disabled} onRoll={onRoll} />
+        <DicePanel
+          rolled={rolled}
+          value={value}
+          disabled={disabled}
+          onRoll={onRoll}
+          onActionsReadyChange={onDiceActionsReadyChange}
+        />
         {showOverlay && (
           <div className={styles.diceOverlay}>
             {showSwapActions && (

@@ -3,7 +3,7 @@
   --fg-shell-center-column: minmax(0, 1fr);
   --fg-shell-gutter: clamp(10px, 1vw, 16px);
   --fg-shell-hand-row: 40dvh;
-  --fg-shell-enemy-ledger-max: clamp(260px, 38dvh, 420px);
+  --fg-shell-enemy-ledger-max: 100%;
 
   display: grid;
   grid-template-columns: var(--fg-shell-side-column) var(--fg-shell-center-column) var(--fg-shell-side-column);
@@ -174,7 +174,7 @@
     --fg-shell-center-column: minmax(0, 1fr);
     --fg-shell-gutter: 8px;
     --fg-shell-hand-row: 40dvh;
-    --fg-shell-enemy-ledger-max: clamp(220px, 34dvh, 340px);
+    --fg-shell-enemy-ledger-max: 100%;
 
     gap: 8px;
     padding: var(--fg-shell-gutter);

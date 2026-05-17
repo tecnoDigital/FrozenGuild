@@ -38,9 +38,18 @@ type DiceDecisionConsoleProps = {
   rolled: boolean;
   disabled?: boolean;
   onRoll?: (() => void) | undefined;
+  onActionsReadyChange?: ((ready: boolean) => void) | undefined;
 };
 
-export function DiceDecisionConsole({ value, rolled, disabled = false, onRoll }: DiceDecisionConsoleProps) {
+const DICE_ACTION_UNLOCK_DELAY_MS = 300;
+
+export function DiceDecisionConsole({
+  value,
+  rolled,
+  disabled = false,
+  onRoll,
+  onActionsReadyChange
+}: DiceDecisionConsoleProps) {
   const [animState, setAnimState] = useState<"idle" | "rolling" | "impact" | "revealed">(() =>
     rolled && value !== null ? "revealed" : "idle"
   );
@@ -63,23 +72,29 @@ export function DiceDecisionConsole({ value, rolled, disabled = false, onRoll }:
 
     if (justRolled && value !== null) {
       clearTimers();
+      onActionsReadyChange?.(false);
       const impactDelay = rollingStartedRef.current ? 1280 : 0;
       const impactId = window.setTimeout(() => setAnimState("impact"), impactDelay);
       const revealId = window.setTimeout(() => {
         rollingStartedRef.current = false;
         setAnimState("revealed");
       }, impactDelay + 360);
-      timersRef.current.push(impactId, revealId);
+      const unlockId = window.setTimeout(() => {
+        onActionsReadyChange?.(true);
+      }, impactDelay + 360 + DICE_ACTION_UNLOCK_DELAY_MS);
+      timersRef.current.push(impactId, revealId, unlockId);
     } else if (rolledBack) {
       clearTimers();
       rollingStartedRef.current = false;
       setAnimState("idle");
+      onActionsReadyChange?.(true);
     }
-  }, [rolled, value, clearTimers]);
+  }, [rolled, value, clearTimers, onActionsReadyChange]);
 
   const handleRoll = () => {
     if (disabled || !onRoll || animState === "rolling" || animState === "impact") return;
     clearTimers();
+    onActionsReadyChange?.(false);
     rollingStartedRef.current = true;
     onRoll();
     setNonce((n) => n + 1);
